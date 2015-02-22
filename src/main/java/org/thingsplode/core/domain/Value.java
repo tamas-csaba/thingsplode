@@ -6,6 +6,7 @@
 package org.thingsplode.core.domain;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -24,6 +25,7 @@ public class Value implements Serializable {
      * @return the type
      */
     @Enumerated(EnumType.STRING)
+    @Column(name = "VALUE_TYPE")
     public Type getType() {
         return type;
     }
@@ -62,7 +64,6 @@ public class Value implements Serializable {
     }
 
     public static enum Type {
-
         SCALAR,
         TEXT,
         BOOLEAN

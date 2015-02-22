@@ -5,10 +5,9 @@
  */
 package org.thingsplode.core.domain;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import org.hibernate.metamodel.source.annotations.xml.mocker.MockHelper;
 
 /**
  *
@@ -69,6 +68,7 @@ public class Model implements Serializable {
     /**
      * @return the type
      */
+    @Column(name = "MODEL_TYPE")
     public String getType() {
         return type;
     }
