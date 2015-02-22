@@ -7,9 +7,12 @@ package org.thingsplode.core.domain.entities;
 
 import org.thingsplode.core.domain.Model;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -33,6 +36,7 @@ import org.thingsplode.core.domain.StatusInfo;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Device extends Persistable<Long> {
+
     private String deviceId;
     private EnabledState enabledState;
     private StatusInfo statusInfo;
@@ -45,10 +49,12 @@ public class Device extends Persistable<Long> {
     private Collection<Event> eventLog;
     private Collection<ConfigurationEntity> configuration;
     private InetAddress ipAddress;
-    
+
+
     /**
      * @return the deviceId
      */
+    @Column(nullable = false, unique = true)
     public String getDeviceId() {
         return deviceId;
     }
@@ -64,6 +70,7 @@ public class Device extends Persistable<Long> {
      * @return the enabledState
      */
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     public EnabledState getEnabledState() {
         return enabledState;
     }
@@ -79,6 +86,7 @@ public class Device extends Persistable<Long> {
      * @return the statusInfo
      */
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     public StatusInfo getStatusInfo() {
         return statusInfo;
     }
@@ -138,7 +146,7 @@ public class Device extends Persistable<Long> {
     /**
      * @return the capabilities
      */
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     public Collection<Capability> getCapabilities() {
         return capabilities;
     }
@@ -153,8 +161,8 @@ public class Device extends Persistable<Long> {
     /**
      * @return the components
      */
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-    @JoinColumn(name="DEVICE_ID")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "DEVICE_ID")
     public Collection<Component> getComponents() {
         return components;
     }
@@ -169,8 +177,8 @@ public class Device extends Persistable<Long> {
     /**
      * @return the log
      */
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
-    @JoinColumn(name="DEVICE_ID")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEVICE_ID")
     public Collection<Event> getEventLog() {
         return eventLog;
     }
@@ -185,8 +193,8 @@ public class Device extends Persistable<Long> {
     /**
      * @return the configuration
      */
-    @OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
-    @JoinColumn(name="DEVICE_ID")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEVICE_ID")
     public Collection<ConfigurationEntity> getConfiguration() {
         return configuration;
     }
@@ -225,5 +233,81 @@ public class Device extends Persistable<Long> {
      */
     public void setStartupDate(Calendar startupDate) {
         this.startupDate = startupDate;
+    }
+    
+    public static Device create() {
+        return new Device();
+    }
+
+    public static Device create(String deviceId, EnabledState enabledState, StatusInfo statusInfo) {
+        Device d = Device.create();
+        d.setDeviceId(deviceId);
+        d.setEnabledState(enabledState);
+        d.setStatusInfo(statusInfo);
+        return d;
+    }
+
+    public Device putDeviceId(String deviceId) {
+        this.setDeviceId(deviceId);
+        return this;
+    }
+
+    public Device putEnabledState(EnabledState enabledState) {
+        this.setEnabledState(enabledState);
+        return this;
+    }
+
+    public Device putStatusInfo(StatusInfo statusInfo) {
+        this.setStatusInfo(statusInfo);
+        return this;
+    }
+
+    public Device putStartupDate(Calendar startupDate) {
+        this.setStartupDate(startupDate);
+        return this;
+    }
+
+    public Device putLastHeartbeat(Calendar heartbeatDate) {
+        this.setLastHeartBeat(heartbeatDate);
+        return this;
+    }
+
+    public Device putLocation(Location location) {
+        this.setLocation(location);
+        return this;
+    }
+
+    public Device putModel(Model model) {
+        this.setModel(model);
+        return this;
+    }
+
+    public Device addCapabilities(Capability... capabilitiez) {
+        if (this.capabilities == null) {
+            this.capabilities = new ArrayList<>();
+        }
+        Collections.addAll(this.capabilities, capabilitiez);
+        return this;
+    }
+
+    public Device addComponents(Component... componentz) {
+        if (this.components == null) {
+            this.components = new ArrayList<>();
+        }
+        Collections.addAll(this.components, componentz);
+        return this;
+    }
+
+    public Device addConfigurations(ConfigurationEntity... configurationz) {
+        if (this.configuration == null) {
+            this.configuration = new ArrayList<>();
+        }
+        Collections.addAll(this.configuration, configurationz);
+        return this;
+    }
+    
+    public Device putIpAddress(InetAddress addr){
+        this.setIpAddress(addr);
+        return this;
     }
 }
