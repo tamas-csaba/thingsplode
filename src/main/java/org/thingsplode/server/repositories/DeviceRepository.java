@@ -5,25 +5,26 @@
  */
 package org.thingsplode.server.repositories;
 
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.thingsplode.core.domain.entities.Device;
 
 /**
  *
  * @author tam
+ * @param <Device>
  */
-public interface DeviceRepository extends PagingAndSortingRepository<Device, Long> {
+interface DeviceRepository extends JpaRepository<Device, Long> {
 
-    @CacheEvict("bydeviceId")
-    @Override
-    <S extends Device> S save(S entity);
+//    @CacheEvict("bydeviceId")
+//    @Override
+//    <S extends Device> S save(S entity);
+//
+//    @CacheEvict("bydeviceId")
+//    @Override
+//    <S extends Device> Iterable<S> save(Iterable<S> entities);
 
-    @CacheEvict("bydeviceId")
-    @Override
-    <S extends Device> Iterable<S> save(Iterable<S> entities);
-
-    @Cacheable("bydeviceId")
+    //@Cacheable("bydeviceId")
     Device findBydeviceId(String deviceId);
 }

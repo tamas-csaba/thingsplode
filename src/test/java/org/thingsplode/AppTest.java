@@ -3,11 +3,14 @@ package org.thingsplode;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Unit test for simple App.
  */
-
+@ContextConfiguration()
+@ActiveProfiles
 public class AppTest extends TestCase {
 
     /**
