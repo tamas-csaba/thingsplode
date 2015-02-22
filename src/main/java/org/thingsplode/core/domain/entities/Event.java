@@ -9,24 +9,16 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
-import static org.thingsplode.core.domain.entities.Persistable.COL_ID;
 
 /**
  *
@@ -36,8 +28,7 @@ import static org.thingsplode.core.domain.entities.Persistable.COL_ID;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Event extends Persistable<Long> {
-
-    private String eventId;
+    private String name;
     private String eventClass;
     private Collection<Indication> indications;
     private Severity severity;
@@ -45,27 +36,27 @@ public class Event extends Persistable<Long> {
     @XmlTransient
     private Calendar receiveDate;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Generated(value = GenerationTime.INSERT)
-    @Column(name = COL_ID, updatable = false, insertable = false)
-    @Override
-    public Long getId() {
-        return super.getId();
-    }
-
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @Generated(value = GenerationTime.INSERT)
+//    @Column(name = COL_ID, updatable = false, insertable = false)
+//    @Override
+//    public Long getId() {
+//        return super.getId();
+//    }
+//
     /**
      * @return the eventId
      */
-    public String getEventId() {
-        return eventId;
+    public String getName() {
+        return name;
     }
 
     /**
-     * @param eventId the eventId to set
+     * @param name the eventId to set
      */
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -86,7 +77,7 @@ public class Event extends Persistable<Long> {
      * @return the indications
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "EVT_ID")
+    //@JoinColumn(name = "EVT_ID")
     public Collection<Indication> getIndications() {
         return indications;
     }
@@ -154,7 +145,7 @@ public class Event extends Persistable<Long> {
     }
 
     public Event putId(String eventID) {
-        this.setEventId(eventId);
+        this.setName(name);
         return this;
     }
     
