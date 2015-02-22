@@ -7,6 +7,8 @@ package org.thingsplode.core.domain.entities;
 
 import java.util.Calendar;
 import javax.persistence.Entity;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import org.thingsplode.core.domain.Configuration;
 
 /**
@@ -16,8 +18,18 @@ import org.thingsplode.core.domain.Configuration;
 @Entity
 public class ConfigurationEntity extends Configuration {
 
+
     private Calendar commitDate;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    public Calendar getCommitDate() {
+        return commitDate;
+    }
+
+    public void setCommitDate(Calendar commitDate) {
+        this.commitDate = commitDate;
+    }
+    
     static enum Type {
         STRING,
         BOOLEAN,

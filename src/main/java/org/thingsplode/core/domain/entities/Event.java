@@ -7,11 +7,18 @@ package org.thingsplode.core.domain.entities;
 
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -29,8 +36,7 @@ import static org.thingsplode.core.domain.entities.Persistable.COL_ID;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Event extends Persistable<Long> {
-    @XmlTransient
-    private Long id;
+
     private String eventId;
     private String eventClass;
     private Collection<Indication> indications;
@@ -45,14 +51,7 @@ public class Event extends Persistable<Long> {
     @Column(name = COL_ID, updatable = false, insertable = false)
     @Override
     public Long getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(Long id) {
-        this.id = id;
+        return super.getId();
     }
 
     /**
@@ -86,6 +85,8 @@ public class Event extends Persistable<Long> {
     /**
      * @return the indications
      */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "EVT_ID")
     public Collection<Indication> getIndications() {
         return indications;
     }
@@ -100,6 +101,7 @@ public class Event extends Persistable<Long> {
     /**
      * @return the severity
      */
+    @Enumerated(EnumType.STRING)
     public Severity getSeverity() {
         return severity;
     }
@@ -141,10 +143,41 @@ public class Event extends Persistable<Long> {
         this.eventDate = eventDate;
     }
 
-    static enum Severity {
-           ERROR,
-           WARNING,
-           INFO,
-           DEBUG;
+        public static Event create() {
+        Event evt = new Event();
+        evt.setEventDate(Calendar.getInstance());
+        return evt;   
+    }
+    
+    public static Event create(String eventId, String eventClass, Severity severity){
+        return Event.create().putId(eventId).putClass(eventClass).putSeverity(severity);
+    }
+
+    public Event putId(String eventID) {
+        this.setEventId(eventId);
+        return this;
+    }
+    
+    public Event putClass(String evtClass){
+        this.setEventClass(eventClass);
+        return this;
+    }
+    
+    public Event addIndications(Indication ... indicationArray){
+        Collections.addAll(this.indications, indicationArray);
+        return this;
+    }
+    
+    public Event putSeverity(Severity severity){
+        this.setSeverity(severity);
+        return this;
+    }
+    
+    static public enum Severity {
+
+        ERROR,
+        WARNING,
+        INFO,
+        DEBUG;
     }
 }

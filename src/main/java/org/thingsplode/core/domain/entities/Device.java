@@ -10,22 +10,17 @@ import java.net.InetAddress;
 import java.util.Calendar;
 import java.util.Collection;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.GenerationTime;
 import org.thingsplode.core.domain.EnabledState;
 import org.thingsplode.core.domain.Location;
 import org.thingsplode.core.domain.StatusInfo;
@@ -38,8 +33,6 @@ import org.thingsplode.core.domain.StatusInfo;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Device extends Persistable<Long> {
-    @XmlTransient
-    private Long id;
     private String deviceId;
     private EnabledState enabledState;
     private StatusInfo statusInfo;
@@ -52,23 +45,7 @@ public class Device extends Persistable<Long> {
     private Collection<Event> eventLog;
     private Collection<ConfigurationEntity> configuration;
     private InetAddress ipAddress;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Generated(value = GenerationTime.INSERT)
-    @Column(name = COL_ID, updatable = false, insertable = false)
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    
     /**
      * @return the deviceId
      */
@@ -86,6 +63,7 @@ public class Device extends Persistable<Long> {
     /**
      * @return the enabledState
      */
+    @Enumerated(EnumType.STRING)
     public EnabledState getEnabledState() {
         return enabledState;
     }
@@ -100,6 +78,7 @@ public class Device extends Persistable<Long> {
     /**
      * @return the statusInfo
      */
+    @Enumerated(EnumType.STRING)
     public StatusInfo getStatusInfo() {
         return statusInfo;
     }

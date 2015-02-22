@@ -10,7 +10,7 @@ package org.thingsplode.core.domain;
  * @author tam
  */
 public enum StatusInfo {
-    AVAILABLE,
+    ONLINE,
     DEGRADED,
-    UNAVAILABLE;
+    OFFLINE;
 }
