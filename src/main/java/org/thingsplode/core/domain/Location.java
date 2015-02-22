@@ -5,6 +5,7 @@
  */
 package org.thingsplode.core.domain;
 
+import java.io.Serializable;
 import javax.persistence.Embeddable;
 
 /**
@@ -12,7 +13,7 @@ import javax.persistence.Embeddable;
  * @author tam
  */
 @Embeddable
-public class Location {
+public class Location implements Serializable {
 
     private String name;
     private double mLatitude = 0.0;

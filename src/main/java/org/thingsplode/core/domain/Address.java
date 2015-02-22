@@ -5,11 +5,13 @@
  */
 package org.thingsplode.core.domain;
 
+import java.io.Serializable;
+
 /**
  *
  * @author tam
  */
 //@Embeddable
-public class Address {
+public class Address implements Serializable {
 
 }

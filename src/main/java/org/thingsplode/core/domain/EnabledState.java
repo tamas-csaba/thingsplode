@@ -10,7 +10,6 @@ package org.thingsplode.core.domain;
  * @author tam
  */
 public enum EnabledState {
-
     ENABLED,
     DISABLED,
     UNINITIALIZED;

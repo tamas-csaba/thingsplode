@@ -26,7 +26,6 @@ public class Treshold extends Persistable<Long> {
         return name;
     }
 
-
     /**
      * @return the type
      */
