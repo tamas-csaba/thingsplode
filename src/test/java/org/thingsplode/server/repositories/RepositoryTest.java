@@ -8,25 +8,24 @@ package org.thingsplode.server.repositories;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
-import junit.framework.TestCase;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.thingsplode.TestBase;
 import org.thingsplode.core.domain.Address;
 import org.thingsplode.core.domain.EnabledState;
 import org.thingsplode.core.domain.Location;
-import org.thingsplode.core.domain.Model;
+import org.thingsplode.core.domain.entities.Model;
 import org.thingsplode.core.domain.StatusInfo;
+import org.thingsplode.core.domain.entities.Capability;
+import org.thingsplode.core.domain.entities.Component;
+import org.thingsplode.core.domain.entities.Configuration;
 import org.thingsplode.core.domain.entities.Device;
+import org.thingsplode.core.domain.entities.Event;
 import org.thingsplode.server.BaseConfig;
 import org.thingsplode.server.JpaConfig;
 
@@ -40,39 +39,13 @@ import org.thingsplode.server.JpaConfig;
 //@ActiveProfiles({"dev", "integration"})
 @TransactionConfiguration(transactionManager = "txMgr", defaultRollback = true)
 //@TestExecutionListeners(listeners = {}, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
-public class RepositoryTest extends TestCase {
+public class RepositoryTest extends TestBase {
 
-    @Autowired
-    private ApplicationContext applicationContext;
     @Autowired
     private DeviceRepository deviceRepo;
 
     public RepositoryTest(){
-        Logger.getRootLogger().removeAllAppenders();
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.DEBUG);
-        Logger.getLogger(org.springframework.beans.factory.support.DefaultListableBeanFactory.class).setLevel(Level.DEBUG);
-        Logger.getLogger(org.springframework.beans.factory.xml.XmlBeanDefinitionReader.class).setLevel(Level.INFO);
-        Logger.getLogger(org.springframework.test.context.TestContextManager.class).setLevel(Level.DEBUG);
-        Logger.getLogger("org.hibernate.cfg").setLevel(Level.ERROR);
-        Logger.getLogger("org.hibernate.validator").setLevel(Level.ERROR);
-        Logger.getLogger("org.hibernate.id").setLevel(Level.ERROR);
-        Logger.getLogger(org.hibernate.cfg.annotations.PropertyBinder.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.cfg.annotations.SimpleValueBinder.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.cfg.annotations.TableBinder.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.validator.engine.resolver.DefaultTraversableResolver.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.validator.metadata.ConstraintDescriptorImpl.class).setLevel(Level.WARN);
-        //Logger.getLogger(org.hibernate.id.factory.DefaultIdentifierGeneratorFactory.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.cfg.Configuration.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.persister.entity.AbstractEntityPersister.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.loader.collection.OneToManyLoader.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.loader.collection.OneToManyLoader.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.cfg.Ejb3Column.class).setLevel(Level.WARN);
-        //Logger.getLogger(org.hibernate.cfg.search.HibernateSearchEventListenerRegister.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.validator.xml.ValidationXmlParser.class).setLevel(Level.WARN);
-        Logger.getLogger(com.mchange.v2.resourcepool.BasicResourcePoolFactory.class).setLevel(Level.WARN);
-        Logger.getLogger(com.mchange.v2.async.ThreadPoolAsynchronousRunner.class).setLevel(Level.WARN);
-        Logger.getLogger(org.hibernate.tool.hbm2ddl.SchemaExport.class).setLevel(Level.INFO);
+        super();
     }
     
 //    public RepositoryTest(String testName) {
@@ -83,10 +56,19 @@ public class RepositoryTest extends TestCase {
     public void testBasics() throws UnknownHostException {
         Device d = Device.create("test_device", EnabledState.ENABLED, StatusInfo.OFFLINE);
         d.
+                putSerialNumber("1231234235").putPartNumber("123").
                 putIpAddress(InetAddress.getLocalHost()).
-                putLastHeartbeat(Calendar.getInstance()).putLocation(Location.create("default", Address.create().putCity("some_city"))).
-                putModel(Model.create().putManufacturer("some_manifacturer").putType("some_type")).
-                putStartupDate(Calendar.getInstance());
+                putLastHeartbeat(Calendar.getInstance()).
+                putLocation(Location.create("default", Address.create().putCity("some_city").putCountry("Some Country").putState("some state").putHouseNumber("54").putPostCode("434545")).putLatitude(100.0).putLongitude(123.4)).
+                putModel(Model.create().putManufacturer("some_manifacturer").putType("some_type").putVersion("12123213")).
+                putStartupDate(Calendar.getInstance()).
+                addCapabilities(Capability.create(Capability.Type.READ,"meter_value",true)).
+                addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE,"door_control",true)).
+                addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).
+                        addConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).
+                        addEvents(Event.create())
+                );
+                
         deviceRepo.save(d);
     }
 }

@@ -5,7 +5,6 @@
  */
 package org.thingsplode.core.domain.entities;
 
-import org.thingsplode.core.domain.Model;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,8 +18,10 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -47,14 +48,16 @@ public class Device extends Persistable<Long> {
     private Collection<Capability> capabilities;
     private Collection<Component> components;
     private Collection<Event> eventLog;
-    private Collection<ConfigurationEntity> configuration;
-    private InetAddress ipAddress;
-
+    private Collection<Configuration> configuration;
+    private String hostAddress;
+    private String serialNumber;
+    private String partNumber;
 
     /**
      * @return the deviceId
      */
     @Column(nullable = false, unique = true)
+    @NotNull
     public String getDeviceId() {
         return deviceId;
     }
@@ -131,7 +134,7 @@ public class Device extends Persistable<Long> {
     /**
      * @return the model
      */
-    @Embedded
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     public Model getModel() {
         return model;
     }
@@ -195,29 +198,29 @@ public class Device extends Persistable<Long> {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "DEVICE_ID")
-    public Collection<ConfigurationEntity> getConfiguration() {
+    public Collection<Configuration> getConfiguration() {
         return configuration;
     }
 
     /**
      * @param configuration the configuration to set
      */
-    public void setConfiguration(Collection<ConfigurationEntity> configuration) {
+    public void setConfiguration(Collection<Configuration> configuration) {
         this.configuration = configuration;
     }
 
     /**
      * @return the ipAddress
      */
-    public InetAddress getIpAddress() {
-        return ipAddress;
+    public String getHostAddress() {
+        return hostAddress;
     }
 
     /**
-     * @param ipAddress the ipAddress to set
+     * @param host the ipAddress to set
      */
-    public void setIpAddress(InetAddress ipAddress) {
-        this.ipAddress = ipAddress;
+    public void setIpAddress(String host) {
+        this.hostAddress = host;
     }
 
     /**
@@ -234,7 +237,35 @@ public class Device extends Persistable<Long> {
     public void setStartupDate(Calendar startupDate) {
         this.startupDate = startupDate;
     }
-    
+
+    /**
+     * @return the serialNumber
+     */
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    /**
+     * @param serialNumber the serialNumber to set
+     */
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    /**
+     * @return the partNumber
+     */
+    public String getPartNumber() {
+        return partNumber;
+    }
+
+    /**
+     * @param partNumber the partNumber to set
+     */
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
+    }
+
     public static Device create() {
         return new Device();
     }
@@ -298,16 +329,31 @@ public class Device extends Persistable<Long> {
         return this;
     }
 
-    public Device addConfigurations(ConfigurationEntity... configurationz) {
+    public Device addConfigurations(Configuration... configurationz) {
         if (this.configuration == null) {
             this.configuration = new ArrayList<>();
         }
         Collections.addAll(this.configuration, configurationz);
         return this;
     }
-    
-    public Device putIpAddress(InetAddress addr){
+
+    public Device putIpAddress(String addr) {
         this.setIpAddress(addr);
+        return this;
+    }
+
+    public Device putIpAddress(InetAddress addr) {
+        this.setIpAddress(addr.getHostAddress());
+        return this;
+    }
+
+    public Device putSerialNumber(String serialNumber) {
+        this.setSerialNumber(serialNumber);
+        return this;
+    }
+
+    public Device putPartNumber(String partNumber) {
+        this.setPartNumber(partNumber);
         return this;
     }
 }

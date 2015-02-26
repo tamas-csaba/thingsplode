@@ -3,23 +3,25 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.thingsplode.core.domain;
+package org.thingsplode.core.domain.entities;
 
-import java.io.Serializable;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author tam
  */
-@Embeddable
-public class Model implements Serializable {
+@Entity
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement
+public class Model extends Persistable<Long> {
 
     private String manufacturer;
     private String type;
-    private String serialNumber;
-    private String partNumber;
     private String version;
 
     public static Model create() {
@@ -36,15 +38,6 @@ public class Model implements Serializable {
         return this;
     }
 
-    public Model putSerialNumber(String serialNumber) {
-        this.setSerialNumber(serialNumber);
-        return this;
-    }
-
-    public Model putPartNumber(String partNumber) {
-        this.setPartNumber(partNumber);
-        return this;
-    }
 
     public Model putVersion(String version) {
         this.setVersion(version);
@@ -78,34 +71,6 @@ public class Model implements Serializable {
      */
     public void setType(String type) {
         this.type = type;
-    }
-
-    /**
-     * @return the serialNumber
-     */
-    public String getSerialNumber() {
-        return serialNumber;
-    }
-
-    /**
-     * @param serialNumber the serialNumber to set
-     */
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    /**
-     * @return the partNumber
-     */
-    public String getPartNumber() {
-        return partNumber;
-    }
-
-    /**
-     * @param partNumber the partNumber to set
-     */
-    public void setPartNumber(String partNumber) {
-        this.partNumber = partNumber;
     }
 
     /**

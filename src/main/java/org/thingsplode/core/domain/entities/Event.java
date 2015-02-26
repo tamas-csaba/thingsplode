@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 public class Event extends Persistable<Long> {
+
     private String name;
     private String eventClass;
     private Collection<Indication> indications;
@@ -45,6 +46,10 @@ public class Event extends Persistable<Long> {
 //        return super.getId();
 //    }
 //
+    /**
+     * @return the device
+     */
+
     /**
      * @return the eventId
      */
@@ -134,13 +139,13 @@ public class Event extends Persistable<Long> {
         this.eventDate = eventDate;
     }
 
-        public static Event create() {
+    public static Event create() {
         Event evt = new Event();
         evt.setEventDate(Calendar.getInstance());
-        return evt;   
+        return evt;
     }
-    
-    public static Event create(String eventId, String eventClass, Severity severity){
+
+    public static Event create(String eventId, String eventClass, Severity severity) {
         return Event.create().putId(eventId).putClass(eventClass).putSeverity(severity);
     }
 
@@ -148,22 +153,22 @@ public class Event extends Persistable<Long> {
         this.setName(name);
         return this;
     }
-    
-    public Event putClass(String evtClass){
+
+    public Event putClass(String evtClass) {
         this.setEventClass(eventClass);
         return this;
     }
-    
-    public Event addIndications(Indication ... indicationArray){
+
+    public Event addIndications(Indication... indicationArray) {
         Collections.addAll(this.indications, indicationArray);
         return this;
     }
-    
-    public Event putSeverity(Severity severity){
+
+    public Event putSeverity(Severity severity) {
         this.setSeverity(severity);
         return this;
     }
-    
+
     static public enum Severity {
 
         ERROR,

@@ -17,7 +17,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import org.thingsplode.core.domain.EnabledState;
-import org.thingsplode.core.domain.Model;
 import org.thingsplode.core.domain.StatusInfo;
 
 /**
@@ -35,7 +34,7 @@ public class Component extends Persistable<Long> {
     private Collection<Component> subComponents;
     private Collection<Capability> capabilities;
     private Collection<Event> eventLog;
-    private Collection<ConfigurationEntity> configuration;
+    private Collection<Configuration> configuration;
 
 
     /**
@@ -165,14 +164,14 @@ public class Component extends Persistable<Long> {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "COMP_ID")
-    public Collection<ConfigurationEntity> getConfiguration() {
+    public Collection<Configuration> getConfiguration() {
         return configuration;
     }
 
     /**
      * @param configuration the configuration to set
      */
-    public void setConfiguration(Collection<ConfigurationEntity> configuration) {
+    public void setConfiguration(Collection<Configuration> configuration) {
         this.configuration = configuration;
     }
 
@@ -237,7 +236,7 @@ public class Component extends Persistable<Long> {
         return this;
     }
 
-    public Component addConfigurations(ConfigurationEntity... configs) {
+    public Component addConfigurations(Configuration... configs) {
         if (this.configuration == null) {
             this.configuration = new ArrayList<>();
         }
