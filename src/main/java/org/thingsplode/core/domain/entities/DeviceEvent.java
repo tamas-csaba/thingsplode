@@ -27,7 +27,7 @@ public class DeviceEvent extends Event {
     private Device device;
 
     @ManyToOne
-    @JoinColumn(name = JOIN_COLUMN, insertable = false, updatable = false, nullable = false)
+    @JoinColumn(name = JOIN_COLUMN, insertable = true, updatable = false, nullable = false)
     public Device getDevice() {
         return device;
     }
@@ -44,6 +44,10 @@ public class DeviceEvent extends Event {
 
     public static DeviceEvent create(String eventId, String eventClass, Severity severity) {
         return (DeviceEvent) DeviceEvent.create().putId(eventId).putClass(eventClass).putSeverity(severity);
+    }
+
+    public static DeviceEvent create(String eventId, String eventClass, Severity severity, Calendar receiveDate) {
+        return (DeviceEvent) DeviceEvent.create(eventId, eventClass, severity).putReceiveDate(receiveDate);
     }
 
     public DeviceEvent putDevice(Device device) {

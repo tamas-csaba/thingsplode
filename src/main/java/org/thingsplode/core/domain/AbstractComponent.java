@@ -23,6 +23,7 @@ import org.thingsplode.core.domain.entities.Configuration;
 import org.thingsplode.core.domain.entities.Model;
 import org.thingsplode.core.domain.entities.Persistable;
 import org.thingsplode.core.domain.entities.Component;
+import org.thingsplode.core.domain.entities.Treshold;
 
 /**
  *
@@ -38,6 +39,7 @@ public abstract class AbstractComponent extends Persistable<Long> {
     private Collection<Component> components;
     private Collection<Capability> capabilities;
     private Collection<Configuration> configuration;
+    private Collection<Treshold> tresholds;
     private String serialNumber;
     private String partNumber;
 
@@ -128,11 +130,30 @@ public abstract class AbstractComponent extends Persistable<Long> {
     public Collection<Configuration> getConfiguration() {
         return configuration;
     }
-    
+
+    /**
+     * @return the tresholds
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "TRESHOLD_ID")
+    public Collection<Treshold> getTresholds() {
+        return tresholds;
+    }
+
+    protected void setTresholdCollections(Collection<Treshold> tresholds) {
+        this.tresholds = tresholds;
+    }
+
+    /**
+     * @param tresholds the tresholds to set
+     */
+    public abstract void setTresholds(Collection<Treshold> tresholds);
+
     /**
      * @return the serialNumber
      */
     @Basic
+    @Column(unique = true)
     public String getSerialNumber() {
         return serialNumber;
     }
@@ -184,4 +205,10 @@ public abstract class AbstractComponent extends Persistable<Long> {
         }
     }
     
+    public void initializeTresholds(){
+        if (this.tresholds == null){
+            this.tresholds = new ArrayList<>();
+        }
+    }
+
 }

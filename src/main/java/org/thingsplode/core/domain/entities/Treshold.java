@@ -18,8 +18,9 @@ import org.thingsplode.core.domain.Value;
 @Entity
 public class Treshold extends Persistable<Long> {
 
-    private Type type;//if HIGH, the method isTriggerable will return true if the indication.value < tresholdIndication.value
     private String name;
+    private Scope scope;
+    private Type type;//if HIGH, the method isTriggerable will return true if the indication.value < tresholdIndication.value
     private Value tresholdValue;
 
     public String getName() {
@@ -53,29 +54,59 @@ public class Treshold extends Persistable<Long> {
     public void setName(String name) {
         this.name = name;
     }
-    
 
     public boolean isTriggerable(Indication indication) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    public static Treshold create(String name, Type type){
+
+    public static Treshold create(String name, Type tresholdType) {
         Treshold t = new Treshold();
         t.setName(name);
-        t.setType(type);
+        t.setType(tresholdType);
         return t;
     }
-    
-    public static Treshold create (String name, Type type, Value value){
-        Treshold t = Treshold.create(name, type);
+
+    public static Treshold create(String tresholdName, Type tresholdType, Value value) {
+        Treshold t = Treshold.create(tresholdName, tresholdType);
         t.setTresholdValue(value);
         return t;
-        
     }
-            
+
+    public static Treshold create(String tresholdName, Type tresholdType, Value.Type valueType, String tresholdValue) {
+        Treshold t = Treshold.create(tresholdName, tresholdType);
+        t.setTresholdValue(Value.create(valueType, tresholdValue));
+        return t;
+    }
+
+    public Treshold putValue(Value.Type valueType, String tresholdValue) {
+        this.setTresholdValue(Value.create(valueType, tresholdValue));
+        return this;
+    }
+
+    /**
+     * @return the scope
+     */
+    public Scope getScope() {
+        return scope;
+    }
+
+    /**
+     * @param scope the scope to set
+     */
+    public void setScope(Scope scope) {
+        this.scope = scope;
+    }
+
     public static enum Type {
 
         HIGH,
         LOW;
+    }
+
+    public static enum Scope {
+
+        GLOBAL,
+        DEVICE,
+        COMPONENT;
     }
 }

@@ -5,6 +5,7 @@
  */
 package org.thingsplode.core.domain;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
@@ -91,7 +93,7 @@ public class Event extends Persistable<Long> {
      * @return the indications
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    //@JoinColumn(name = "EVT_ID")
+    @JoinColumn(name = "EVT_ID")
     public Collection<Indication> getIndications() {
         return indications;
     }
@@ -172,8 +174,15 @@ public class Event extends Persistable<Long> {
     }
 
     public Event addIndications(Indication... indicationArray) {
+        initializeIndications();
         Collections.addAll(this.indications, indicationArray);
         return this;
+    }
+
+    public void initializeIndications() {
+        if (this.indications == null) {
+            this.indications = new ArrayList<>();
+        }
     }
 
     public Event putSeverity(Severity severity) {

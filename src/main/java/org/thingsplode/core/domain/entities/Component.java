@@ -80,6 +80,20 @@ public class Component extends AbstractComponent {
         this.eventLog = eventLog;
     }
 
+    @Override
+    public void setTresholds(Collection<Treshold> tresholds) {
+        setTresholdsScope(tresholds);
+        setTresholdCollections(tresholds);
+    }
+
+    private void setTresholdsScope(Collection<Treshold> tresholds) {
+        if (tresholds != null) {
+            for (Treshold t : tresholds) {
+                t.setScope(Treshold.Scope.COMPONENT);
+            }
+        }
+    }
+
     static public enum Type {
 
         HARDWARE,
@@ -127,6 +141,15 @@ public class Component extends AbstractComponent {
     public Component addCapabilities(Capability... capabilities) {
         this.initializeCapabilities();
         Collections.addAll(this.getCapabilities(), capabilities);
+        return this;
+    }
+
+    public Component addTresholds(Treshold... tresholds) {
+        this.initializeTresholds();
+        ArrayList<Treshold> trshs = new ArrayList<>();
+        Collections.addAll(trshs, tresholds);
+        setTresholdsScope(trshs);
+        getTresholds().addAll(trshs);
         return this;
     }
 

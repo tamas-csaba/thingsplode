@@ -5,9 +5,7 @@
  */
 package org.thingsplode.server.repositories;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Calendar;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +14,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.thingsplode.TestBase;
-import org.thingsplode.core.domain.Address;
-import org.thingsplode.core.domain.EnabledState;
-import org.thingsplode.core.domain.Location;
-import org.thingsplode.core.domain.entities.Model;
-import org.thingsplode.core.domain.StatusInfo;
-import org.thingsplode.core.domain.entities.Capability;
-import org.thingsplode.core.domain.entities.Component;
-import org.thingsplode.core.domain.entities.Configuration;
-import org.thingsplode.core.domain.entities.Device;
-import org.thingsplode.core.domain.Event;
-import org.thingsplode.core.domain.entities.ComponentEvent;
+import org.thingsplode.domain.TestFactory;
 import org.thingsplode.server.BaseConfig;
 import org.thingsplode.server.JpaConfig;
 
@@ -54,22 +42,7 @@ public class RepositoryTest extends TestBase {
 //    }
     @Test
     public void testBasics() throws UnknownHostException {
-        Device d = Device.create("test_device", EnabledState.ENABLED, StatusInfo.OFFLINE);
-        d.
-                putSerialNumber("1231234235").putPartNumber("123").
-                putStatusInfo(StatusInfo.ONLINE).
-                putIpAddress(InetAddress.getLocalHost()).
-                putLastHeartbeat(Calendar.getInstance()).
-                putLocation(Location.create("default", Address.create().putCity("some_city").putCountry("Some Country").putState("some state").putHouseNumber("54").putPostCode("434545")).putLatitude(100.0).putLongitude(123.4)).
-                putModel(Model.create().putManufacturer("some_manifacturer").putType("some_type").putVersion("12123213")).
-                putStartupDate(Calendar.getInstance()).
-                addCapabilities(Capability.create(Capability.Type.READ, "meter_value", true)).
-                addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "door_control", true)).
-                addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).
-                        addConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).
-                        addEvents((ComponentEvent) ComponentEvent.create("some_event", "some_event_class", Event.Severity.ERROR).putReceiveDate(Calendar.getInstance()))
-                );
-
-        deviceRepo.save(d);
+        deviceRepo.save(TestFactory.createDevice("test_device_1"));
+        deviceRepo.save(TestFactory.createDevice("test_device_2"));
     }
 }

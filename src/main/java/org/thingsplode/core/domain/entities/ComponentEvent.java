@@ -45,6 +45,10 @@ public class ComponentEvent extends Event {
     public static ComponentEvent create(String eventId, String eventClass, Severity severity) {
         return (ComponentEvent) ComponentEvent.create().putId(eventId).putClass(eventClass).putSeverity(severity);
     }
+    
+    public static ComponentEvent create(String eventId, String eventClass, Severity severity, Calendar receiveDate) {
+        return (ComponentEvent) ComponentEvent.create(eventId, eventClass, severity).putReceiveDate(receiveDate);
+    }
 
     public ComponentEvent putComponent(ComponentEvent device) {
         this.setComponent(component);

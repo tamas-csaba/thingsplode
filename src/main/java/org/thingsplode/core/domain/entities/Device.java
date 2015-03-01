@@ -6,6 +6,7 @@
 package org.thingsplode.core.domain.entities;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -102,7 +103,7 @@ public class Device extends AbstractComponent {
      */
     public void setEventLog(Collection<DeviceEvent> log) {
         this.eventLog = log;
-    }    
+    }
 
     /**
      * @return the ipAddress
@@ -193,8 +194,29 @@ public class Device extends AbstractComponent {
     }
 
     public Device addConfigurations(Configuration... configurationz) {
-       this.initializeConfiguration();
+        this.initializeConfiguration();
         Collections.addAll(this.getConfiguration(), configurationz);
+        return this;
+    }
+
+    public Device addTresholds(Treshold... tresholds) {
+        this.initializeTresholds();
+        ArrayList<Treshold> trshs = new ArrayList<>();
+        Collections.addAll(trshs, tresholds);
+        getTresholds().addAll(trshs);
+        return this;
+    }
+
+    private void decorateEvents(DeviceEvent... evts) {
+        for (DeviceEvent evt : evts) {
+            evt.setDevice(this);
+        }
+    }
+
+    public Device addEvents(DeviceEvent... events) {
+        this.initializeEventLog();
+        decorateEvents(events);
+        Collections.addAll(this.eventLog, events);
         return this;
     }
 
@@ -216,5 +238,25 @@ public class Device extends AbstractComponent {
     public Device putPartNumber(String partNumber) {
         this.setPartNumber(partNumber);
         return this;
+    }
+
+    public void initializeEventLog() {
+        if (this.eventLog == null) {
+            this.eventLog = new ArrayList<>();
+        }
+    }
+
+    @Override
+    public void setTresholds(Collection<Treshold> tresholds) {
+        setTresholdsScope(tresholds);
+        setTresholdCollections(tresholds);
+    }
+
+    private void setTresholdsScope(Collection<Treshold> tresholds) {
+        if (tresholds != null) {
+            for (Treshold t : tresholds) {
+                t.setScope(Treshold.Scope.DEVICE);
+            }
+        }
     }
 }

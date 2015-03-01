@@ -64,7 +64,7 @@ public class Value implements Serializable {
     }
 
     public static enum Type {
-        SCALAR,
+        NUMBER,
         TEXT,
         BOOLEAN
     }

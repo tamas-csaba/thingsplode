@@ -5,6 +5,7 @@
  */
 package org.thingsplode.core.domain.entities;
 
+import javax.persistence.Basic;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import org.thingsplode.core.domain.Value;
@@ -19,25 +20,13 @@ public class Indication extends Persistable<Long> {
     private String name;
     private Value indicationValue;
 
+    @Basic(optional = false)
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-
-
-    public static Indication create() {
-        return new Indication();
-    }
-
-    public static Indication create(String name, Value.Type type) {
-        Indication i = Indication.create();
-        i.setName(name);
-        i.setIndicationValue(Value.create(type));
-        return i;
     }
 
     /**
@@ -53,6 +42,37 @@ public class Indication extends Persistable<Long> {
      */
     public void setIndicationValue(Value indicationValue) {
         this.indicationValue = indicationValue;
+    }
+
+    public static Indication create() {
+        return new Indication();
+    }
+
+    public static Indication create(String name) {
+        Indication i = Indication.create();
+        i.setName(name);
+        return i;
+    }
+
+    public static Indication create(String name, Value.Type type) {
+        Indication i = Indication.create(name);
+        i.setIndicationValue(Value.create(type));
+        return i;
+    }
+
+    public static Indication create(String name, Value.Type type, String valueContent) {
+        Indication i = Indication.create(name, type);
+        i.getIndicationValue().setContent(valueContent);
+        return i;
+    }
+
+    public Indication putValue(Value.Type type, String valueContent) {
+        if (indicationValue == null) {
+            indicationValue = new Value();
+        }
+        indicationValue.setType(type);
+        indicationValue.setContent(valueContent);
+        return this;
     }
 
 }
