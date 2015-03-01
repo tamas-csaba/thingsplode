@@ -12,7 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Configuration
 @ComponentScan

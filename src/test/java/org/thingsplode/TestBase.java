@@ -5,6 +5,7 @@
  */
 package org.thingsplode;
 
+import java.io.File;
 import junit.framework.TestCase;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -14,14 +15,27 @@ import org.springframework.context.ApplicationContext;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
-public class TestBase extends TestCase {
+public abstract class TestBase extends TestCase {
 
     @Autowired
     private ApplicationContext applicationContext;
-    
+
     public TestBase() {
+        File f = new File(System.getProperty("java.io.tmpdir") + "/thingsplode_h2db_test.h2.db");
+        System.out.println("\n\n ***** \n REMOVING PREVIOUS DATABASE: ("+f.getAbsolutePath()+")\n *****");
+        if (f.exists()) {
+            try {
+                boolean delete = f.delete();
+            } catch (Exception e) {
+                System.out.println("DATABASE couldn't be removed due to:" + e.getMessage());
+                fail();
+            }
+        } else {
+            System.out.println("\n\n **** WARNING: test database file was not found and not deleted. ("+f.getAbsolutePath()+")");
+        }
+
         Logger.getRootLogger().removeAllAppenders();
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.DEBUG);

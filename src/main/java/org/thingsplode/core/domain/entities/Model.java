@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Entity
 @XmlAccessorType(XmlAccessType.FIELD)

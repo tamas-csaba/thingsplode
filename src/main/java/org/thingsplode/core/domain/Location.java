@@ -11,12 +11,13 @@ import javax.persistence.Embedded;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Embeddable
 public class Location implements Serializable {
 
-    private String name;
+    private String description;
+
     private double latitude = 0.0;
     private double longitude = 0.0;
     private Address address;
@@ -25,15 +26,15 @@ public class Location implements Serializable {
         return new Location();
     }
 
-    public static Location create(String name, Address address) {
+    public static Location create(String description, Address address) {
         Location l = Location.create();
-        l.setName(name);
+        l.setDescription(description);
         l.setAddress(address);
         return l;
     }
 
-    public Location putName(String name) {
-        this.setName(name);
+    public Location putDescription(String description) {
+        this.setDescription(description);
         return this;
     }
 
@@ -52,18 +53,12 @@ public class Location implements Serializable {
         return this;
     }
 
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
+    public String getDescription() {
+        return description;
     }
 
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**

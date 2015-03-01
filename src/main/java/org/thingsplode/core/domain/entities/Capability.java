@@ -5,13 +5,15 @@
  */
 package org.thingsplode.core.domain.entities;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Entity
 public class Capability extends Persistable<Long> {
@@ -29,6 +31,7 @@ public class Capability extends Persistable<Long> {
      * @return the type
      */
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     public Type getType() {
         return type;
     }
@@ -43,6 +46,7 @@ public class Capability extends Persistable<Long> {
     /**
      * @return the name
      */
+    @Column(nullable = false)
     public String getName() {
         return name;
     }
@@ -57,6 +61,7 @@ public class Capability extends Persistable<Long> {
     /**
      * @return the active
      */
+    @Basic(optional = false)
     public boolean isActive() {
         return active;
     }

@@ -8,7 +8,7 @@ package org.thingsplode.server.repositories;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 public class EventRepository {
     

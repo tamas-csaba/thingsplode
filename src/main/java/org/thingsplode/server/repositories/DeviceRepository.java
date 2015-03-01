@@ -5,14 +5,12 @@
  */
 package org.thingsplode.server.repositories;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.NoRepositoryBean;
 import org.thingsplode.core.domain.entities.Device;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  * @param <Device>
  */
 interface DeviceRepository extends JpaRepository<Device, Long> {

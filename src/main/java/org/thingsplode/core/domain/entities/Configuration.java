@@ -6,6 +6,8 @@
 package org.thingsplode.core.domain.entities;
 
 import java.util.Calendar;
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,7 +16,7 @@ import javax.persistence.TemporalType;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Entity
 public class Configuration extends Persistable<Long> {
@@ -24,6 +26,7 @@ public class Configuration extends Persistable<Long> {
     private Calendar commitDate;
     
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     public Type getType() {
         return type;
     }
@@ -32,6 +35,7 @@ public class Configuration extends Persistable<Long> {
         this.type = type;
     }
     
+    @Basic(optional = false)
     public String getKey() {
         return key;
     }
@@ -40,6 +44,7 @@ public class Configuration extends Persistable<Long> {
         this.key = key;
     }
     
+    @Basic(optional = false)
     public String getValue() {
         return value;
     }
@@ -58,7 +63,6 @@ public class Configuration extends Persistable<Long> {
     }
     
     public static enum Type {
-        
         STRING,
         BOOLEAN,
         NUMBER,

@@ -8,38 +8,35 @@ package org.thingsplode.core.domain.entities;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import org.thingsplode.core.domain.AbstractComponent;
 import org.thingsplode.core.domain.EnabledState;
 import org.thingsplode.core.domain.StatusInfo;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Entity
-public class Component extends Persistable<Long> {
+public class Component extends AbstractComponent {
 
     private String name;
     private Type type;
-    private EnabledState enabledState;
-    private StatusInfo status;
-    private Model model;
-    private Collection<Component> subComponents;
-    private Collection<Capability> capabilities;
-    private Collection<Event> eventLog;
-    private Collection<Configuration> configuration;
-
+    private Collection<ComponentEvent> eventLog;
 
     /**
      * @return the name
      */
+    @Basic(optional = false)
+    @Column()
     public String getName() {
         return name;
     }
@@ -55,6 +52,7 @@ public class Component extends Persistable<Long> {
      * @return the type
      */
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     public Type getType() {
         return type;
     }
@@ -67,119 +65,27 @@ public class Component extends Persistable<Long> {
     }
 
     /**
-     * @return the enabledState
-     */
-    @Enumerated(EnumType.STRING)
-    public EnabledState getEnabledState() {
-        return enabledState;
-    }
-
-    /**
-     * @param enabledState the enabledState to set
-     */
-    public void setEnabledState(EnabledState enabledState) {
-        this.enabledState = enabledState;
-    }
-
-    /**
-     * @return the status
-     */
-    @Enumerated(EnumType.STRING)
-    public StatusInfo getStatus() {
-        return status;
-    }
-
-    /**
-     * @param status the status to set
-     */
-    public void setStatus(StatusInfo status) {
-        this.status = status;
-    }
-
-    /**
-     * @return the model
-     */
-    @Embedded
-    public Model getModel() {
-        return model;
-    }
-
-    /**
-     * @param model the model to set
-     */
-    public void setModel(Model model) {
-        this.model = model;
-    }
-
-    /**
-     * @return the subComponents
-     */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ROOT_COMP_ID")
-    public Collection<Component> getSubComponents() {
-        return subComponents;
-    }
-
-    /**
-     * @param subComponents the subComponents to set
-     */
-    public void setSubComponents(Collection<Component> subComponents) {
-        this.subComponents = subComponents;
-    }
-
-    /**
-     * @return the capabilities
-     */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "COMP_ID")
-    public Collection<Capability> getCapabilities() {
-        return capabilities;
-    }
-
-    /**
-     * @param capabilities the capabilities to set
-     */
-    public void setCapabilities(Collection<Capability> capabilities) {
-        this.capabilities = capabilities;
-    }
-
-    /**
      * @return the eventLog
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMP_ID")
-    public Collection<Event> getEventLog() {
+    @JoinColumn(name = ComponentEvent.JOIN_COLUMN)
+    public Collection<ComponentEvent> getEventLog() {
         return eventLog;
     }
 
     /**
      * @param eventLog the eventLog to set
      */
-    public void setEventLog(Collection<Event> eventLog) {
+    public void setEventLog(Collection<ComponentEvent> eventLog) {
         this.eventLog = eventLog;
     }
 
-    /**
-     * @return the configuration
-     */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "COMP_ID")
-    public Collection<Configuration> getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * @param configuration the configuration to set
-     */
-    public void setConfiguration(Collection<Configuration> configuration) {
-        this.configuration = configuration;
-    }
-
     static public enum Type {
+
         HARDWARE,
         SOFTWARE;
     }
-    
+
     public static Component create() {
         return new Component();
     }
@@ -198,7 +104,7 @@ public class Component extends Persistable<Long> {
     }
 
     public Component putEnabledState(EnabledState state) {
-        this.setEnabledState(enabledState);
+        this.setEnabledState(state);
         return this;
     }
 
@@ -213,34 +119,39 @@ public class Component extends Persistable<Long> {
     }
 
     public Component addComponents(Component... componentArray) {
-        if (subComponents == null) {
-            this.subComponents = new ArrayList<>();
-        }
-        Collections.addAll(this.subComponents, componentArray);
+        this.initializeComponents();
+        Collections.addAll(this.getComponents(), componentArray);
         return this;
     }
 
     public Component addCapabilities(Capability... capabilities) {
-        if (this.capabilities == null) {
-            this.capabilities = new ArrayList<>();
-        }
-        Collections.addAll(this.capabilities, capabilities);
+        this.initializeCapabilities();
+        Collections.addAll(this.getCapabilities(), capabilities);
         return this;
     }
 
-    public Component addEvents(Event... events) {
-        if (this.eventLog == null) {
-            this.eventLog = new ArrayList<>();
+    private void decorateEvents(ComponentEvent... evts) {
+        for (ComponentEvent evt : evts) {
+            evt.setComponent(this);
         }
+    }
+
+    public Component addEvents(ComponentEvent... events) {
+        this.initializeEventLog();
+        decorateEvents(events);
         Collections.addAll(this.eventLog, events);
         return this;
     }
 
     public Component addConfigurations(Configuration... configs) {
-        if (this.configuration == null) {
-            this.configuration = new ArrayList<>();
-        }
-        Collections.addAll(this.configuration, configs);
+        this.initializeConfiguration();
+        Collections.addAll(this.getConfiguration(), configs);
         return this;
+    }
+
+    public void initializeEventLog() {
+        if (this.eventLog == null) {
+            this.eventLog = new ArrayList<>();
+        }
     }
 }

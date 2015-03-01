@@ -25,13 +25,14 @@ import org.thingsplode.core.domain.entities.Capability;
 import org.thingsplode.core.domain.entities.Component;
 import org.thingsplode.core.domain.entities.Configuration;
 import org.thingsplode.core.domain.entities.Device;
-import org.thingsplode.core.domain.entities.Event;
+import org.thingsplode.core.domain.Event;
+import org.thingsplode.core.domain.entities.ComponentEvent;
 import org.thingsplode.server.BaseConfig;
 import org.thingsplode.server.JpaConfig;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {BaseConfig.class, JpaConfig.class})
@@ -44,31 +45,31 @@ public class RepositoryTest extends TestBase {
     @Autowired
     private DeviceRepository deviceRepo;
 
-    public RepositoryTest(){
+    public RepositoryTest() {
         super();
     }
-    
+
 //    public RepositoryTest(String testName) {
 //        super(testName);
 //    }
-
     @Test
     public void testBasics() throws UnknownHostException {
         Device d = Device.create("test_device", EnabledState.ENABLED, StatusInfo.OFFLINE);
         d.
                 putSerialNumber("1231234235").putPartNumber("123").
+                putStatusInfo(StatusInfo.ONLINE).
                 putIpAddress(InetAddress.getLocalHost()).
                 putLastHeartbeat(Calendar.getInstance()).
                 putLocation(Location.create("default", Address.create().putCity("some_city").putCountry("Some Country").putState("some state").putHouseNumber("54").putPostCode("434545")).putLatitude(100.0).putLongitude(123.4)).
                 putModel(Model.create().putManufacturer("some_manifacturer").putType("some_type").putVersion("12123213")).
                 putStartupDate(Calendar.getInstance()).
-                addCapabilities(Capability.create(Capability.Type.READ,"meter_value",true)).
-                addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE,"door_control",true)).
+                addCapabilities(Capability.create(Capability.Type.READ, "meter_value", true)).
+                addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "door_control", true)).
                 addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).
                         addConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).
-                        addEvents(Event.create())
+                        addEvents((ComponentEvent) ComponentEvent.create("some_event", "some_event_class", Event.Severity.ERROR).putReceiveDate(Calendar.getInstance()))
                 );
-                
+
         deviceRepo.save(d);
     }
 }

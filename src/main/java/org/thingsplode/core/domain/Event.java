@@ -3,33 +3,41 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.thingsplode.core.domain.entities;
+package org.thingsplode.core.domain;
 
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
-import javax.persistence.Entity;
+import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.thingsplode.core.domain.entities.Indication;
+import org.thingsplode.core.domain.entities.Persistable;
 
 /**
  *
- * @author tam
+ *
+ * @author tamas.csaba@gmail.com
  */
-@Entity
+@MappedSuperclass
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Event extends Persistable<Long> {
 
-    private String name;
+    private String eventId;
     private String eventClass;
     private Collection<Indication> indications;
     private Severity severity;
@@ -49,24 +57,25 @@ public class Event extends Persistable<Long> {
     /**
      * @return the device
      */
-
     /**
      * @return the eventId
      */
-    public String getName() {
-        return name;
+    @Basic(optional = false)
+    public String getEventId() {
+        return eventId;
     }
 
     /**
      * @param name the eventId to set
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setEventId(String name) {
+        this.eventId = name;
     }
 
     /**
      * @return the eventClass
      */
+    @Basic(optional = false)
     public String getEventClass() {
         return eventClass;
     }
@@ -98,6 +107,7 @@ public class Event extends Persistable<Long> {
      * @return the severity
      */
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     public Severity getSeverity() {
         return severity;
     }
@@ -113,6 +123,7 @@ public class Event extends Persistable<Long> {
      * @return the receiveDate
      */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(nullable = false)
     public Calendar getReceiveDate() {
         return receiveDate;
     }
@@ -128,6 +139,7 @@ public class Event extends Persistable<Long> {
      * @return the eventDate
      */
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Column(nullable = false)
     public Calendar getEventDate() {
         return eventDate;
     }
@@ -139,23 +151,23 @@ public class Event extends Persistable<Long> {
         this.eventDate = eventDate;
     }
 
-    public static Event create() {
+    protected static Event create() {
         Event evt = new Event();
         evt.setEventDate(Calendar.getInstance());
         return evt;
     }
 
-    public static Event create(String eventId, String eventClass, Severity severity) {
+    protected static Event create(String eventId, String eventClass, Severity severity) {
         return Event.create().putId(eventId).putClass(eventClass).putSeverity(severity);
     }
 
     public Event putId(String eventID) {
-        this.setName(name);
+        this.setEventId(eventID);
         return this;
     }
 
     public Event putClass(String evtClass) {
-        this.setEventClass(eventClass);
+        this.setEventClass(evtClass);
         return this;
     }
 
@@ -166,6 +178,11 @@ public class Event extends Persistable<Long> {
 
     public Event putSeverity(Severity severity) {
         this.setSeverity(severity);
+        return this;
+    }
+
+    public Event putReceiveDate(Calendar rcvDate) {
+        this.setReceiveDate(rcvDate);
         return this;
     }
 

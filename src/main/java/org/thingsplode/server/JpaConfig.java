@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Configuration
 @EnableJpaRepositories(Bootstrap.REPOS)

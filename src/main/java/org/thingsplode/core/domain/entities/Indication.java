@@ -11,7 +11,7 @@ import org.thingsplode.core.domain.Value;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Entity
 public class Indication extends Persistable<Long> {

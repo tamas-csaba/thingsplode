@@ -13,7 +13,7 @@ import javax.persistence.Enumerated;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 @Embeddable
 public class Value implements Serializable {

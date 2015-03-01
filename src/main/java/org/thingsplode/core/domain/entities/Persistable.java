@@ -18,7 +18,7 @@ import org.hibernate.annotations.GenerationTime;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  * @param <ID>
  */
 @MappedSuperclass

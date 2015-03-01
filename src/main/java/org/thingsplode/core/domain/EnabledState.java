@@ -7,7 +7,7 @@ package org.thingsplode.core.domain;
 
 /**
  *
- * @author tam
+ * @author tamas.csaba@gmail.com
  */
 public enum EnabledState {
     ENABLED,
