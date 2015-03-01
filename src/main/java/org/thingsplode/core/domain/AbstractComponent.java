@@ -36,7 +36,6 @@ public abstract class AbstractComponent extends Persistable<Long> {
     private EnabledState enabledState;
     private StatusInfo status;
     private Model model;
-    private Collection<Component> components;
     private Collection<Capability> capabilities;
     private Collection<Configuration> configuration;
     private Collection<Treshold> tresholds;
@@ -90,21 +89,7 @@ public abstract class AbstractComponent extends Persistable<Long> {
         this.model = model;
     }
 
-    /**
-     * @return the subComponents
-     */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ROOT_COMP_ID")
-    public Collection<Component> getComponents() {
-        return components;
-    }
 
-    /**
-     * @param subComponents the subComponents to set
-     */
-    public void setComponents(Collection<Component> subComponents) {
-        this.components = subComponents;
-    }
 
     /**
      * @return the capabilities
@@ -185,12 +170,6 @@ public abstract class AbstractComponent extends Persistable<Long> {
      */
     public void setConfiguration(Collection<Configuration> configuration) {
         this.configuration = configuration;
-    }
-
-    public void initializeComponents() {
-        if (this.components == null) {
-            this.components = new ArrayList<>();
-        }
     }
 
     public void initializeCapabilities() {

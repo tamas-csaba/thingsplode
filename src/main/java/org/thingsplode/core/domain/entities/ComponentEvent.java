@@ -27,7 +27,7 @@ public class ComponentEvent extends Event {
     private Component component;
 
     @ManyToOne
-    @JoinColumn(name = JOIN_COLUMN, insertable = true, updatable = false, nullable = false)
+    @JoinColumn(name = JOIN_COLUMN, insertable = false, updatable = false)
     public Component getComponent() {
         return component;
     }

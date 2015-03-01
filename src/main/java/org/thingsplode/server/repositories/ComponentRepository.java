@@ -6,10 +6,13 @@
 
 package org.thingsplode.server.repositories;
 
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.thingsplode.core.domain.entities.Component;
+
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class EventRepository {
+public interface ComponentRepository extends PagingAndSortingRepository<Component, Long> {
     
 }

@@ -31,6 +31,7 @@ public class Component extends AbstractComponent {
     private String name;
     private Type type;
     private Collection<ComponentEvent> eventLog;
+    private Collection<Component> subComponents;
 
     /**
      * @return the name
@@ -78,6 +79,22 @@ public class Component extends AbstractComponent {
      */
     public void setEventLog(Collection<ComponentEvent> eventLog) {
         this.eventLog = eventLog;
+    }
+
+    /**
+     * @return the subComponents
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ROOT_COMP_ID")
+    public Collection<Component> getSubComponents() {
+        return subComponents;
+    }
+
+    /**
+     * @param subComponents the subComponents to set
+     */
+    public void setSubComponents(Collection<Component> subComponents) {
+        this.subComponents = subComponents;
     }
 
     @Override
@@ -132,9 +149,9 @@ public class Component extends AbstractComponent {
         return this;
     }
 
-    public Component addComponents(Component... componentArray) {
-        this.initializeComponents();
-        Collections.addAll(this.getComponents(), componentArray);
+    public Component addSubComponents(Component... componentArray) {
+        this.initializeSubComponents();
+        Collections.addAll(this.getSubComponents(), componentArray);
         return this;
     }
 
@@ -175,6 +192,12 @@ public class Component extends AbstractComponent {
     public void initializeEventLog() {
         if (this.eventLog == null) {
             this.eventLog = new ArrayList<>();
+        }
+    }
+    
+    public void initializeSubComponents() {
+        if (this.subComponents == null) {
+            this.subComponents = new ArrayList<>();
         }
     }
 }

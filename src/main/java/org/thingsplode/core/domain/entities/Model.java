@@ -7,6 +7,8 @@ package org.thingsplode.core.domain.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -18,6 +20,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"manufacturer", "type", "version"})
+)
 public class Model extends Persistable<Long> {
 
     private String manufacturer;
@@ -37,7 +42,6 @@ public class Model extends Persistable<Long> {
         this.setType(type);
         return this;
     }
-
 
     public Model putVersion(String version) {
         this.setVersion(version);

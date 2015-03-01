@@ -41,6 +41,7 @@ public class Device extends AbstractComponent {
     private Calendar lastHeartBeat;
     private Location location;
     private Collection<DeviceEvent> eventLog;
+    private Collection<Component> components;
     private String hostAddress;
 
     /**
@@ -92,7 +93,7 @@ public class Device extends AbstractComponent {
     /**
      * @return the log
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY) 
     @JoinColumn(name = DeviceEvent.JOIN_COLUMN)
     public Collection<DeviceEvent> getEventLog() {
         return eventLog;
@@ -103,6 +104,22 @@ public class Device extends AbstractComponent {
      */
     public void setEventLog(Collection<DeviceEvent> log) {
         this.eventLog = log;
+    }
+
+    /**
+     * @return the subComponents
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEVICE_ID")
+    public Collection<Component> getComponents() {
+        return components;
+    }
+
+    /**
+     * @param subComponents the subComponents to set
+     */
+    public void setComponents(Collection<Component> subComponents) {
+        this.components = subComponents;
     }
 
     /**
@@ -257,6 +274,12 @@ public class Device extends AbstractComponent {
             for (Treshold t : tresholds) {
                 t.setScope(Treshold.Scope.DEVICE);
             }
+        }
+    }
+
+    public void initializeComponents() {
+        if (this.components == null) {
+            this.components = new ArrayList<>();
         }
     }
 }

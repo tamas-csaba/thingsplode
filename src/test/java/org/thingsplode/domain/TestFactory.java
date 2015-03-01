@@ -31,13 +31,13 @@ import org.thingsplode.core.domain.entities.Treshold;
 public class TestFactory {
 
     public static Device createDevice() throws UnknownHostException {
-        return createDevice("default_test_device");
+        return createDevice("default_test_device", "1231234235");
     }
 
-    public static Device createDevice(String deviceId) throws UnknownHostException {
+    public static Device createDevice(String deviceId, String serialNumber) throws UnknownHostException {
         Device d = Device.create(deviceId, EnabledState.ENABLED, StatusInfo.OFFLINE);
         d.
-                putSerialNumber("1231234235").putPartNumber("123").
+                putSerialNumber(serialNumber).putPartNumber("123").
                 putStatusInfo(StatusInfo.ONLINE).
                 putIpAddress(InetAddress.getLocalHost()).
                 putLastHeartbeat(Calendar.getInstance()).
@@ -54,7 +54,7 @@ public class TestFactory {
                         ).
                         addTresholds(Treshold.create("nr_of_transactions", Treshold.Type.HIGH, Value.Type.NUMBER, "100000")).
                         addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "read_card", true)).
-                        addComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).
+                        addSubComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).
                                 addConfigurations(Configuration.create("chip_installed", "true", Configuration.Type.BOOLEAN)).
                                 putEnabledState(EnabledState.ENABLED).
                                 putStatusInfo(StatusInfo.ONLINE)
