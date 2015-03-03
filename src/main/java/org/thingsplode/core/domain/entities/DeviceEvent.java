@@ -8,7 +8,6 @@ package org.thingsplode.core.domain.entities;
 import java.util.Calendar;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.domain.Event;
@@ -26,8 +25,7 @@ public class DeviceEvent extends Event {
 
     private Device device;
 
-    @ManyToOne
-    @JoinColumn(name = JOIN_COLUMN, insertable = false, updatable = false)
+    @ManyToOne(optional = false)
     public Device getDevice() {
         return device;
     }
