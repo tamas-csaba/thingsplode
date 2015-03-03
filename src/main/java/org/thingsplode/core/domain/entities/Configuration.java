@@ -23,7 +23,7 @@ public class Configuration extends Persistable<Long> {
     private Type type;
     private String key;
     private String value;
-    private Calendar commitDate;
+    private SyncStatus syncStatus;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -52,14 +52,20 @@ public class Configuration extends Persistable<Long> {
     public void setValue(String value) {
         this.value = value;
     }
-    
-    @Temporal(TemporalType.TIMESTAMP)
-    public Calendar getCommitDate() {
-        return commitDate;
+
+    /**
+     * @return the syncStatus
+     */
+    @Enumerated(EnumType.STRING)
+    public SyncStatus getSyncStatus() {
+        return syncStatus;
     }
-    
-    public void setCommitDate(Calendar commitDate) {
-        this.commitDate = commitDate;
+
+    /**
+     * @param syncStatus the syncStatus to set
+     */
+    public void setSyncStatus(SyncStatus syncStatus) {
+        this.syncStatus = syncStatus;
     }
     
     public static enum Type {
@@ -88,5 +94,10 @@ public class Configuration extends Persistable<Long> {
     public Configuration putValue(String value) {
         this.setValue(value);
         return this;
+    }
+
+    private static enum SyncStatus {
+        NEW, 
+        SYNCED
     }
 }

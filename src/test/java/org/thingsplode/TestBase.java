@@ -5,7 +5,6 @@
  */
 package org.thingsplode;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,8 +29,7 @@ public abstract class TestBase extends TestCase {
     private ApplicationContext applicationContext;
 
     public TestBase() {
-        
-
+        super();
         Logger.getRootLogger().removeAllAppenders();
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.DEBUG);

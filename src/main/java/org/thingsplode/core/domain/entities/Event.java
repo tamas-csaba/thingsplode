@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.thingsplode.core.domain;
+package org.thingsplode.core.domain.entities;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,40 +12,37 @@ import java.util.Collections;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import org.thingsplode.core.domain.entities.Indication;
-import org.thingsplode.core.domain.entities.Persistable;
 
 /**
  *
  *
  * @author tamas.csaba@gmail.com
  */
-@MappedSuperclass
+@Entity
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Event extends Persistable<Long> {
 
+    private Component component;
     private String eventId;
     private String eventClass;
-    private Collection<Indication> indications;
     private Severity severity;
     private Calendar eventDate;
     @XmlTransient
     private Calendar receiveDate;
+    private Collection<Indication> indications;
 
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.AUTO)
@@ -57,11 +54,20 @@ public class Event extends Persistable<Long> {
 //    }
 //
     /**
-     * @return the device
+     * @return the component
      */
+    @ManyToOne(optional = false)
+    public Component getComponent() {
+        return component;
+    }
+
     /**
-     * @return the eventId
+     * @param component the component to set
      */
+    public void setComponent(Component component) {
+        this.component = component;
+    }
+
     @Basic(optional = false)
     public String getEventId() {
         return eventId;
@@ -153,14 +159,18 @@ public class Event extends Persistable<Long> {
         this.eventDate = eventDate;
     }
 
-    protected static Event create() {
+    public static Event create() {
         Event evt = new Event();
         evt.setEventDate(Calendar.getInstance());
         return evt;
     }
 
-    protected static Event create(String eventId, String eventClass, Severity severity) {
+    public static Event create(String eventId, String eventClass, Severity severity) {
         return Event.create().putId(eventId).putClass(eventClass).putSeverity(severity);
+    }
+
+    public static Event create(String eventId, String eventClass, Severity severity, Calendar eventDate) {
+        return Event.create(eventId, eventClass, severity).putEventDate(eventDate);
     }
 
     public Event putId(String eventID) {
@@ -195,11 +205,21 @@ public class Event extends Persistable<Long> {
         return this;
     }
 
+    public Event putEventDate(Calendar evtDate) {
+        this.setEventDate(eventDate);
+        return this;
+    }
+
     static public enum Severity {
 
         ERROR,
         WARNING,
         INFO,
         DEBUG;
+    }
+
+    public Event putComponent(Component comp) {
+        this.setComponent(comp);
+        return this;
     }
 }

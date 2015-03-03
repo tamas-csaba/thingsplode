@@ -11,13 +11,20 @@ import java.util.Collections;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import org.thingsplode.core.domain.AbstractComponent;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.domain.EnabledState;
 import org.thingsplode.core.domain.StatusInfo;
 
@@ -26,12 +33,32 @@ import org.thingsplode.core.domain.StatusInfo;
  * @author tamas.csaba@gmail.com
  */
 @Entity
-public class Component extends AbstractComponent {
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = Component.DISCRIMINATOR, discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue(value = Component.MAIN_TYPE)
+@Table(name = Component.TABLE_NAME)
+public class Component extends Persistable<Long> {
 
+    /**
+     * COMPONENT
+     */
+    @XmlTransient
+    public final static String MAIN_TYPE = "COMPONENT";
+    @XmlTransient
+    public final static String DISCRIMINATOR = "MAIN_TYPE";
+    @XmlTransient
+    public final static String TABLE_NAME = "COMPONENT";
     private String name;
     private Type type;
-    private Collection<ComponentEvent> eventLog;
-    private Collection<Component> subComponents;
+    private EnabledState enabledState;
+    private StatusInfo status;
+    private Model model;
+    private String serialNumber;
+    private String partNumber;
+    private Collection<Component> components;
+    private Collection<Capability> capabilities;
+    private Collection<Configuration> configuration;
+    private Collection<Treshold> tresholds;
 
     /**
      * @return the name
@@ -65,50 +92,185 @@ public class Component extends AbstractComponent {
         this.type = type;
     }
 
-    /**
-     * @return the eventLog
-     */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = ComponentEvent.JOIN_COLUMN)
-    public Collection<ComponentEvent> getEventLog() {
-        return eventLog;
-    }
-
-    /**
-     * @param eventLog the eventLog to set
-     */
-    public void setEventLog(Collection<ComponentEvent> eventLog) {
-        this.eventLog = eventLog;
-    }
-
+//    /**
+//     * @return the eventLog
+//     */
+//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JoinColumn(name = ComponentEvent.JOIN_COLUMN)
+//    public Collection<ComponentEvent> getEventLog() {
+//        return eventLog;
+//    }
+//
+//    /**
+//     * @param eventLog the eventLog to set
+//     */
+//    public void setEventLog(Collection<ComponentEvent> eventLog) {
+//        this.eventLog = eventLog;
+//    }
     /**
      * @return the subComponents
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOT_COMP_ID")
-    public Collection<Component> getSubComponents() {
-        return subComponents;
+    public Collection<Component> getComponents() {
+        return components;
     }
 
     /**
      * @param subComponents the subComponents to set
      */
-    public void setSubComponents(Collection<Component> subComponents) {
-        this.subComponents = subComponents;
+    public void setComponents(Collection<Component> subComponents) {
+        this.components = subComponents;
     }
 
-    @Override
     public void setTresholds(Collection<Treshold> tresholds) {
         setTresholdsScope(tresholds);
-        setTresholdCollections(tresholds);
+        this.tresholds = tresholds;
     }
 
-    private void setTresholdsScope(Collection<Treshold> tresholds) {
+    protected void setTresholdsScope(Collection<Treshold> tresholds) {
         if (tresholds != null) {
             for (Treshold t : tresholds) {
                 t.setScope(Treshold.Scope.COMPONENT);
             }
         }
+    }
+
+    /**
+     * @return the enabledState
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    public EnabledState getEnabledState() {
+        return enabledState;
+    }
+
+    /**
+     * @param enabledState the enabledState to set
+     */
+    public void setEnabledState(EnabledState enabledState) {
+        this.enabledState = enabledState;
+    }
+
+    /**
+     * @return the status
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    public StatusInfo getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(StatusInfo status) {
+        this.status = status;
+    }
+
+    /**
+     * @return the model
+     */
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    public Model getModel() {
+        return model;
+    }
+
+    /**
+     * @param model the model to set
+     */
+    public void setModel(Model model) {
+        this.model = model;
+    }
+
+    /**
+     * @return the serialNumber
+     */
+    @Basic
+    @Column(unique = true)
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    /**
+     * @param serialNumber the serialNumber to set
+     */
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    /**
+     * @return the partNumber
+     */
+    @Basic
+    public String getPartNumber() {
+        return partNumber;
+    }
+
+    /**
+     * @param partNumber the partNumber to set
+     */
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
+    }
+
+    /**
+     * @param configuration the configuration to set
+     */
+    public void setConfiguration(Collection<Configuration> configuration) {
+        this.configuration = configuration;
+    }
+
+    protected void initializeCapabilities() {
+        if (this.getCapabilities() == null) {
+            this.setCapabilities(new ArrayList<Capability>());
+        }
+    }
+
+    public void initializeConfiguration() {
+        if (this.getConfiguration() == null) {
+            this.configuration = new ArrayList<>();
+        }
+    }
+
+    public void initializeTresholds() {
+        if (this.getTresholds() == null) {
+            this.tresholds = new ArrayList<>();
+        }
+    }
+
+    /**
+     * @return the capabilities
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMP_ID")
+    public Collection<Capability> getCapabilities() {
+        return capabilities;
+    }
+
+    /**
+     * @param capabilities the capabilities to set
+     */
+    public void setCapabilities(Collection<Capability> capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    /**
+     * @return the configuration
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMP_ID")
+    public Collection<Configuration> getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * @return the tresholds
+     */
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "COMP_ID")
+    public Collection<Treshold> getTresholds() {
+        return tresholds;
     }
 
     static public enum Type {
@@ -139,6 +301,11 @@ public class Component extends AbstractComponent {
         return this;
     }
 
+    public Component putType(Type type) {
+        this.setType(type);
+        return this;
+    }
+
     public Component putStatusInfo(StatusInfo status) {
         this.setStatus(status);
         return this;
@@ -150,8 +317,8 @@ public class Component extends AbstractComponent {
     }
 
     public Component addSubComponents(Component... componentArray) {
-        this.initializeSubComponents();
-        Collections.addAll(this.getSubComponents(), componentArray);
+        this.initializeComponents();
+        Collections.addAll(this.getComponents(), componentArray);
         return this;
     }
 
@@ -170,34 +337,31 @@ public class Component extends AbstractComponent {
         return this;
     }
 
-    private void decorateEvents(ComponentEvent... evts) {
-        for (ComponentEvent evt : evts) {
-            evt.setComponent(this);
-        }
-    }
-
-    public Component addEvents(ComponentEvent... events) {
-        this.initializeEventLog();
-        decorateEvents(events);
-        Collections.addAll(this.eventLog, events);
-        return this;
-    }
-
+//    private void decorateEvents(ComponentEvent... evts) {
+//        for (ComponentEvent evt : evts) {
+//            evt.setComponent(this);
+//        }
+//    }
+//    public Component addEvents(ComponentEvent... events) {
+//        this.initializeEventLog();
+//        decorateEvents(events);
+//        Collections.addAll(this.eventLog, events);
+//        return this;
+//    }
     public Component addConfigurations(Configuration... configs) {
         this.initializeConfiguration();
         Collections.addAll(this.getConfiguration(), configs);
         return this;
     }
 
-    public void initializeEventLog() {
-        if (this.eventLog == null) {
-            this.eventLog = new ArrayList<>();
-        }
-    }
-    
-    public void initializeSubComponents() {
-        if (this.subComponents == null) {
-            this.subComponents = new ArrayList<>();
+//    public void initializeEventLog() {
+//        if (this.eventLog == null) {
+//            this.eventLog = new ArrayList<>();
+//        }
+//    }
+    protected void initializeComponents() {
+        if (this.components == null) {
+            this.components = new ArrayList<>();
         }
     }
 }

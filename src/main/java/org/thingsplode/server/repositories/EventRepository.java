@@ -5,18 +5,17 @@
  */
 package org.thingsplode.server.repositories;
 
-import java.util.List;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.thingsplode.core.domain.entities.Component;
+import org.thingsplode.core.domain.entities.Event;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public interface ComponentRepository extends PagingAndSortingRepository<Component, Long> {
+public interface EventRepository extends PagingAndSortingRepository<Event, Long> {
 
-    @Query("select c from Component c where " + Component.DISCRIMINATOR + "= ?1")
-    List<Component> findbyMainType(String typeValue);
-    
+    Page<Event> findByComponent(Component component, Pageable pageable);
 }
