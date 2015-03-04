@@ -4,12 +4,14 @@
  * and open the template in the editor.
  */
 
-package org.thingsplode.core.domain.protocol;
+package org.thingsplode.core.domain.protocol.response;
+
+import org.thingsplode.core.domain.protocol.AbstractResponse;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class BootNotificationRequest {
+public class RegistrationResponse extends AbstractResponse {
     
 }

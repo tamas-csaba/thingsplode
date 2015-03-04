@@ -5,14 +5,12 @@
  */
 package org.thingsplode.core.domain.entities;
 
-import java.util.Calendar;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -23,6 +21,7 @@ public class Configuration extends Persistable<Long> {
     private Type type;
     private String key;
     private String value;
+    @XmlTransient
     private SyncStatus syncStatus;
     
     @Enumerated(EnumType.STRING)
