@@ -8,17 +8,17 @@ package org.thingsplode.domain;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Calendar;
-import org.thingsplode.core.domain.Address;
-import org.thingsplode.core.domain.EnabledState;
-import org.thingsplode.core.domain.Location;
-import org.thingsplode.core.domain.StatusInfo;
-import org.thingsplode.core.domain.Value;
-import org.thingsplode.core.domain.entities.Capability;
-import org.thingsplode.core.domain.entities.Component;
-import org.thingsplode.core.domain.entities.Configuration;
-import org.thingsplode.core.domain.entities.Device;
-import org.thingsplode.core.domain.entities.Model;
-import org.thingsplode.core.domain.entities.Treshold;
+import org.thingsplode.core.Address;
+import org.thingsplode.core.EnabledState;
+import org.thingsplode.core.Location;
+import org.thingsplode.core.StatusInfo;
+import org.thingsplode.core.Value;
+import org.thingsplode.core.entities.Capability;
+import org.thingsplode.core.entities.Component;
+import org.thingsplode.core.entities.Configuration;
+import org.thingsplode.core.entities.Device;
+import org.thingsplode.core.entities.Model;
+import org.thingsplode.core.entities.Treshold;
 
 /**
  *

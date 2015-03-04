@@ -7,7 +7,7 @@
 package org.thingsplode.server.repositories;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.thingsplode.core.domain.entities.Model;
+import org.thingsplode.core.entities.Model;
 
 /**
  *

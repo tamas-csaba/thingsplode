@@ -8,7 +8,7 @@ package org.thingsplode.server.repositories;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.thingsplode.core.domain.entities.Device;
+import org.thingsplode.core.entities.Device;
 
 /**
  *

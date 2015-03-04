@@ -8,8 +8,8 @@ package org.thingsplode.server.repositories;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.thingsplode.core.domain.entities.Component;
-import org.thingsplode.core.domain.entities.Event;
+import org.thingsplode.core.entities.Component;
+import org.thingsplode.core.entities.Event;
 
 /**
  *
