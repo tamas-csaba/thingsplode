@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
+import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.exceptions.SrvExecutionException;
 import org.thingsplode.core.protocol.AbstractRequest;
 import org.thingsplode.core.protocol.ExecutionStatus;
@@ -28,7 +29,7 @@ public class RegistrationRequestImpl<REQ extends AbstractRequest, RSP extends Re
     private DeviceService deviceService;
 
     @Override
-    public Message<?> executeImpl(Message<?> msg) {
+    public Message<?> executeImpl(Message<?> msg, Device d) {
         RegistrationRequest req = (RegistrationRequest) msg.getPayload();
         try {
             deviceService.register(req.getDevice());
