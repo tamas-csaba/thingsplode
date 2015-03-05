@@ -27,23 +27,23 @@ public class RequestAugmentationInterceptor extends ChannelInterceptorAdapter {
 
     @Override
     public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
-//        if (message == null) {
-//            return;
-//        }
-//
-//        Object payload = message.getPayload();
-//        AbstractRequest req;
-//        if (payload == null || !(payload instanceof AbstractRequest)) {
-//            return;
-//        } else {
-//            req = (AbstractRequest) payload;
-//        }
-//        Device d = deviceRepo.findBydeviceId(req.getDeviceId());
-//        if (d != null) {
-//            message.getHeaders().put(Device.MAIN_TYPE, d);
-//        }
-//
-//        message.getHeaders().put(AbstractMessage.MESSAGE_TYPE, req.getClass().getSimpleName());
+        if (message == null) {
+            return;
+        }
+
+        Object payload = message.getPayload();
+        AbstractRequest req;
+        if (payload == null || !(payload instanceof AbstractRequest)) {
+            return;
+        } else {
+            req = (AbstractRequest) payload;
+        }
+        Device d = deviceRepo.findBydeviceId(req.getDeviceId());
+        if (d != null) {
+            message.getHeaders().put(Device.MAIN_TYPE, d);
+        }
+
+        message.getHeaders().put(AbstractMessage.MESSAGE_TYPE, req.getClass().getSimpleName());
 
     }
 }
