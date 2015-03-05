@@ -28,6 +28,19 @@ public abstract class AbstractRequest extends AbstractMessage {
     @XmlElement(name = "SrvProvider")
     private String serviceProviderName;
 
+    public AbstractRequest() {
+    }
+
+    public AbstractRequest(String deviceId, Calendar timeStamp) {
+        this.deviceId = deviceId;
+        this.timeStamp = timeStamp;
+    }
+
+    public AbstractRequest(String deviceId, Calendar timeStamp, String serviceProviderName) {
+        this(deviceId, timeStamp);
+        this.serviceProviderName = serviceProviderName;
+    }
+
     /**
      * @return the deviceId
      */

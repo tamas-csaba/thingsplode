@@ -5,6 +5,7 @@
  */
 package org.thingsplode.core.protocol.request;
 
+import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -20,6 +21,20 @@ import org.thingsplode.core.protocol.AbstractRequest;
 public class RegistrationRequest extends AbstractRequest {
 
     private Device device;
+
+    public RegistrationRequest() {
+        super();
+    }
+
+    public RegistrationRequest(Device device) {
+        super();
+        this.device = device;
+    }
+
+    public RegistrationRequest(String deviceId, Calendar timeStamp, Device device) {
+        super(deviceId, timeStamp);
+        this.device = device;
+    }
 
     /**
      * @return the device
