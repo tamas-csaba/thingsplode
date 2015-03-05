@@ -15,7 +15,7 @@ import org.thingsplode.core.entities.Device;
  * @author tamas.csaba@gmail.com
  * @param <Device>
  */
-interface DeviceRepository extends PagingAndSortingRepository<Device, Long> {
+public interface DeviceRepository extends PagingAndSortingRepository<Device, Long> {
 
     @CacheEvict("bydeviceId")
     @Override
