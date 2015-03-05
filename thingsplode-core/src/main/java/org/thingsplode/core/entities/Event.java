@@ -35,6 +35,9 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 public class Event extends Persistable<Long> {
 
+    public final static String EVENT_REF = "EVT_ID";
+    public final static String COMP_REF = "COMPONENT_ID";
+    @XmlTransient
     private Component component;
     private String eventId;
     private String eventClass;
@@ -57,6 +60,7 @@ public class Event extends Persistable<Long> {
      * @return the component
      */
     @ManyToOne(optional = false)
+    @JoinColumn(name = COMP_REF)
     public Component getComponent() {
         return component;
     }
@@ -99,7 +103,7 @@ public class Event extends Persistable<Long> {
      * @return the indications
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "EVT_ID")
+    @JoinColumn(name = EVENT_REF)
     public Collection<Indication> getIndications() {
         return indications;
     }

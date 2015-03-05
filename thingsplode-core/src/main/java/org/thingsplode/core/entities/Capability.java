@@ -23,6 +23,7 @@ public class Capability extends Persistable<Long> {
     private boolean active;
 
     static public enum Type {
+
         READ, //sensor information
         WRITE_OR_EXECUTE; //configuration option or command eg. ResetCapability
     }
@@ -88,6 +89,11 @@ public class Capability extends Persistable<Long> {
         c.setType(type);
         c.setName(name);
         return c;
+    }
+
+    @Override
+    public String toString() {
+        return "Capability{" + "type=" + (type != null ? type : "null") + ", name=" + name + ", active=" + active + '}';
     }
 
 }

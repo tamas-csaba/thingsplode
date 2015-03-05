@@ -24,6 +24,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.EnabledState;
 import org.thingsplode.core.StatusInfo;
@@ -36,7 +37,11 @@ import org.thingsplode.core.StatusInfo;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = Component.DISCRIMINATOR, discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue(value = Component.MAIN_TYPE)
-@Table(name = Component.TABLE_NAME)
+
+@Table(
+        name = Component.TABLE_NAME,
+        uniqueConstraints = @UniqueConstraint(columnNames = {"name", Component.ROOT_COMP_REF})
+)
 public class Component extends Persistable<Long> {
 
     /**
@@ -48,6 +53,10 @@ public class Component extends Persistable<Long> {
     public final static String DISCRIMINATOR = "MAIN_TYPE";
     @XmlTransient
     public final static String TABLE_NAME = "COMPONENT";
+    @XmlTransient
+    public final static String COMP_REF = "COMP_ID";
+    @XmlTransient
+    public final static String ROOT_COMP_REF = "ROOT_COMP_ID";
     private String name;
     private Type type;
     private EnabledState enabledState;
@@ -111,7 +120,7 @@ public class Component extends Persistable<Long> {
      * @return the subComponents
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ROOT_COMP_ID")
+    @JoinColumn(name = Component.ROOT_COMP_REF)
     public Collection<Component> getComponents() {
         return components;
     }
@@ -243,7 +252,7 @@ public class Component extends Persistable<Long> {
      * @return the capabilities
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMP_ID")
+    @JoinColumn(name = Component.COMP_REF)
     public Collection<Capability> getCapabilities() {
         return capabilities;
     }
@@ -259,7 +268,7 @@ public class Component extends Persistable<Long> {
      * @return the configuration
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMP_ID")
+    @JoinColumn(name = Component.COMP_REF)
     public Collection<Configuration> getConfiguration() {
         return configuration;
     }
@@ -268,7 +277,7 @@ public class Component extends Persistable<Long> {
      * @return the tresholds
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMP_ID")
+    @JoinColumn(name = Component.COMP_REF)
     public Collection<Treshold> getTresholds() {
         return tresholds;
     }

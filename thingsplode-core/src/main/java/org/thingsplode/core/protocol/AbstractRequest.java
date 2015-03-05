@@ -25,6 +25,8 @@ public abstract class AbstractRequest extends AbstractMessage {
     private String deviceId;
     @XmlElement(name = "MsgTstmp")
     private Calendar timeStamp;
+    @XmlElement(name = "SrvProvider")
+    private String serviceProviderName;
 
     /**
      * @return the deviceId
@@ -53,4 +55,19 @@ public abstract class AbstractRequest extends AbstractMessage {
     public void setTimeStamp(Calendar timeStamp) {
         this.timeStamp = timeStamp;
     }
+
+    /**
+     * @return the serviceProviderName
+     */
+    public String getServiceProviderName() {
+        return serviceProviderName;
+    }
+
+    /**
+     * @param serviceProviderName the serviceProviderName to set
+     */
+    public void setServiceProviderName(String serviceProviderName) {
+        this.serviceProviderName = serviceProviderName;
+    }
+
 }

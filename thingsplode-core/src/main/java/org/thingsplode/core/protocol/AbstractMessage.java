@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -21,6 +22,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement
 public abstract class AbstractMessage implements Serializable {
 
+    @XmlTransient
+    public static final String MESSAGE_TYPE = "MESSAGE_TYPE";
+    
     @XmlElement(required = true, name = "MsgID")
     private String messageId;
     @XmlElement(required = true, name = "PrtVer")

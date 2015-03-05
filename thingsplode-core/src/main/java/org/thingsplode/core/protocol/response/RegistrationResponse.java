@@ -6,12 +6,12 @@
 
 package org.thingsplode.core.protocol.response;
 
-import org.thingsplode.core.protocol.AbstractResponse;
+import org.thingsplode.core.protocol.Response;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class RegistrationResponse extends AbstractResponse {
+public class RegistrationResponse extends Response {
     
 }
