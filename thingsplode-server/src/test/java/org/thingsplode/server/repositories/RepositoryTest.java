@@ -34,7 +34,7 @@ import org.thingsplode.server.JpaConfig;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {BaseConfig.class, JpaConfig.class})
-@TestPropertySource("file:C:\\Code\\research\\thingsplode\\src\\test\\resources\\test.properties")
+@TestPropertySource("file:C:\\Code\\research\\thingsplode\\thingsplode-server\\src\\test\\resources\\test.properties")
 //@ActiveProfiles({"dev", "integration"})
 @TransactionConfiguration(transactionManager = "txMgr", defaultRollback = false)
 //@TestExecutionListeners(listeners = {}, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)

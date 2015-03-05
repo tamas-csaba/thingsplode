@@ -77,7 +77,7 @@ public class BusConfig {
                 try {
                     return serviceLocator.getService(requestMessage).execute(requestMessage);
                 } catch (SrvExecutionException ex) {
-                    return MessageBuilder.withPayload(new Response(ex.getMessageCorrelationID(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, ex.getMessage()));
+                    return MessageBuilder.withPayload(new Response(ex.getMessageCorrelationID(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, ex.getMessage())).build();
                 }
             }
         };

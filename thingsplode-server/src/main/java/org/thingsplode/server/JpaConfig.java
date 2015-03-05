@@ -21,6 +21,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.thingsplode.core.entities.Device;
 
 /**
  *
@@ -76,7 +77,7 @@ public class JpaConfig {
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
         factory.setJpaVendorAdapter(vendorAdapter);
         
-        factory.setPackagesToScan(Bootstrap.ENTITIES, "org.thingsplode.core.domain");
+        factory.setPackagesToScan(Bootstrap.ENTITIES, Device.class.getPackage().getName());
         
         factory.setDataSource(dataSource());
         factory.setJpaProperties(getProperties());

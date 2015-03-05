@@ -5,6 +5,7 @@
  */
 package org.thingsplode.server.bus;
 
+import org.thingsplode.server.executors.AbstractRequestExecutorService;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
