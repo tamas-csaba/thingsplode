@@ -5,15 +5,10 @@
  */
 package org.thingsplode.core.protocol.response;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
-import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.protocol.ExecutionStatus;
-import org.thingsplode.core.protocol.Response;
 import org.thingsplode.core.protocol.ResponseCode;
 
 /**
@@ -22,12 +17,11 @@ import org.thingsplode.core.protocol.ResponseCode;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "BootNotificationRsp")
-public class BootNotificationResponse extends Response {
+public class BootNotificationResponse extends ConfigurationCarrierResponse<BootNotificationResponse> {
 
     private Long registrationID;
     private Long currentTimeMillis;
-    private String locale;
-    private Collection<Configuration> configuration;
+    
 
     public BootNotificationResponse() {
         super();
@@ -75,20 +69,6 @@ public class BootNotificationResponse extends Response {
     }
 
     /**
-     * @return the locale
-     */
-    public String getLocale() {
-        return locale;
-    }
-
-    /**
-     * @param locale the locale to set
-     */
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
-
-    /**
      * @return the currentTimeMillis
      */
     public Long getCurrentTimeMillis() {
@@ -101,31 +81,4 @@ public class BootNotificationResponse extends Response {
     public void setCurrentTimeMillis(Long currentTimeMillis) {
         this.currentTimeMillis = currentTimeMillis;
     }
-
-    /**
-     * @return the configuration
-     */
-    public Collection<Configuration> getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * @param configuration the configuration to set
-     */
-    public void setConfiguration(Collection<Configuration> configuration) {
-        this.configuration = configuration;
-    }
-
-    public BootNotificationResponse addConfigurations(Configuration... cfgs) {
-        initializeConfiguration();
-        Collections.addAll(this.getConfiguration(), cfgs);
-        return this;
-    }
-
-    private void initializeConfiguration() {
-        if (configuration == null) {
-            this.configuration = new ArrayList<>();
-        }
-    }
-
 }

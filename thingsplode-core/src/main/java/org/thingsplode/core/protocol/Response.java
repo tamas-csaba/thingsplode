@@ -13,14 +13,14 @@ import javax.xml.bind.annotation.XmlType;
 /**
  *
  * @author tamas.csaba@gmail.com
+ * @param <T>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ARsp")
-public class Response extends AbstractCmdReq {
+public class Response<T extends Response<T>> extends AbstractCmdReq<T> {
 
     @XmlElement(required = true, name = "CorrId")
     private String responseCorrelationID;
-
     @XmlElement(required = true, name = "ExStat")
     private ExecutionStatus requestStatus;
     @XmlElement(name = "RspCde")
@@ -29,14 +29,15 @@ public class Response extends AbstractCmdReq {
     private String resultMessage;
 
     public Response() {
+        super();
     }
 
     public Response(ExecutionStatus requestStatus, ResponseCode responseCode) {
-        this();
+        super();
         this.requestStatus = requestStatus;
         this.responseCode = responseCode;
     }
-    
+
     public Response(String responseCorrelationID, ExecutionStatus requestStatus, ResponseCode responseCode) {
         this(requestStatus, responseCode);
         this.responseCorrelationID = responseCorrelationID;
@@ -45,6 +46,25 @@ public class Response extends AbstractCmdReq {
     public Response(String responseCorrelationID, ExecutionStatus requestStatus, ResponseCode responseCode, String resultMessage) {
         this(responseCorrelationID, requestStatus, responseCode);
         this.resultMessage = resultMessage;
+    }
+
+    public boolean isAcknowledged() {
+        return requestStatus.isAcknowledged();
+    }
+
+    public T putResponseCorrelationId(String corrId) {
+        this.setResponseCorrelationID(corrId);
+        return (T) this;
+    }
+
+    public T putRequestStatus(ExecutionStatus status) {
+        this.setRequestStatus(status);
+        return (T) this;
+    }
+
+    public T putResponseCode(ResponseCode rspCode) {
+        this.setResponseCode(rspCode);
+        return (T) this;
     }
 
     /**
@@ -107,5 +127,5 @@ public class Response extends AbstractCmdReq {
     public String toString() {
         return "Response{" + "responseCorrelationID=" + responseCorrelationID + ", requestStatus=" + requestStatus + ", responseCode=" + responseCode + ", resultMessage=" + resultMessage + '}';
     }
-    
+
 }

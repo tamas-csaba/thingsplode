@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AMsg")
 @XmlRootElement
-public abstract class AbstractMessage implements Serializable {
+public abstract class AbstractMessage<T extends AbstractMessage<T>> implements Serializable {
 
     @XmlTransient
     public static final String MESSAGE_TYPE = "MESSAGE_TYPE";
@@ -30,6 +30,16 @@ public abstract class AbstractMessage implements Serializable {
     @XmlElement(required = true, name = "PrtVer")
     private int protocolVersion;
 
+    public T putMessageId(String messageId){
+        this.setMessageId(messageId);
+        return (T)this;
+    }
+    
+    public T putProtocolVersion(int protocolVersion){
+        this.setProtocolVersion(protocolVersion);
+        return (T)this;
+    }
+    
     public String getMessageId() {
         return messageId;
     }

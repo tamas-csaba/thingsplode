@@ -8,7 +8,8 @@ package org.thingsplode.core.protocol.request;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
-import org.thingsplode.core.protocol.AbstractResponse;
+import org.thingsplode.core.StatusInfo;
+import org.thingsplode.core.protocol.AbstractRequest;
 
 /**
  *
@@ -16,6 +17,22 @@ import org.thingsplode.core.protocol.AbstractResponse;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "HeartbeatReq")
-public class HeartbeatRequest extends AbstractResponse {
+public class HeartbeatRequest extends AbstractRequest {
         
+    private StatusInfo deviceStatus;
+
+    /**
+     * @return the deviceStatus
+     */
+    public StatusInfo getDeviceStatus() {
+        return deviceStatus;
+    }
+
+    /**
+     * @param deviceStatus the deviceStatus to set
+     */
+    public void setDeviceStatus(StatusInfo deviceStatus) {
+        this.deviceStatus = deviceStatus;
+    }
+    
 }

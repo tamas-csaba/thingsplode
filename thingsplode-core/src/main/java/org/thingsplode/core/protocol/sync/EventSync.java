@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import org.thingsplode.core.entities.Event;
-import org.thingsplode.core.protocol.AbstractResponse;
+import org.thingsplode.core.protocol.AbstractRequest;
 
 /**
  *
@@ -17,7 +17,7 @@ import org.thingsplode.core.protocol.AbstractResponse;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "EvtSync")
-public class EventSync extends AbstractResponse {
+public class EventSync extends AbstractRequest {
 
     private String componentName;
     private Event event;

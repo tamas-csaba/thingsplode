@@ -5,7 +5,6 @@
  */
 package org.thingsplode.core.protocol;
 
-import java.util.Calendar;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -18,25 +17,25 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AReq")
-public abstract class AbstractResponse extends AbstractMessage {
+public abstract class AbstractRequest extends AbstractMessage {
 
     @XmlElement(required = true, name = "DeviceID")
     @NotNull
     private String deviceId;
     @XmlElement(name = "MsgTstmp")
-    private Calendar timeStamp;
+    private Long messageTimestamp;
     @XmlElement(name = "SrvProvider")
     private String serviceProviderName;
 
-    public AbstractResponse() {
+    public AbstractRequest() {
     }
 
-    public AbstractResponse(String deviceId, Calendar timeStamp) {
+    public AbstractRequest(String deviceId, Long timeStamp) {
         this.deviceId = deviceId;
-        this.timeStamp = timeStamp;
+        this.messageTimestamp = timeStamp;
     }
 
-    public AbstractResponse(String deviceId, Calendar timeStamp, String serviceProviderName) {
+    public AbstractRequest(String deviceId, Long timeStamp, String serviceProviderName) {
         this(deviceId, timeStamp);
         this.serviceProviderName = serviceProviderName;
     }
@@ -56,20 +55,6 @@ public abstract class AbstractResponse extends AbstractMessage {
     }
 
     /**
-     * @return the timeStamp
-     */
-    public Calendar getTimeStamp() {
-        return timeStamp;
-    }
-
-    /**
-     * @param timeStamp the timeStamp to set
-     */
-    public void setTimeStamp(Calendar timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-
-    /**
      * @return the serviceProviderName
      */
     public String getServiceProviderName() {
@@ -82,5 +67,21 @@ public abstract class AbstractResponse extends AbstractMessage {
     public void setServiceProviderName(String serviceProviderName) {
         this.serviceProviderName = serviceProviderName;
     }
+
+    /**
+     * @return the messageTimestamp
+     */
+    public Long getMessageTimestamp() {
+        return messageTimestamp;
+    }
+
+    /**
+     * @param messageTimestamp the messageTimestamp to set
+     */
+    public void setMessageTimestamp(Long messageTimestamp) {
+        this.messageTimestamp = messageTimestamp;
+    }
+
+
 
 }

@@ -13,15 +13,26 @@ import javax.xml.bind.annotation.XmlType;
 /**
  *
  * @author tamas.csaba@gmail.com
+ * @param <T>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ACmdReq")
-public abstract class AbstractCmdReq extends AbstractMessage {
+public abstract class AbstractCmdReq<T extends AbstractCmdReq<T>> extends AbstractMessage<T> {
 
     @XmlElement(name = "DstDevId")
     private String destinationDeviceId;
     @XmlElement(name = "SrcSP")
     private String sourceServiceProviderName;
+
+    public T putDestinationDeviceId(String destinationDeviceId) {
+        this.setDestinationDeviceId(destinationDeviceId);
+        return (T) this;
+    }
+
+    public T putSourceServiceProviderName(String sourceSPName) {
+        this.setSourceServiceProviderName(sourceSPName);
+        return (T) this;
+    }
 
     /**
      * @return the destinationDeviceId

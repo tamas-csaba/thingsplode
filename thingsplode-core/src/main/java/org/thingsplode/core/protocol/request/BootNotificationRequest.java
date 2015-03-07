@@ -5,12 +5,11 @@
  */
 package org.thingsplode.core.protocol.request;
 
-import java.util.Calendar;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import org.thingsplode.core.entities.Device;
-import org.thingsplode.core.protocol.AbstractResponse;
+import org.thingsplode.core.protocol.AbstractRequest;
 
 /**
  *
@@ -18,7 +17,7 @@ import org.thingsplode.core.protocol.AbstractResponse;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "BootNotificationReq")
-public class BootNotificationRequest extends AbstractResponse {
+public class BootNotificationRequest extends AbstractRequest {
 
     private Device device;
 
@@ -31,7 +30,7 @@ public class BootNotificationRequest extends AbstractResponse {
         this.device = device;
     }
 
-    public BootNotificationRequest(String deviceId, Calendar timeStamp, Device device) {
+    public BootNotificationRequest(String deviceId, Long timeStamp, Device device) {
         super(deviceId, timeStamp);
         this.device = device;
     }
