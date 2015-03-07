@@ -103,4 +103,9 @@ public class Response extends AbstractCmdReq {
         this.resultMessage = resultMessage;
     }
 
+    @Override
+    public String toString() {
+        return "Response{" + "responseCorrelationID=" + responseCorrelationID + ", requestStatus=" + requestStatus + ", responseCode=" + responseCode + ", resultMessage=" + resultMessage + '}';
+    }
+    
 }

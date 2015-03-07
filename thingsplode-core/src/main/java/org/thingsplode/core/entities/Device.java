@@ -37,7 +37,9 @@ public class Device extends Component {
     public final static String MAIN_TYPE = "DEVICE";
     
     private String deviceId;
+    @XmlTransient
     private Calendar startupDate;
+    @XmlTransient
     private Calendar lastHeartBeat;
     private Location location;
     private String hostAddress;

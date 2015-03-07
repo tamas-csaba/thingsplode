@@ -3,15 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.thingsplode.core.protocol.response;
 
-import org.thingsplode.core.protocol.Response;
+import java.util.Calendar;
+import java.util.Locale;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class RegistrationResponse extends Response {
-    
+public class HeartbeatResponse {
+
+    private Calendar currentTime;
+    private Locale locale;
+    private Long heartbeatInterval;
 }

@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AReq")
-public abstract class AbstractRequest extends AbstractMessage {
+public abstract class AbstractResponse extends AbstractMessage {
 
     @XmlElement(required = true, name = "DeviceID")
     @NotNull
@@ -28,15 +28,15 @@ public abstract class AbstractRequest extends AbstractMessage {
     @XmlElement(name = "SrvProvider")
     private String serviceProviderName;
 
-    public AbstractRequest() {
+    public AbstractResponse() {
     }
 
-    public AbstractRequest(String deviceId, Calendar timeStamp) {
+    public AbstractResponse(String deviceId, Calendar timeStamp) {
         this.deviceId = deviceId;
         this.timeStamp = timeStamp;
     }
 
-    public AbstractRequest(String deviceId, Calendar timeStamp, String serviceProviderName) {
+    public AbstractResponse(String deviceId, Calendar timeStamp, String serviceProviderName) {
         this(deviceId, timeStamp);
         this.serviceProviderName = serviceProviderName;
     }

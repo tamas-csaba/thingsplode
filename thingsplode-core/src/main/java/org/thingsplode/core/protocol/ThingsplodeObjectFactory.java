@@ -6,8 +6,8 @@
 package org.thingsplode.core.protocol;
 
 import javax.xml.bind.annotation.XmlRegistry;
+import org.thingsplode.core.protocol.request.HeartbeatRequest;
 import org.thingsplode.core.protocol.request.BootNotificationRequest;
-import org.thingsplode.core.protocol.request.RegistrationRequest;
 
 /**
  *
@@ -16,11 +16,11 @@ import org.thingsplode.core.protocol.request.RegistrationRequest;
 @XmlRegistry
 public class ThingsplodeObjectFactory {
 
-    public BootNotificationRequest createBootNotificationRequest() {
-        return new BootNotificationRequest();
+    public HeartbeatRequest createBootNotificationRequest() {
+        return new HeartbeatRequest();
     }
     
-    public RegistrationRequest createRegistrationRequest() {
-        return new RegistrationRequest();
+    public BootNotificationRequest createRegistrationRequest() {
+        return new BootNotificationRequest();
     }
 }
