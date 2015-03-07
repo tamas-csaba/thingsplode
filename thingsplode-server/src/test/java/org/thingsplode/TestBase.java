@@ -35,6 +35,7 @@ public abstract class TestBase extends TestCase {
         Logger.getRootLogger().setLevel(Level.DEBUG);
         Logger.getLogger(org.springframework.beans.factory.support.DefaultListableBeanFactory.class).setLevel(Level.DEBUG);
         Logger.getLogger(org.springframework.beans.factory.xml.XmlBeanDefinitionReader.class).setLevel(Level.INFO);
+        Logger.getLogger("org.springframework.beans.factory.config").setLevel(Level.TRACE);
         Logger.getLogger(org.springframework.test.context.TestContextManager.class).setLevel(Level.DEBUG);
         Logger.getLogger("org.hibernate.cfg").setLevel(Level.ERROR);
         Logger.getLogger("org.hibernate.validator").setLevel(Level.ERROR);
@@ -55,6 +56,14 @@ public abstract class TestBase extends TestCase {
         Logger.getLogger(com.mchange.v2.resourcepool.BasicResourcePoolFactory.class).setLevel(Level.WARN);
         Logger.getLogger(com.mchange.v2.async.ThreadPoolAsynchronousRunner.class).setLevel(Level.WARN);
         Logger.getLogger(org.hibernate.tool.hbm2ddl.SchemaExport.class).setLevel(Level.INFO);
+        Logger.getLogger("com.mchange.v2.c3p0").setLevel(Level.INFO);
+        Logger.getLogger("com.mchange.v2.resourcepool").setLevel(Level.INFO);
+        Logger.getLogger("org.hibernate.persister.walking").setLevel(Level.INFO);
+        Logger.getLogger("org.hibernate.type.BasicTypeRegistry").setLevel(Level.INFO);
+        
+        
+        
+        
     }
 
     /**

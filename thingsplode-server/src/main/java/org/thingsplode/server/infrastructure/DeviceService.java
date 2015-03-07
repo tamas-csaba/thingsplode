@@ -29,9 +29,28 @@ public class DeviceService {
     //private boolean 
 
     @Transactional
-    public void register(Device device) throws SrvExecutionException {
+    public Long registerOrUpdate(Device device) throws SrvExecutionException {
+        if (device == null) {
+            throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "The device cannot be null.");
+        }
+        if (device.getDeviceId().isEmpty()) {
+            throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "The device Id cannot be null.");
+        }
+        if (device.getId() != null) {
+            Device existingDevice = deviceRepo.findOne(device.getId());
+            if (existingDevice != null && existingDevice.getDeviceId() != null && !existingDevice.getDeviceId().equalsIgnoreCase(device.getDeviceId())) {
+                throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "Device with resgistration id [" + existingDevice.getId() + "] is already registered under a different device identification.");
+            }
+        } else {
+            Device existingDevice = deviceRepo.findBydeviceId(device.getDeviceId());
+            if (existingDevice != null) {
+                device.setId(existingDevice.getId());
+            }
+        }
+        
         try {
-            deviceRepo.save(device);
+            Device d = deviceRepo.save(device);
+            return d.getId();
         } catch (Exception e) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
         }

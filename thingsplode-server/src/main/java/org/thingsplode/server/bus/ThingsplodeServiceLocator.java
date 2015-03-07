@@ -13,7 +13,7 @@ import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.thingsplode.core.exceptions.SrvExecutionException;
-import org.thingsplode.core.protocol.AbstractRequest;
+import org.thingsplode.core.protocol.AbstractResponse;
 import org.thingsplode.core.protocol.ExecutionStatus;
 import org.thingsplode.core.protocol.ResponseCode;
 
@@ -34,13 +34,13 @@ public class ThingsplodeServiceLocator implements ApplicationContextAware {
         Object request = message.getPayload();
 
         AbstractRequestExecutorService service;
-        if (request instanceof AbstractRequest) {
-            AbstractRequest req = (AbstractRequest) request;
+        if (request instanceof AbstractResponse) {
+            AbstractResponse req = (AbstractResponse) request;
             if (req.getServiceProviderName() != null && !req.getServiceProviderName().isEmpty()) {
                 try {
                     service = (AbstractRequestExecutorService) ctx.getBean(req.getServiceProviderName(), AbstractRequestExecutorService.class);
                 } catch (BeansException ex) {
-                    throw new SrvExecutionException(((AbstractRequest) request).getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "Service of name: " + req.getServiceProviderName() + " is not installed! Try to request a different service provider name. " + ex.getMessage(), ex);
+                    throw new SrvExecutionException(((AbstractResponse) request).getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "Service of name: " + req.getServiceProviderName() + " is not installed! Try to request a different service provider name. " + ex.getMessage(), ex);
                 }
             } else {
                 String requestBeanName = request.getClass().getSimpleName();
@@ -49,7 +49,7 @@ public class ThingsplodeServiceLocator implements ApplicationContextAware {
                 try {
                     service = (AbstractRequestExecutorService) ctx.getBean(requestBeanName, AbstractRequestExecutorService.class);
                 } catch (BeansException ex) {
-                    throw new SrvExecutionException(((AbstractRequest) request).getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "Service of name: " + requestBeanName + " is not installed! Try to request a different service provider name. " + ex.getMessage(), ex);
+                    throw new SrvExecutionException(((AbstractResponse) request).getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "Service of name: " + requestBeanName + " is not installed! Try to request a different service provider name. " + ex.getMessage(), ex);
                 }
             }
         } else {

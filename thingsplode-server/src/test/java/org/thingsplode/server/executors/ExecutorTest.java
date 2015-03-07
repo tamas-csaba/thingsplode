@@ -10,13 +10,15 @@ import java.util.Calendar;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.thingsplode.TestBaseWithRepos;
 import org.thingsplode.core.entities.Device;
-import org.thingsplode.core.protocol.request.RegistrationRequest;
+import org.thingsplode.core.protocol.request.BootNotificationRequest;
 import org.thingsplode.domain.TestFactory;
 import org.thingsplode.server.BaseConfig;
 import org.thingsplode.server.BusConfig;
@@ -29,21 +31,23 @@ import org.thingsplode.server.bus.TestRequestService;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {BaseConfig.class, JpaConfig.class, BusConfig.class})
-@TestPropertySource("file:C:\\Code\\research\\thingsplode\\thingsplode-server\\src\\test\\resources\\test.properties")
+@TestPropertySource("classpath:/test.properties")
 @TransactionConfiguration(transactionManager = "txMgr", defaultRollback = false)
 public class ExecutorTest extends TestBaseWithRepos {
 
     @Autowired(required = true)
     private TestRequestService service;
-    
+
     public ExecutorTest() {
         super();
     }
-    
+
+
+
     @Test
-    public void testRegistration() throws UnknownHostException{
+    public void testBootNotificationRequest() throws UnknownHostException {
         Device d = TestFactory.createDevice("test_device_1", "1231234235", "1");
-        service.execute(new RegistrationRequest(d.getDeviceId(), Calendar.getInstance(), d));
+        service.execute(new BootNotificationRequest(d.getDeviceId(), Calendar.getInstance(), d));
     }
 
 }

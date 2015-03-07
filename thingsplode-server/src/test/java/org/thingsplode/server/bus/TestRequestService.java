@@ -8,7 +8,7 @@ package org.thingsplode.server.bus;
 
 
 import org.springframework.integration.annotation.MessagingGateway;
-import org.thingsplode.core.protocol.AbstractRequest;
+import org.thingsplode.core.protocol.AbstractResponse;
 import org.thingsplode.core.protocol.Response;
 
 /**
@@ -17,5 +17,5 @@ import org.thingsplode.core.protocol.Response;
  */
 @MessagingGateway(name = "entryGateway", defaultRequestChannel = "requestChannel")
 public interface TestRequestService {
-    public Response execute(AbstractRequest request);
+    public Response execute(AbstractResponse request);
 }
