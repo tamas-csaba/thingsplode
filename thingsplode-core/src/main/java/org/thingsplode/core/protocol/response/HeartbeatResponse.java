@@ -5,29 +5,9 @@
  */
 package org.thingsplode.core.protocol.response;
 
-import java.util.Collection;
-import org.thingsplode.core.entities.Configuration;
-import org.thingsplode.core.protocol.Response;
-
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class HeartbeatResponse extends ConfigurationCarrierResponse<HeartbeatResponse> {
-    private Collection<Configuration> configuration;
-    
-    /**
-     * @return the configuration
-     */
-    public Collection<Configuration> getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * @param configuration the configuration to set
-     */
-    public void setConfiguration(Collection<Configuration> configuration) {
-        this.configuration = configuration;
-    }
-    
+public class HeartbeatResponse extends ConfigurationCarrierResponse<HeartbeatResponse> {    
 }
