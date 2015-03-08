@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 public class Configuration extends Persistable<Long> {
     
     @XmlTransient
-    public final static String TABLE_NAME = "COMPONENT";
+    public final static String TABLE_NAME = "CONFIGURATION";
     
     private Type type;
     private String key;

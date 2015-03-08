@@ -6,6 +6,7 @@
 package org.thingsplode.core.entities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import javax.persistence.Basic;
@@ -25,6 +26,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.EnabledState;
 import org.thingsplode.core.StatusInfo;
@@ -32,6 +34,7 @@ import org.thingsplode.core.StatusInfo;
 /**
  *
  * @author tamas.csaba@gmail.com
+ * @param <T>
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -42,11 +45,9 @@ import org.thingsplode.core.StatusInfo;
         name = Component.TABLE_NAME,
         uniqueConstraints = @UniqueConstraint(columnNames = {"name", Component.ROOT_COMP_REF})
 )
-public class Component extends Persistable<Long> {
+//todo: serial number also should be unique
+public class Component<T extends Component<?>> extends Persistable<Long> {
 
-    /**
-     * COMPONENT
-     */
     @XmlTransient
     public final static String MAIN_TYPE = "COMPONENT";
     @XmlTransient
@@ -57,9 +58,13 @@ public class Component extends Persistable<Long> {
     public final static String COMP_REF = "COMP_ID";
     @XmlTransient
     public final static String ROOT_COMP_REF = "ROOT_COMP_ID";
+    @NotNull
     private String name;
+    @NotNull
     private Type type;
+    @NotNull
     private EnabledState enabledState;
+    @NotNull
     private StatusInfo status;
     private Model model;
     private String serialNumber;
@@ -68,6 +73,23 @@ public class Component extends Persistable<Long> {
     private Collection<Capability> capabilities;
     private Collection<Configuration> configuration;
     private Collection<Treshold> tresholds;
+
+    public static Component create() {
+        return new Component();
+    }
+
+    public static Component create(String name, Type type) {
+        Component comp = Component.create();
+        comp.setName(name);
+        comp.setType(type);
+        return comp;
+    }
+
+    public static Component create(String name, Type type, EnabledState state) {
+        Component comp = Component.create(name, type);
+        comp.setEnabledState(state);
+        return comp;
+    }
 
     /**
      * @return the name
@@ -99,50 +121,6 @@ public class Component extends Persistable<Long> {
      */
     public void setType(Type type) {
         this.type = type;
-    }
-
-//    /**
-//     * @return the eventLog
-//     */
-//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    @JoinColumn(name = ComponentEvent.JOIN_COLUMN)
-//    public Collection<ComponentEvent> getEventLog() {
-//        return eventLog;
-//    }
-//
-//    /**
-//     * @param eventLog the eventLog to set
-//     */
-//    public void setEventLog(Collection<ComponentEvent> eventLog) {
-//        this.eventLog = eventLog;
-//    }
-    /**
-     * @return the subComponents
-     */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = Component.ROOT_COMP_REF)
-    public Collection<Component> getComponents() {
-        return components;
-    }
-
-    /**
-     * @param subComponents the subComponents to set
-     */
-    public void setComponents(Collection<Component> subComponents) {
-        this.components = subComponents;
-    }
-
-    public void setTresholds(Collection<Treshold> tresholds) {
-        setTresholdsScope(tresholds);
-        this.tresholds = tresholds;
-    }
-
-    protected void setTresholdsScope(Collection<Treshold> tresholds) {
-        if (tresholds != null) {
-            for (Treshold t : tresholds) {
-                t.setScope(Treshold.Scope.COMPONENT);
-            }
-        }
     }
 
     /**
@@ -223,6 +201,32 @@ public class Component extends Persistable<Long> {
         this.partNumber = partNumber;
     }
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = Component.ROOT_COMP_REF)
+    public Collection<Component> getComponents() {
+        return components;
+    }
+
+    /**
+     * @param subComponents the subComponents to set
+     */
+    public void setComponents(Collection<Component> subComponents) {
+        this.components = subComponents;
+    }
+
+    public void setTresholds(Collection<Treshold> tresholds) {
+        setTresholdsScope(tresholds);
+        this.tresholds = tresholds;
+    }
+
+    protected void setTresholdsScope(Collection<Treshold> tresholds) {
+        if (tresholds != null) {
+            tresholds.stream().forEach((t) -> {
+                t.setScope(Treshold.Scope.COMPONENT);
+            });
+        }
+    }
+
     /**
      * @param configuration the configuration to set
      */
@@ -232,7 +236,7 @@ public class Component extends Persistable<Long> {
 
     protected void initializeCapabilities() {
         if (this.getCapabilities() == null) {
-            this.setCapabilities(new ArrayList<Capability>());
+            this.setCapabilities(new ArrayList<>());
         }
     }
 
@@ -274,15 +278,31 @@ public class Component extends Persistable<Long> {
     }
 
     public Configuration getConfigurationByKey(String searchKey) {
+        if (configuration == null || configuration.isEmpty()) {
+            return null;
+        }
         return configuration.stream().filter(p -> p.getKey().equalsIgnoreCase(searchKey)).findFirst().orElse(null);
     }
 
     public Capability getCapabilityByName(String capabilityName) {
+        if (capabilities == null || capabilities.isEmpty()) {
+            return null;
+        }
         return capabilities.stream().filter(c -> c.getName().equalsIgnoreCase(capabilityName)).findFirst().orElse(null);
     }
 
-    public Component getSubComponentByName(String componentName) {
+    public Component getComponentByName(String componentName) {
+        if (components == null || components.isEmpty()) {
+            return null;
+        }
         return components.stream().filter(c -> c.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+    public Treshold getTresholdByName(String tresholdName) {
+        if (tresholds == null || tresholds.isEmpty()) {
+            return null;
+        }
+        return tresholds.stream().filter(t -> t.getName().equalsIgnoreCase(tresholdName)).findFirst().orElse(null);
     }
 
     /**
@@ -290,8 +310,51 @@ public class Component extends Persistable<Long> {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = Component.COMP_REF)
+
     public Collection<Treshold> getTresholds() {
         return tresholds;
+    }
+
+    public T addComponents(Component... componentArray) {
+        this.initializeComponents();
+        Collections.addAll(this.getComponents(), componentArray);
+        return (T) this;
+    }
+
+    public T addCapabilities(Capability... capabilities) {
+        this.initializeCapabilities();
+        Collections.addAll(this.getCapabilities(), capabilities);
+        return (T) this;
+    }
+
+    public T removeCapabilities(Capability... caps) {
+        if (this.capabilities != null && this.capabilities.size() > 0) {
+            Arrays.asList(caps).stream().forEach(c -> {
+                this.capabilities.removeIf(oc -> oc.getName().equalsIgnoreCase(c.getName()));
+            });
+        }
+        return (T) this;
+    }
+
+    public T addTresholds(Treshold... tresholds) {
+        this.initializeTresholds();
+        ArrayList<Treshold> trshs = new ArrayList<>();
+        Collections.addAll(trshs, tresholds);
+        setTresholdsScope(trshs);
+        getTresholds().addAll(trshs);
+        return (T) this;
+    }
+
+    public T addConfigurations(Configuration... configs) {
+        this.initializeConfiguration();
+        Collections.addAll(this.getConfiguration(), configs);
+        return (T) this;
+    }
+
+    protected void initializeComponents() {
+        if (this.components == null) {
+            this.components = new ArrayList<>();
+        }
     }
 
     static public enum Type {
@@ -300,89 +363,33 @@ public class Component extends Persistable<Long> {
         SOFTWARE;
     }
 
-    public static Component create() {
-        return new Component();
-    }
-
-    public static Component create(String name, Type type) {
-        Component comp = Component.create();
-        comp.setName(name);
-        comp.setType(type);
-        return comp;
-    }
-
-    public static Component create(String name, Type type, EnabledState state) {
-        Component comp = Component.create(name, type);
-        comp.setEnabledState(state);
-        return comp;
-    }
-
-    public Component putEnabledState(EnabledState state) {
+    public T putEnabledState(EnabledState state) {
         this.setEnabledState(state);
-        return this;
+        return (T) this;
     }
 
-    public Component putType(Type type) {
+    public T putType(Type type) {
         this.setType(type);
-        return this;
+        return (T) this;
     }
 
-    public Component putStatusInfo(StatusInfo status) {
+    public T putStatusInfo(StatusInfo status) {
         this.setStatus(status);
-        return this;
+        return (T) this;
     }
 
-    public Component putModel(Model model) {
+    public T putModel(Model model) {
         this.setModel(model);
-        return this;
+        return (T) this;
     }
 
-    public Component addSubComponents(Component... componentArray) {
-        this.initializeComponents();
-        Collections.addAll(this.getComponents(), componentArray);
-        return this;
+    public T putSerialNumber(String serialNumber) {
+        this.setSerialNumber(serialNumber);
+        return (T) this;
     }
 
-    public Component addCapabilities(Capability... capabilities) {
-        this.initializeCapabilities();
-        Collections.addAll(this.getCapabilities(), capabilities);
-        return this;
-    }
-
-    public Component addTresholds(Treshold... tresholds) {
-        this.initializeTresholds();
-        ArrayList<Treshold> trshs = new ArrayList<>();
-        Collections.addAll(trshs, tresholds);
-        setTresholdsScope(trshs);
-        getTresholds().addAll(trshs);
-        return this;
-    }
-
-//    private void decorateEvents(ComponentEvent... evts) {
-//        for (ComponentEvent evt : evts) {
-//            evt.setComponent(this);
-//        }
-//    }
-//    public Component addEvents(ComponentEvent... events) {
-//        this.initializeEventLog();
-//        decorateEvents(events);
-//        Collections.addAll(this.eventLog, events);
-//        return this;
-//    }
-    public Component addConfigurations(Configuration... configs) {
-        this.initializeConfiguration();
-        Collections.addAll(this.getConfiguration(), configs);
-        return this;
-    }
-
-//    public void initializeEventLog() {
-//        if (this.eventLog == null) {
-//            this.eventLog = new ArrayList<>();
-//        }
-//    }
-    protected void initializeComponents() {
-        if (this.components == null) {
-            this.components = new ArrayList<>();
-        }
+    public T putPartNumber(String partNumber) {
+        this.setPartNumber(partNumber);
+        return (T) this;
     }
 }
