@@ -18,10 +18,10 @@ public enum ExecutionStatus {
 
     @XmlEnumValue("ACK")
     ACKNOWLEDGED,
-    @XmlEnumValue("DEC")
-    DECLINED,
     @XmlEnumValue("POST")
-    POSTED;
+    POSTED,
+    @XmlEnumValue("DEC")
+    DECLINED;
 
     /**
      *

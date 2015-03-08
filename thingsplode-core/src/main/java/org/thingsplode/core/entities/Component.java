@@ -273,6 +273,11 @@ public class Component extends Persistable<Long> {
         return configuration;
     }
 
+//    public boolean containsConfiguration(){
+//        if (configuration != null){
+//        }
+//    }
+    
     /**
      * @return the tresholds
      */
