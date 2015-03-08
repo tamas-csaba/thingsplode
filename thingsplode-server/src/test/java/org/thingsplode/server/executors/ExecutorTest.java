@@ -64,6 +64,7 @@ public class ExecutorTest extends TestBaseWithRepos {
 
     @Before
     public void setupTest() throws UnknownHostException, SrvExecutionException {
+        deviceService.setEnableAutoRegistration(true);
         if (testDevice == null || testDevice.getId() == null) {
             testDevice = TestFactory.createDevice(testDeviceID, "123456789", "1");
             testDevice = deviceService.registerOrUpdate(testDevice);

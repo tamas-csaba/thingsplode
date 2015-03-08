@@ -7,10 +7,7 @@ package org.thingsplode.server.repositories;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.transaction.annotation.Transactional;
 import org.thingsplode.core.entities.Component;
 import org.thingsplode.core.entities.Event;
 

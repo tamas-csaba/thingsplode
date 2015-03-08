@@ -45,19 +45,14 @@ public class TestFactory {
                 addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "door_control", true)).
                 addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).
                         addConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).
-//                        addEvents((ComponentEvent) ComponentEvent.create("some_event", "some_event_class", Event.Severity.ERROR, Calendar.getInstance()).
-//                                addIndications(Indication.create("evendInd", Value.Type.TEXT, "some text value"))
-//                        ).
                         addTresholds(Treshold.create("nr_of_transactions", Treshold.Type.HIGH, Value.Type.NUMBER, "100000")).
                         addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "read_card", true)).
-                        addSubComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).
+                        addComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).
                                 addConfigurations(Configuration.create("chip_installed", "true", Configuration.Type.BOOLEAN)).
                                 putEnabledState(EnabledState.ENABLED).
                                 putStatusInfo(StatusInfo.ONLINE)
                         )
                 ).
-//                addEvents((DeviceEvent) DeviceEvent.create("some_device_event", "some_event_class", Event.Severity.WARNING, Calendar.getInstance()).
-//                        addIndications(Indication.create("some other indication", Value.Type.NUMBER, "300"))).
                 addTresholds(Treshold.create("alarm", Treshold.Type.HIGH, Value.Type.NUMBER, "10000")).
                 putType(Component.Type.HARDWARE);
 

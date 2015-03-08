@@ -5,17 +5,20 @@
  */
 package org.thingsplode.server.infrastructure;
 
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsplode.core.EnabledState;
 import org.thingsplode.core.StatusInfo;
-import org.thingsplode.core.entities.Configuration;
+import org.thingsplode.core.entities.Capability;
+import org.thingsplode.core.entities.Component;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Model;
+import org.thingsplode.core.entities.Treshold;
 import org.thingsplode.core.exceptions.SrvExecutionException;
 import org.thingsplode.core.protocol.ExecutionStatus;
 import org.thingsplode.core.protocol.ResponseCode;
@@ -38,6 +41,10 @@ public class DeviceService {
     private EventRepository eventRepo;
     @Value("${autoregistration.enabled:false}")
     private boolean enableAutoRegistration;
+    @Value("${overwrite.serialnumber.ondevices.enabled:false}")
+    private boolean overwriteSerialNumberOnDevices;
+    @Value("${overwrite.serialnumber.oncomponents.enabled:true}")
+    private boolean overwriteSerialNumberOnComponents;
 
     /**
      * Registers a new device or update with the newest status
@@ -64,9 +71,9 @@ public class DeviceService {
             existingDevice = deviceRepo.findBydeviceId(device.getDeviceId());
         }
 
-        if (existingDevice == null && !enableAutoRegistration) {
+        if (existingDevice == null && !isEnableAutoRegistration()) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.PERMISSION_DENIED, "The device is not activated and auto registration is not enabled.");
-        } else if (existingDevice == null && enableAutoRegistration) {
+        } else if (existingDevice == null && isEnableAutoRegistration()) {
             try {
                 attachModel(device);
                 setDeviceFieldsOnRegistration(device);
@@ -81,7 +88,8 @@ public class DeviceService {
             try {
 
                 setDeviceFieldsOnRegistration(existingDevice);
-
+                mergeComponents(device, existingDevice);
+                return deviceRepo.save(existingDevice);
             } catch (Exception e) {
                 throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
             }
@@ -96,15 +104,62 @@ public class DeviceService {
         }
     }
 
-    private void mergeDeviceFields(Device source, Device destination) {
+    public void mergeComponents(Component<?> source, Component<?> destination) {
+        source.getComponents().forEach(c -> {
+            Component<?> existingComponent = destination.getComponentByName(c.getName());
+            if (existingComponent == null) {
+                destination.addComponents(c);
+            } else {
+                mergeComponentFields(c, existingComponent);
+                if (c.getComponents() != null || !c.getComponents().isEmpty()) {
+                    ((Component<?>) c).getComponents().forEach(ssc -> {
+                        Component<?> existingSubComponent = existingComponent.getComponentByName(ssc.getName());
+                        if (existingSubComponent == null) {
+                            existingComponent.addComponents(ssc);
+                        } else {
+                            mergeComponents(ssc, existingSubComponent);
+                        }
+                    });
+                };
+            }
+        });
+    }
+
+    private void mergeComponentFields(Component<?> source, Component<?> destination) {
+
         destination.setStatus(source.getStatus());
-        //*****
         source.getConfiguration().stream().filter(s -> (destination.getConfigurationByKey(s.getKey()) == null)).forEach(s -> {
             s.setSynced();
             destination.addConfigurations(s);
         });
-        
+
+        //add capabilities which are new and remove the ones which are not anymore on the message
+        destination.getCapabilities().stream().forEach(dc -> {
+            Capability sourceCapability = source.getCapabilityByName(dc.getName());
+            if (sourceCapability != null) {
+                dc.setActive(sourceCapability.isActive());
+                dc.setType(sourceCapability.getType());
+            }
+        });
         source.getCapabilities().stream().filter(c -> (destination.getCapabilityByName(c.getName()) == null)).forEach(c -> destination.addCapabilities(c));
+        List<Capability> deletables = destination.getCapabilities().stream().
+                filter(c -> (source.getCapabilityByName(c.getName()) == null)).
+                collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        destination.removeCapabilities(deletables.toArray(new Capability[]{}));
+
+        List<Treshold> newTresholds = source.getTresholds().stream().filter(st -> destination.getTresholdByName(st.getName()) == null).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        destination.addTresholds(newTresholds.toArray(new Treshold[]{}));
+
+        if ((destination instanceof Device) && overwriteSerialNumberOnDevices) {
+            destination.setPartNumber(source.getPartNumber());
+            destination.setSerialNumber(source.getSerialNumber());
+        } else if (!(destination instanceof Device) && overwriteSerialNumberOnComponents) {
+            destination.setPartNumber(source.getPartNumber());
+            destination.setSerialNumber(source.getSerialNumber());
+        }
+
+        destination.setStatus(source.getStatus());
+
     }
 
     private void setDeviceFieldsOnRegistration(Device device) {
@@ -127,6 +182,34 @@ public class DeviceService {
         } catch (Exception e) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
         }
+    }
+
+    /**
+     * @return the enableAutoRegistration
+     */
+    public boolean isEnableAutoRegistration() {
+        return enableAutoRegistration;
+    }
+
+    /**
+     * @param enableAutoRegistration the enableAutoRegistration to set
+     */
+    public void setEnableAutoRegistration(boolean enableAutoRegistration) {
+        this.enableAutoRegistration = enableAutoRegistration;
+    }
+
+    /**
+     * @param overwriteSerialNumberOnDevices the overwriteSerialNumberOnDevices to set
+     */
+    public void setOverwriteSerialNumberOnDevices(boolean overwriteSerialNumberOnDevices) {
+        this.overwriteSerialNumberOnDevices = overwriteSerialNumberOnDevices;
+    }
+
+    /**
+     * @param overwriteSerialNumberOnComponents the overwriteSerialNumberOnComponents to set
+     */
+    public void setOverwriteSerialNumberOnComponents(boolean overwriteSerialNumberOnComponents) {
+        this.overwriteSerialNumberOnComponents = overwriteSerialNumberOnComponents;
     }
 
 }
