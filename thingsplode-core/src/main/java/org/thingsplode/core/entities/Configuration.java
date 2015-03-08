@@ -10,14 +10,24 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
+@Table(
+        name = Configuration.TABLE_NAME,
+        uniqueConstraints = @UniqueConstraint(columnNames = {"key", Component.COMP_REF})
+)
 @Entity
 public class Configuration extends Persistable<Long> {
+    
+    @XmlTransient
+    public final static String TABLE_NAME = "COMPONENT";
+    
     private Type type;
     private String key;
     private String value;
@@ -33,7 +43,11 @@ public class Configuration extends Persistable<Long> {
     public void setType(Type type) {
         this.type = type;
     }
-    
+
+    /**
+     *
+     * @return
+     */
     @Basic(optional = false)
     public String getKey() {
         return key;
@@ -67,7 +81,16 @@ public class Configuration extends Persistable<Long> {
         this.syncStatus = syncStatus;
     }
     
+    public void setNew() {
+        this.setSyncStatus(SyncStatus.NEW);
+    }
+    
+    public void setSynced() {
+        this.setSyncStatus(SyncStatus.SYNCED);
+    }
+    
     public static enum Type {
+        
         STRING,
         BOOLEAN,
         NUMBER,
@@ -94,9 +117,10 @@ public class Configuration extends Persistable<Long> {
         this.setValue(value);
         return this;
     }
-
-    private static enum SyncStatus {
-        NEW, 
+    
+    public static enum SyncStatus {
+        
+        NEW,
         SYNCED
     }
 }

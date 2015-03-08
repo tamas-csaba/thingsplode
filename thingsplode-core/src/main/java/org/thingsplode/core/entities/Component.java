@@ -273,11 +273,18 @@ public class Component extends Persistable<Long> {
         return configuration;
     }
 
-//    public boolean containsConfiguration(){
-//        if (configuration != null){
-//        }
-//    }
-    
+    public Configuration getConfigurationByKey(String searchKey) {
+        return configuration.stream().filter(p -> p.getKey().equalsIgnoreCase(searchKey)).findFirst().orElse(null);
+    }
+
+    public Capability getCapabilityByName(String capabilityName) {
+        return capabilities.stream().filter(c -> c.getName().equalsIgnoreCase(capabilityName)).findFirst().orElse(null);
+    }
+
+    public Component getSubComponentByName(String componentName) {
+        return components.stream().filter(c -> c.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
     /**
      * @return the tresholds
      */
