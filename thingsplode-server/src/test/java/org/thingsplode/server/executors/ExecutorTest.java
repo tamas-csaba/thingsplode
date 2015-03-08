@@ -24,10 +24,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.thingsplode.TestBaseWithRepos;
 import org.thingsplode.core.entities.Device;
+import org.thingsplode.core.entities.Event;
 import org.thingsplode.core.exceptions.MessageConversionException;
 import org.thingsplode.core.exceptions.SrvExecutionException;
 import org.thingsplode.core.protocol.Response;
 import org.thingsplode.core.protocol.request.BootNotificationRequest;
+import org.thingsplode.core.protocol.response.BootNotificationResponse;
+import org.thingsplode.core.protocol.sync.EventSync;
 import org.thingsplode.domain.TestFactory;
 import org.thingsplode.server.BaseConfig;
 import org.thingsplode.server.BusConfig;
@@ -73,21 +76,24 @@ public class ExecutorTest extends TestBaseWithRepos {
 
     @Test
     public void testBootNotificationRequest() throws UnknownHostException, InterruptedException, ExecutionException, TimeoutException, MessageConversionException {
-        Device d = TestFactory.createDevice("test_device_2", "123456789", "1");
+        Device d = TestFactory.createDevice("test_device_2", "987654321", "1");
         Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(d.getDeviceId(), Calendar.getInstance().getTimeInMillis(), d));
         Response rsp = rspHandle.get(30, TimeUnit.SECONDS);
         Assert.assertNotNull("The resposne message cannot be null.", rsp);
         Assert.assertFalse(rsp.isErrorType());
         Assert.assertTrue(rsp.isAcknowledged());
-        //Assert.assertNotNull("The registration id cannot be null", rsp.expectMessageByType(BootNotificationResponse.class).getRegistrationID());
+        Assert.assertNotNull("The registration id cannot be null", rsp.expectMessageByType(BootNotificationResponse.class).getRegistrationID());
         System.out.println("\n\n RESPONSE");
         System.out.println(rsp.toString());
         System.out.println("\n\n ========");
     }
-//    @Test
-//    public void testEventSync() {
-//        Event evt = new Event().putId("some_event_id").putClass("some_class").putSeverity(Event.Severity.DEBUG).putEventDate(Calendar.getInstance()).putReceiveDate(Calendar.getInstance());
-//        syncGw.process(new EventSync(testDevice.getName(), evt));
-//    }
+
+    @Test
+    public void testEventSync() {
+        Event evt = new Event().putId("some_event_id").putClass("some_class").putSeverity(Event.Severity.DEBUG).putEventDate(Calendar.getInstance()).putReceiveDate(Calendar.getInstance());
+        syncGw.process(new EventSync(testDevice.getDeviceId(), testDevice.getName(), evt, Calendar.getInstance().getTimeInMillis()));
+    }
+    //todo: test exceptions and error messages
+    //http://xpadro.blogspot.co.at/2013/11/how-error-handling-works-in-spring.html
 
 }

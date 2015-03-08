@@ -20,6 +20,11 @@ public class LoggingInterceptor extends ChannelInterceptorAdapter {
 
     private Logger logger = Logger.getLogger(LoggingInterceptor.class);
 
+//    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+//        System.out.println("\n\n\n\n PRESEND --> message on channel [" + channel.toString() + "]: \n " + message.toString());
+//        return message;
+//    }
+
     @Override
     public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
 

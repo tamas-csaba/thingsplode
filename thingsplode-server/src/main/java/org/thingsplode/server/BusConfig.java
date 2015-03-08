@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Description;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.AbstractMessageChannel;
 import org.springframework.integration.channel.DirectChannel;
-import org.springframework.integration.handler.AbstractMessageProducingHandler;
+import org.springframework.integration.core.MessagingTemplate;
+import org.springframework.integration.handler.AbstractMessageHandler;
 import org.springframework.integration.handler.AbstractReplyProducingMessageHandler;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
@@ -44,9 +45,9 @@ import org.thingsplode.server.bus.interceptors.LoggingInterceptor;
  */
 @Configuration
 public class BusConfig {
-    
+
     private Logger logger = Logger.getLogger(BusConfig.class);
-    
+
     @Bean
     @Description("Entry to the messaging system through the gateway for requests.")
     public MessageChannel requestChannel() {
@@ -54,7 +55,7 @@ public class BusConfig {
         ch.addInterceptor(0, channelLoggingInterceptor());
         return ch;
     }
-    
+
     @Bean
     @Description("Entry to the messaging system through the gateway for sync messages.")
     public MessageChannel syncChannel() {
@@ -62,49 +63,42 @@ public class BusConfig {
         ch.addInterceptor(0, channelLoggingInterceptor());
         return ch;
     }
-    
+
     @Bean
     @Description("Exit from the messaging system through the gateway.")
     public MessageChannel responseChannel() {
         return new DirectChannel();
     }
-    
+
     @Bean
     @Description("Error messages are going here.")
     public MessageChannel errorChannel() {
         return new DirectChannel();
     }
-    
+
     @Bean
     @ServiceActivator(autoStartup = "true", requiresReply = "false", inputChannel = "syncChannel")
     public MessageHandler syncMessageHandler() {
-        return new AbstractMessageProducingHandler() {
-            
+        return new AbstractMessageHandler() {
+
             @Autowired
             private ThingsplodeServiceLocator serviceLocator;
-            
+
             @Override
             protected void handleMessageInternal(Message<?> message) throws Exception {
-                try {
-                    Message errorMessage = serviceLocator.getService(message).execute(message);
-                    if (errorMessage != null) {
-                        sendOutputs(errorMessage, message);
-                    }
-                } catch (SrvExecutionException ex) {
-                    sendOutputs(MessageBuilder.withPayload(new ErrorMessage(ex.getMessageCorrelationID(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, ex.getMessage(), ex)).build(), message);
-                }
+                serviceLocator.getService(message).execute(message);
             }
         };
     }
-    
+
     @Bean
     @ServiceActivator(autoStartup = "true", requiresReply = "true", inputChannel = "requestChannel")
     public MessageHandler requestMessageHandler() {
         return new AbstractReplyProducingMessageHandler() {
-            
+
             @Autowired
             private ThingsplodeServiceLocator serviceLocator;
-            
+
             @Override
             protected Object handleRequestMessage(Message<?> requestMessage) {
                 try {
@@ -115,12 +109,11 @@ public class BusConfig {
             }
         };
     }
-    
+
     @ServiceActivator(inputChannel = "errorChannel")
-    public LoggingHandler LoggingHandler(Message<ErrorMessage> msg) {
-        LoggingHandler loggingHandler = new LoggingHandler("DEBUG");        
+    public LoggingHandler loggingHandler(Message<ErrorMessage> msg) {
+        LoggingHandler loggingHandler = new LoggingHandler("ERROR");
         return loggingHandler;
-        
     }
 
 //    @Bean
@@ -139,5 +132,5 @@ public class BusConfig {
     public LoggingInterceptor channelLoggingInterceptor() {
         return new LoggingInterceptor();
     }
-    
+
 }

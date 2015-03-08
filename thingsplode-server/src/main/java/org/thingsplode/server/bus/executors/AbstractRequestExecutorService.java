@@ -34,6 +34,6 @@ public abstract class AbstractRequestExecutorService<REQ extends AbstractRequest
             return MessageBuilder.withPayload(new Response(req.getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, ex.getMessage())).build();
         }
     }
-
+    
     public abstract Message<?> executeImpl(Message<?> msg, Device device);
 }
