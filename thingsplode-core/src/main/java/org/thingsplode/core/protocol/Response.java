@@ -129,7 +129,7 @@ public class Response<T extends AbstractCommandRequest> extends AbstractCommandR
 
     @Override
     public String toString() {
-        return "Response{" + "responseCorrelationID=" + responseCorrelationID + ", requestStatus=" + requestStatus + ", responseCode=" + responseCode + ", resultMessage=" + resultMessage + '}';
+        return "Response{ " + super.toString() + " responseCorrelationID=" + responseCorrelationID + ", requestStatus=" + requestStatus + ", responseCode=" + responseCode + ", resultMessage=" + resultMessage + '}';
     }
 
 }

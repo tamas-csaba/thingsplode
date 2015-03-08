@@ -42,4 +42,10 @@ public abstract class Persistable<ID extends Serializable> implements Serializab
     public void setId(ID id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "Persistable{" + "id=" + id + '}';
+    }
+
 }

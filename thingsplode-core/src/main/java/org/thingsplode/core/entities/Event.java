@@ -226,4 +226,10 @@ public class Event extends Persistable<Long> {
         this.setComponent(comp);
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "Event{ " + super.toString() + " component=" + component + ", eventId=" + eventId + ", eventClass=" + eventClass + ", severity=" + severity + ", eventDate=" + eventDate + ", receiveDate=" + receiveDate + ", indications=" + indications + '}';
+    }
+
 }

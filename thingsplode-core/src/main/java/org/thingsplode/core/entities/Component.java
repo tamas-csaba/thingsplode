@@ -41,10 +41,10 @@ import org.thingsplode.core.StatusInfo;
 @DiscriminatorColumn(name = Component.DISCRIMINATOR, discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue(value = Component.MAIN_TYPE)
 
-@Table(
-        name = Component.TABLE_NAME,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"name", Component.ROOT_COMP_REF})
-)
+//@Table(
+//        name = Component.TABLE_NAME,
+//        uniqueConstraints = @UniqueConstraint(columnNames = {"name", Component.ROOT_COMP_REF})
+//)
 //todo: serial number also should be unique
 public class Component<T extends Component<?>> extends Persistable<Long> {
 

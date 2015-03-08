@@ -23,9 +23,17 @@ public class EventSync extends AbstractRequest {
     private Event event;
 
     public EventSync() {
+        super();
     }
 
-    public EventSync(String componentName, Event event) {
+    public EventSync(String deviceId, String componentName, Event event, Long timeStamp) {
+        super(deviceId, timeStamp);
+        this.componentName = componentName;
+        this.event = event;
+    }
+
+    public EventSync(String deviceId, String componentName, Event event, Long timeStamp, String serviceProviderName) {
+        super(deviceId, timeStamp, serviceProviderName);
         this.componentName = componentName;
         this.event = event;
     }
@@ -60,6 +68,6 @@ public class EventSync extends AbstractRequest {
 
     @Override
     public String toString() {
-        return "EventSync{" + "componentName=" + componentName + ", event=" + event + '}';
+        return "EventSync{ " + super.toString() + " componentName=" + componentName + ", event=" + event + '}';
     }
 }

@@ -61,4 +61,9 @@ public abstract class AbstractCommandRequest<T extends AbstractCommandRequest> e
     public void setSourceServiceProviderName(String sourceServiceProviderName) {
         this.sourceServiceProviderName = sourceServiceProviderName;
     }
+
+    @Override
+    public String toString() {
+        return "AbstractCommandRequest{ " + super.toString() + " destinationDeviceId=" + destinationDeviceId + ", sourceServiceProviderName=" + sourceServiceProviderName + '}';
+    }
 }
