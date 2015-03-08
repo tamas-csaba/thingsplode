@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.thingsplode.server.executors;
+package org.thingsplode.server.bus.executors;
 
 import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.thingsplode.server.infrastructure.DeviceService;
  * @param <RSP>
  */
 @Service
-public class BootNotificationReqImpl<REQ extends BootNotificationRequest, RSP extends BootNotificationResponse> extends AbstractRequestExecutorService<REQ, RSP> {
+public class BootNotificationRequestExecutor<REQ extends BootNotificationRequest, RSP extends BootNotificationResponse> extends AbstractRequestExecutorService<REQ, RSP> {
 
     @Autowired(required = true)
     private DeviceService deviceService;
@@ -37,10 +37,9 @@ public class BootNotificationReqImpl<REQ extends BootNotificationRequest, RSP ex
     public Message<?> executeImpl(Message<?> msg, Device d) {
         BootNotificationRequest req = (BootNotificationRequest) msg.getPayload();
         try {
-            Long registrationID = deviceService.registerOrUpdate(req.getDevice());
+            Long registrationID = deviceService.registerOrUpdate(req.getDevice()).getId();
             BootNotificationResponse rsp = new BootNotificationResponse(registrationID, req.getMessageId(), ExecutionStatus.ACKNOWLEDGED, ResponseCode.SUCCESSFULLY_EXECUTED);
             rsp.setCurrentTimeMillis(System.currentTimeMillis());
-            rsp.setLocale(Locale.getDefault().getCountry());
             return MessageBuilder.withPayload(rsp).build();
         } catch (SrvExecutionException ex) {
             return MessageBuilder.withPayload(new BootNotificationResponse(req.getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, ex.getMessage())).build();

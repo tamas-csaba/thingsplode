@@ -29,7 +29,7 @@ public class DeviceService {
     //private boolean 
 
     @Transactional
-    public Long registerOrUpdate(Device device) throws SrvExecutionException {
+    public Device registerOrUpdate(Device device) throws SrvExecutionException {
         if (device == null) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "The device cannot be null.");
         }
@@ -47,10 +47,10 @@ public class DeviceService {
                 device.setId(existingDevice.getId());
             }
         }
-        
+
         try {
             Device d = deviceRepo.save(device);
-            return d.getId();
+            return d;
         } catch (Exception e) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
         }

@@ -10,12 +10,14 @@ import java.math.BigInteger;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
+@Ignore()
 public class TestBaseWithRepos extends TestBase {
 
     @Autowired(required = true)

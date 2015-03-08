@@ -16,6 +16,7 @@ import junit.framework.TestCase;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -23,6 +24,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author tamas.csaba@gmail.com
  */
+@Ignore
 public abstract class TestBase extends TestCase {
 
     @Autowired

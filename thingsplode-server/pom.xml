@@ -20,7 +20,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>4.12</version>
             <scope>test</scope>
             <type>jar</type>
         </dependency>
@@ -150,8 +150,10 @@
                         <phase>package</phase>
                         <configuration>
                             <descriptorRefs>
-                                <descriptorRef>service</descriptorRef>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
+                            <finalName>${project.build.finalName}-service</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                             <archive>
                                 <manifest>
                                     <useUniqueVersions>false</useUniqueVersions>

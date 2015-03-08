@@ -15,6 +15,7 @@ import org.springframework.integration.channel.AbstractMessageChannel;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.handler.AbstractMessageProducingHandler;
 import org.springframework.integration.handler.AbstractReplyProducingMessageHandler;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -24,7 +25,7 @@ import org.thingsplode.core.protocol.ErrorMessage;
 import org.thingsplode.core.protocol.ExecutionStatus;
 import org.thingsplode.core.protocol.ResponseCode;
 import org.thingsplode.server.bus.ThingsplodeServiceLocator;
-import org.thingsplode.server.bus.interceptors.RequestLoggingInterceptor;
+import org.thingsplode.server.bus.interceptors.LoggingInterceptor;
 
 /**
  * * Possible values
@@ -50,7 +51,7 @@ public class BusConfig {
     @Description("Entry to the messaging system through the gateway for requests.")
     public MessageChannel requestChannel() {
         AbstractMessageChannel ch = new DirectChannel();
-        ch.addInterceptor(0, requestLoggingInterceptor());
+        ch.addInterceptor(0, channelLoggingInterceptor());
         return ch;
     }
     
@@ -58,7 +59,7 @@ public class BusConfig {
     @Description("Entry to the messaging system through the gateway for sync messages.")
     public MessageChannel syncChannel() {
         AbstractMessageChannel ch = new DirectChannel();
-        ch.addInterceptor(0, requestLoggingInterceptor());
+        ch.addInterceptor(0, channelLoggingInterceptor());
         return ch;
     }
     
@@ -75,7 +76,7 @@ public class BusConfig {
     }
     
     @Bean
-    @ServiceActivator(autoStartup = "true", requiresReply = "false", inputChannel = "requestChannel", outputChannel = "errorChannel")
+    @ServiceActivator(autoStartup = "true", requiresReply = "false", inputChannel = "syncChannel")
     public MessageHandler syncMessageHandler() {
         return new AbstractMessageProducingHandler() {
             
@@ -116,8 +117,10 @@ public class BusConfig {
     }
     
     @ServiceActivator(inputChannel = "errorChannel")
-    public void loggerAdapter(Message<ErrorMessage> msg) {
-        logger.error(msg.toString());
+    public LoggingHandler LoggingHandler(Message<ErrorMessage> msg) {
+        LoggingHandler loggingHandler = new LoggingHandler("DEBUG");        
+        return loggingHandler;
+        
     }
 
 //    @Bean
@@ -133,8 +136,8 @@ public class BusConfig {
 //        return new DirectChannel();
 //    }
     @Bean
-    public RequestLoggingInterceptor requestLoggingInterceptor() {
-        return new RequestLoggingInterceptor();
+    public LoggingInterceptor channelLoggingInterceptor() {
+        return new LoggingInterceptor();
     }
     
 }

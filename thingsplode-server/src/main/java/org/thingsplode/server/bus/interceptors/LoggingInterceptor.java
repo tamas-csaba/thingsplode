@@ -16,15 +16,15 @@ import org.springframework.stereotype.Component;
  * @author tamas.csaba@gmail.com
  */
 @Component
-public class RequestLoggingInterceptor extends ChannelInterceptorAdapter {
+public class LoggingInterceptor extends ChannelInterceptorAdapter {
 
-    private Logger logger = Logger.getLogger(RequestLoggingInterceptor.class);
+    private Logger logger = Logger.getLogger(LoggingInterceptor.class);
 
     @Override
     public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("On channel: " + channel.toString() + ": " + message.toString());
+            logger.debug("On channel: " + channel.toString() + " -> Message: " + message.toString());
 
         }
 
