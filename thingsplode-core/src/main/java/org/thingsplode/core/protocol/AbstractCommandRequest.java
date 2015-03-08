@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ACmdReq")
-public abstract class AbstractCmdReq<T extends AbstractCmdReq<T>> extends AbstractMessage<T> {
+public abstract class AbstractCommandRequest<T extends AbstractCommandRequest> extends AbstractMessage<T> {
 
     @XmlElement(name = "DstDevId")
     private String destinationDeviceId;

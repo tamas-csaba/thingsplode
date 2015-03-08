@@ -62,4 +62,9 @@ public abstract class ConfigurationCarrierResponse<T extends ConfigurationCarrie
             this.configuration = new ArrayList<>();
         }
     }
+
+    @Override
+    public String toString() {
+        return "ConfigurationCarrierResponse{ " + super.toString() + " configuration=" + configuration + '}';
+    }
 }

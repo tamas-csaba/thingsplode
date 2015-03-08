@@ -48,4 +48,9 @@ public class BootNotificationRequest extends AbstractRequest {
     public void setDevice(Device device) {
         this.device = device;
     }
+
+    @Override
+    public String toString() {
+        return "BootNotificationRequest{ " + super.toString() + " device=" + device + '}';
+    }
 }

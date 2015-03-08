@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 import org.thingsplode.core.entities.Configuration;
-import org.thingsplode.core.protocol.AbstractCmdReq;
+import org.thingsplode.core.protocol.AbstractCommandRequest;
 
 /**
  *
@@ -18,7 +18,7 @@ import org.thingsplode.core.protocol.AbstractCmdReq;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SyncCmd")
-public class SynchronizationCmd extends AbstractCmdReq {
+public class SynchronizationCmd extends AbstractCommandRequest {
 
     
     private Collection<Configuration> configuration;

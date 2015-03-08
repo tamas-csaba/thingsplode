@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ARsp")
-public class Response<T extends Response<T>> extends AbstractCmdReq<T> {
+public class Response<T extends AbstractCommandRequest> extends AbstractCommandRequest<T> {
 
     @XmlElement(required = true, name = "CorrId")
     private String responseCorrelationID;
@@ -65,6 +65,10 @@ public class Response<T extends Response<T>> extends AbstractCmdReq<T> {
     public T putResponseCode(ResponseCode rspCode) {
         this.setResponseCode(rspCode);
         return (T) this;
+    }
+
+    public boolean isErrorType() {
+        return this instanceof ErrorMessage;
     }
 
     /**

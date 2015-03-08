@@ -5,41 +5,42 @@
  */
 package org.thingsplode.core.protocol;
 
-import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.thingsplode.core.Expectable;
 
 /**
  *
  * @author tamas.csaba@gmail.com
+ * @param <T>
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AMsg")
 @XmlRootElement
-public abstract class AbstractMessage<T extends AbstractMessage<T>> implements Serializable {
+public abstract class AbstractMessage<T extends AbstractMessage> extends Expectable {
 
     @XmlTransient
     public static final String MESSAGE_TYPE = "MESSAGE_TYPE";
-    
+
     @XmlElement(required = true, name = "MsgID")
     private String messageId;
     @XmlElement(required = true, name = "PrtVer")
     private int protocolVersion;
-
-    public T putMessageId(String messageId){
+    
+    public T putMessageId(String messageId) {
         this.setMessageId(messageId);
-        return (T)this;
+        return (T) this;
     }
-    
-    public T putProtocolVersion(int protocolVersion){
+
+    public T putProtocolVersion(int protocolVersion) {
         this.setProtocolVersion(protocolVersion);
-        return (T)this;
+        return (T) this;
     }
-    
+
     public String getMessageId() {
         return messageId;
     }
@@ -54,5 +55,10 @@ public abstract class AbstractMessage<T extends AbstractMessage<T>> implements S
 
     public void setProtocolVersion(int protocolVersion) {
         this.protocolVersion = protocolVersion;
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractMessage{ " + super.toString() + " messageId=" + messageId + ", protocolVersion=" + protocolVersion + '}';
     }
 }

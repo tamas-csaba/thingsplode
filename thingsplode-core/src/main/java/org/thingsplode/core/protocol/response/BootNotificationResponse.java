@@ -81,4 +81,9 @@ public class BootNotificationResponse extends ConfigurationCarrierResponse<BootN
     public void setCurrentTimeMillis(Long currentTimeMillis) {
         this.currentTimeMillis = currentTimeMillis;
     }
+
+    @Override
+    public String toString() {
+        return "BootNotificationResponse{ " + super.toString() + " registrationID=" + registrationID + ", currentTimeMillis=" + currentTimeMillis + '}';
+    }
 }

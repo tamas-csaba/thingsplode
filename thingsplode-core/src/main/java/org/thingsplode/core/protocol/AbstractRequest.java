@@ -82,6 +82,9 @@ public abstract class AbstractRequest extends AbstractMessage {
         this.messageTimestamp = messageTimestamp;
     }
 
-
+    @Override
+    public String toString() {
+        return "AbstractRequest{ " + super.toString() + " deviceId=" + deviceId + ", messageTimestamp=" + messageTimestamp + ", serviceProviderName=" + serviceProviderName + '}';
+    }
 
 }
