@@ -5,6 +5,8 @@
  */
 package org.thingsplode.core.entities;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -94,6 +96,32 @@ public class Capability extends Persistable<Long> {
     @Override
     public String toString() {
         return "Capability{" + "type=" + (type != null ? type : "null") + ", name=" + name + ", active=" + active + '}';
+    }
+
+    public static class CapabilityBuilder {
+
+        private List<Capability> capabiities = new ArrayList<>();
+
+        public static CapabilityBuilder newBuilder() {
+            return new CapabilityBuilder();
+        }
+
+        public CapabilityBuilder add(Capability capability) {
+            this.capabiities.add(capability);
+            return this;
+        }
+
+        public CapabilityBuilder add(String name, Type type, boolean active) {
+            Capability c = new Capability();
+            c.setName(name);
+            c.setType(type);
+            c.setActive(active);
+            return this.add(c);
+        }
+
+        public List<Capability> build() {
+            return this.capabiities;
+        }
     }
 
 }

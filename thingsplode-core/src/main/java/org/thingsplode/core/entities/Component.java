@@ -355,6 +355,11 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         if (this.getConfiguration() == null || this.getConfiguration().isEmpty()) {
             return false;
         }
+
+        if (cfg != null && cfg.getSyncStatus() == null) {
+            cfg.setSyncStatus(Configuration.SyncStatus.NEW);
+        }
+
         Configuration oldConfig = this.getConfigurationByKey(cfg.getKey());
         if (oldConfig != null) {
             this.getConfiguration().remove(oldConfig);
