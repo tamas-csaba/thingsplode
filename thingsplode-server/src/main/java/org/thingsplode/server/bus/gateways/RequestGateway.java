@@ -3,9 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.thingsplode.server.bus.gateways;
-
 
 import java.util.concurrent.Future;
 import org.springframework.integration.annotation.MessagingGateway;
@@ -19,7 +17,7 @@ import org.thingsplode.core.protocol.Response;
  */
 @MessagingGateway(name = "requestEntryGateway", defaultRequestChannel = "requestChannel")
 public interface RequestGateway {
-    
-    public Future<Response> execute(@Payload AbstractRequest request);    
-    
+
+    public Future<Response> execute(@Payload AbstractRequest request);
+
 }

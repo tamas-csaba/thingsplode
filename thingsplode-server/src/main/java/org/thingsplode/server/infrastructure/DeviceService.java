@@ -8,14 +8,18 @@ package org.thingsplode.server.infrastructure;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsplode.core.EnabledState;
 import org.thingsplode.core.StatusInfo;
 import org.thingsplode.core.entities.Capability;
 import org.thingsplode.core.entities.Component;
+import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Model;
 import org.thingsplode.core.entities.Treshold;
@@ -33,6 +37,7 @@ import org.thingsplode.server.repositories.ModelRepository;
 @Service
 public class DeviceService {
 
+    private static final Logger logger = Logger.getLogger(DeviceService.class);
     @Autowired
     private DeviceRepository deviceRepo;
     @Autowired
@@ -45,6 +50,40 @@ public class DeviceService {
     private boolean overwriteSerialNumberOnDevices;
     @Value("${overwrite.serialnumber.oncomponents.enabled:true}")
     private boolean overwriteSerialNumberOnComponents;
+    @Value("${repo.query.pagesize:100}")
+    private int pageSize;
+
+    /**
+     *
+     * @param deviceID
+     * @param state
+     * @return true if the device was found and state is changed
+     */
+    @Transactional
+    public boolean setDeviceEnabledState(String deviceID, EnabledState state) {
+        Device d = deviceRepo.findBydeviceId(deviceID);
+        if (d != null) {
+            d.setEnabledState(state);
+            deviceRepo.save(d);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Transactional
+    public void setConfigurationForDevices(List<Configuration> configurations) {
+        int pageIndex = 0;
+        Page<Device> devicePage;
+        do {
+            devicePage = deviceRepo.findAll(new PageRequest(pageIndex, pageSize));
+            if (devicePage != null && devicePage.getSize() > 0) {
+                devicePage.getContent().stream().forEach(d -> d.addOrUpdateConfigurations(configurations));
+                deviceRepo.save(devicePage.getContent());
+            }
+            pageIndex += 1;
+        } while (devicePage != null && (!devicePage.isLast() || devicePage.getNumber() > 0));
+    }
 
     /**
      * Registers a new device or update with the newest status
@@ -80,18 +119,19 @@ public class DeviceService {
                 Device d = deviceRepo.save(device);
                 return d;
             } catch (Exception e) {
-                throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
+                logger.error("cannot register or update device, due to: " + e.getMessage(), e);
+                throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e.getMessage(), e);
             }
         } else if (existingDevice != null && existingDevice.getEnabledState() == EnabledState.DISABLED) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.PERMISSION_DENIED, "The device is in DISABLED state.");
         } else if (existingDevice != null && (existingDevice.getEnabledState() == EnabledState.UNINITIALIZED || existingDevice.getEnabledState() == EnabledState.ENABLED)) {
             try {
-
                 setDeviceFieldsOnRegistration(existingDevice);
                 mergeComponents(device, existingDevice);
                 return deviceRepo.save(existingDevice);
             } catch (Exception e) {
-                throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
+                logger.error("cannot register or update device, due to: " + e.getMessage(), e);
+                throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e.getMessage(), e);
             }
         }
         return null;
@@ -120,7 +160,7 @@ public class DeviceService {
                             mergeComponents(ssc, existingSubComponent);
                         }
                     });
-                };
+                }
             }
         });
     }
@@ -130,7 +170,7 @@ public class DeviceService {
         destination.setStatus(source.getStatus());
         source.getConfiguration().stream().filter(s -> (destination.getConfigurationByKey(s.getKey()) == null)).forEach(s -> {
             s.setSynced();
-            destination.addConfigurations(s);
+            destination.addOrUpdateConfigurations(s);
         });
 
         //add capabilities which are new and remove the ones which are not anymore on the message
@@ -199,14 +239,16 @@ public class DeviceService {
     }
 
     /**
-     * @param overwriteSerialNumberOnDevices the overwriteSerialNumberOnDevices to set
+     * @param overwriteSerialNumberOnDevices the overwriteSerialNumberOnDevices
+     * to set
      */
     public void setOverwriteSerialNumberOnDevices(boolean overwriteSerialNumberOnDevices) {
         this.overwriteSerialNumberOnDevices = overwriteSerialNumberOnDevices;
     }
 
     /**
-     * @param overwriteSerialNumberOnComponents the overwriteSerialNumberOnComponents to set
+     * @param overwriteSerialNumberOnComponents the
+     * overwriteSerialNumberOnComponents to set
      */
     public void setOverwriteSerialNumberOnComponents(boolean overwriteSerialNumberOnComponents) {
         this.overwriteSerialNumberOnComponents = overwriteSerialNumberOnComponents;

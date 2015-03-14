@@ -28,22 +28,14 @@ public class BootNotificationRequestExecutor<REQ extends BootNotificationRequest
 
     @Autowired(required = true)
     private DeviceService deviceService;
-    
 
     @Override
-    public Message<?> executeImpl(Message<?> msg, Device d) {
+    public Message<?> executeImpl(Message<?> msg, Device d) throws SrvExecutionException {
         BootNotificationRequest req = (BootNotificationRequest) msg.getPayload();
-        try {
-            Long registrationID = deviceService.registerOrUpdate(req.getDevice()).getId();
-            BootNotificationResponse rsp = new BootNotificationResponse(registrationID, req.getMessageId(), ExecutionStatus.ACKNOWLEDGED, ResponseCode.SUCCESSFULLY_EXECUTED);
-            rsp.setCurrentTimeMillis(System.currentTimeMillis());
-            return MessageBuilder.withPayload(rsp).build();
-        } catch (SrvExecutionException ex) {
-            return MessageBuilder.withPayload(new BootNotificationResponse(req.getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, ex.getMessage())).build();
-        }
-
+        Long registrationID = deviceService.registerOrUpdate(req.getDevice()).getId();
+        BootNotificationResponse rsp = new BootNotificationResponse(registrationID, req.getMessageId(), ExecutionStatus.ACKNOWLEDGED, ResponseCode.SUCCESSFULLY_EXECUTED);
+        rsp.setCurrentTimeMillis(System.currentTimeMillis());
+        return MessageBuilder.withPayload(rsp).build();
     }
-
-
 
 }
