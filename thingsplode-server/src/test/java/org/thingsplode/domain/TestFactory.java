@@ -39,16 +39,13 @@ public class TestFactory {
                 putLastHeartbeat(Calendar.getInstance()).
                 putLocation(Location.create("default", Address.create().putCity("some_city").putCountry("Some Country").putState("some state").putHouseNumber("54").putPostCode("434545")).putLatitude(100.0).putLongitude(123.4)).
                 putModel(Model.create().putManufacturer("some_manufacturer").putType("some_type").putVersion(modelVersion)).
-                putStartupDate(Calendar.getInstance()).
-                addConfigurations(Configuration.create("shutdown_timeout", "3000", Configuration.Type.NUMBER)).
+                putStartupDate(Calendar.getInstance()).addOrUpdateConfigurations(Configuration.create("shutdown_timeout", "3000", Configuration.Type.NUMBER), Configuration.create("deletable_config", "1000", Configuration.Type.NUMBER)).
                 addCapabilities(Capability.create(Capability.Type.READ, "meter_value", true)).
                 addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "door_control", true)).
-                addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).
-                        addConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).
+                addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).addOrUpdateConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).
                         addTresholds(Treshold.create("nr_of_transactions", Treshold.Type.HIGH, Value.Type.NUMBER, "100000")).
                         addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "read_card", true)).
-                        addComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).
-                                addConfigurations(Configuration.create("chip_installed", "true", Configuration.Type.BOOLEAN)).
+                        addComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).addOrUpdateConfigurations(Configuration.create("chip_installed", "true", Configuration.Type.BOOLEAN)).
                                 putEnabledState(EnabledState.ENABLED).
                                 putStatusInfo(StatusInfo.ONLINE)
                         )
