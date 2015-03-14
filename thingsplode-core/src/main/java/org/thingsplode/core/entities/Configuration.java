@@ -5,6 +5,8 @@
  */
 package org.thingsplode.core.entities;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,22 +26,22 @@ import javax.xml.bind.annotation.XmlTransient;
 )
 @Entity
 public class Configuration extends Persistable<Long> {
-    
+
     @XmlTransient
     public final static String TABLE_NAME = "CONFIGURATION";
-    
+
     private Type type;
     private String key;
     private String value;
     @XmlTransient
     private SyncStatus syncStatus;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     public Type getType() {
         return type;
     }
-    
+
     public void setType(Type type) {
         this.type = type;
     }
@@ -52,16 +54,16 @@ public class Configuration extends Persistable<Long> {
     public String getKey() {
         return key;
     }
-    
+
     public void setKey(String key) {
         this.key = key;
     }
-    
+
     @Basic(optional = false)
     public String getValue() {
         return value;
     }
-    
+
     public void setValue(String value) {
         this.value = value;
     }
@@ -80,47 +82,83 @@ public class Configuration extends Persistable<Long> {
     public void setSyncStatus(SyncStatus syncStatus) {
         this.syncStatus = syncStatus;
     }
-    
+
     public void setNew() {
         this.setSyncStatus(SyncStatus.NEW);
     }
-    
+
     public void setSynced() {
         this.setSyncStatus(SyncStatus.SYNCED);
     }
-    
+
     public static enum Type {
-        
+
         STRING,
         BOOLEAN,
         NUMBER,
     }
-    
+
     public static Configuration create() {
         return new Configuration();
     }
-    
+
     public static Configuration create(String key, Configuration.Type type) {
         Configuration c = new Configuration();
         c.setKey(key);
         c.setType(type);
         return c;
     }
-    
+
     public static Configuration create(String key, String value, Configuration.Type type) {
         Configuration c = Configuration.create(key, type);
         c.setValue(value);
         return c;
     }
-    
+
     public Configuration putValue(String value) {
         this.setValue(value);
         return this;
     }
-    
+
     public static enum SyncStatus {
-        
+
         NEW,
         SYNCED
+    }
+
+    @Override
+    public String toString() {
+        return "Configuration{" + "type=" + type + ", key=" + key + ", value=" + value + ", syncStatus=" + syncStatus + '}';
+    }
+    
+    public static class ConfigurationBuilder {
+
+        private List<Configuration> configurations = new ArrayList<>();
+
+        public static ConfigurationBuilder newBuilder() {
+            return new ConfigurationBuilder();
+        }
+
+        public ConfigurationBuilder add(Configuration cfg) {
+            configurations.add(cfg);
+            return this;
+        }
+
+        public ConfigurationBuilder addConfiguration(String key, Type type, String value) {
+            return addConfiguration(key, type, value, SyncStatus.NEW);
+        }
+
+        public ConfigurationBuilder addConfiguration(String key, Type type, String value, SyncStatus syncStatus) {
+            Configuration cfg = new Configuration();
+            cfg.setKey(key);
+            cfg.setType(type);
+            cfg.setValue(value);
+            cfg.setSyncStatus(syncStatus);
+            return this.add(cfg);
+        }
+
+        public List<Configuration> build() {
+            return configurations;
+        }
     }
 }

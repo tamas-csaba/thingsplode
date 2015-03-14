@@ -102,7 +102,7 @@ public class Event extends Persistable<Long> {
     /**
      * @return the indications
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = EVENT_REF)
     public Collection<Indication> getIndications() {
         return indications;

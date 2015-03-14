@@ -32,6 +32,22 @@ public class Response<T extends AbstractCommandRequest> extends AbstractCommandR
         super();
     }
 
+    public <T extends Response> T expectTypeSafely(Class<T> expectedResponseType) {
+        if (this.isTypeOf(expectedResponseType)) {
+            return (T) this;
+        } else {
+            return null;
+        }
+    }
+
+    public <T extends Response> T expectType(Class<T> expectedResponseType) {
+        return (T) this;
+    }
+
+    public boolean isTypeOf(Class expectedResponseType) {
+        return expectedResponseType.isAssignableFrom(this.getClass());
+    }
+
     public Response(ExecutionStatus requestStatus, ResponseCode responseCode) {
         super();
         this.requestStatus = requestStatus;

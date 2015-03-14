@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,8 +26,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.EnabledState;
@@ -201,7 +201,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         this.partNumber = partNumber;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = Component.ROOT_COMP_REF)
     public Collection<Component> getComponents() {
         return components;
@@ -255,7 +255,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @return the capabilities
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = Component.COMP_REF)
     public Collection<Capability> getCapabilities() {
         return capabilities;
@@ -271,7 +271,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @return the configuration
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = Component.COMP_REF)
     public Collection<Configuration> getConfiguration() {
         return configuration;
@@ -308,7 +308,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @return the tresholds
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = Component.COMP_REF)
 
     public Collection<Treshold> getTresholds() {
@@ -345,9 +345,41 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         return (T) this;
     }
 
-    public T addConfigurations(Configuration... configs) {
+    /**
+     *
+     * @param cfg the config values which need to be updated
+     * @return false if configuration identified by key was not set on this
+     * component
+     */
+    public boolean updateConfiguration(Configuration cfg) {
+        if (this.getConfiguration() == null || this.getConfiguration().isEmpty()) {
+            return false;
+        }
+        Configuration oldConfig = this.getConfigurationByKey(cfg.getKey());
+        if (oldConfig != null) {
+            this.getConfiguration().remove(oldConfig);
+            this.getConfiguration().add(cfg);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public T addOrUpdateConfigurations(List<Configuration> configs) {
         this.initializeConfiguration();
-        Collections.addAll(this.getConfiguration(), configs);
+        if (this.getConfiguration().size() > 0 && configs != null && configs.size() > 0) {
+            List<Configuration> removables = configs.stream().filter(ac -> this.getConfigurationByKey(ac.getKey()) != null).peek(ac -> this.updateConfiguration(ac)).collect(Collectors.toList());
+            configs.removeAll(removables);
+            this.getConfiguration().addAll(configs);
+        } else if (configs != null && configs.size() > 0) {
+            this.getConfiguration().addAll(configs);
+        }
+
+        return (T) this;
+    }
+
+    public T addOrUpdateConfigurations(Configuration... cfgsAsArray) {
+        this.addOrUpdateConfigurations(Arrays.asList(cfgsAsArray));
         return (T) this;
     }
 
@@ -392,4 +424,10 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         this.setPartNumber(partNumber);
         return (T) this;
     }
+
+    @Override
+    public String toString() {
+        return "Component{ " + super.toString() + " name=" + name + ", type=" + type + ", enabledState=" + enabledState + ", status=" + status + ", model=" + model + ", serialNumber=" + serialNumber + ", partNumber=" + partNumber + ", components=" + components + ", capabilities=" + capabilities + ", configuration=" + configuration + ", tresholds=" + tresholds + '}';
+    }
+
 }

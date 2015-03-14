@@ -169,4 +169,9 @@ public class Device extends Component<Device> {
             });
         }
     }
+
+    @Override
+    public String toString() {
+        return "Device{ " + super.toString() + " deviceId=" + deviceId + ", startupDate=" + startupDate + ", lastHeartBeat=" + lastHeartBeat + ", location=" + location + ", hostAddress=" + hostAddress + '}';
+    }
 }
