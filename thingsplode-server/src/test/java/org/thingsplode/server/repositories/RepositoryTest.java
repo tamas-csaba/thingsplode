@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ import org.thingsplode.server.JpaConfig;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {BaseConfig.class, JpaConfig.class})
-//@TestPropertySource("classpath:/test.properties")
+@TestPropertySource("classpath:/test.properties")
 //@ActiveProfiles({"dev", "integration"})
 @TransactionConfiguration(transactionManager = "txMgr", defaultRollback = false)
 //@TestExecutionListeners(listeners = {}, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
@@ -65,6 +66,15 @@ public class RepositoryTest extends TestBaseWithRepos {
 
         deviceRepo.delete(d2);
         deviceAssertions(0);
+    }
+
+    @Test
+    public void testDeleteConfigs() throws UnknownHostException {
+        Device d1 = deviceRepo.save(TestFactory.createDevice("test_device_1", "1231234235", "1"));
+        deviceRepo.save(d1);
+        d1.getConfiguration().removeAll(d1.getConfiguration());
+        deviceRepo.save(d1);
+
     }
 
     @Test

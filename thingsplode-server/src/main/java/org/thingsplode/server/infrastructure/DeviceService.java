@@ -78,7 +78,9 @@ public class DeviceService {
         do {
             devicePage = deviceRepo.findAll(new PageRequest(pageIndex, pageSize));
             if (devicePage != null && devicePage.getSize() > 0) {
-                devicePage.getContent().stream().forEach(d -> d.addOrUpdateConfigurations(configurations));
+                devicePage.getContent().stream().forEach((d) -> {
+                    d.setConfiguration(configurations);
+                });
                 deviceRepo.save(devicePage.getContent());
             }
             pageIndex += 1;

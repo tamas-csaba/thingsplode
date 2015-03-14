@@ -7,6 +7,7 @@ package org.thingsplode.server.executors;
 
 import java.net.UnknownHostException;
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -23,11 +24,15 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.thingsplode.TestBaseWithRepos;
+import org.thingsplode.core.EnabledState;
+import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Event;
 import org.thingsplode.core.exceptions.MessageConversionException;
 import org.thingsplode.core.exceptions.SrvExecutionException;
+import org.thingsplode.core.protocol.ExecutionStatus;
 import org.thingsplode.core.protocol.Response;
+import org.thingsplode.core.protocol.ResponseCode;
 import org.thingsplode.core.protocol.request.BootNotificationRequest;
 import org.thingsplode.core.protocol.response.BootNotificationResponse;
 import org.thingsplode.core.protocol.sync.EventSync;
@@ -86,6 +91,37 @@ public class ExecutorTest extends TestBaseWithRepos {
         System.out.println("\n\n RESPONSE");
         System.out.println(rsp.toString());
         System.out.println("\n\n ========");
+    }
+
+    @Test
+    public void testBootNotificationRequestWithDisabledDevice() throws InterruptedException, ExecutionException, TimeoutException {
+        boolean updated = deviceService.setDeviceEnabledState(testDevice.getDeviceId(), EnabledState.DISABLED);
+        Assert.assertTrue("The device should have been found.", updated);
+        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(testDevice.getDeviceId(), Calendar.getInstance().getTimeInMillis(), testDevice));
+        Response rsp = rspHandle.get(30, TimeUnit.SECONDS);
+        Assert.assertTrue("the request should be declined", rsp.getRequestStatus() == ExecutionStatus.DECLINED);
+        Assert.assertTrue("the request should be declined with permission denied", rsp.getResponseCode() == ResponseCode.PERMISSION_DENIED);
+        System.out.println("\n\n\n ***** RESULT MESSAGE \n " + rsp.getResultMessage());
+    }
+
+    @Test
+    public void testBootNotificationReqyestWithNewConfigs() throws InterruptedException, ExecutionException, TimeoutException, MessageConversionException {
+        boolean updated = deviceService.setDeviceEnabledState(testDevice.getDeviceId(), EnabledState.ENABLED);
+        Assert.assertTrue("The device should have been found.", updated);
+        List<Configuration> cfgs = Configuration.ConfigurationBuilder.newBuilder().addConfiguration("key_1", Configuration.Type.STRING, "woops1").addConfiguration("key_2", Configuration.Type.STRING, "woops2").addConfiguration("shutdown_timeout", Configuration.Type.NUMBER, "4000").build();
+        deviceService.setConfigurationForDevices(cfgs);
+        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(testDevice.getDeviceId(), Calendar.getInstance().getTimeInMillis(), testDevice));
+        Response rsp = rspHandle.get(30, TimeUnit.SECONDS);
+        System.out.println("\n\n RESPONSE: \n" + rsp != null ? rsp.toString() : "<NULL>");
+        Assert.assertNotNull("the type should be boot notification response", rsp.expectTypeSafely(BootNotificationResponse.class));
+        Assert.assertTrue("the configruation must not be empty", !rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration().isEmpty());
+        this.listACollection("CONFIGURATION: ", rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration());
+        
+        // expected test outcomes:
+            //new configs are available -> key 1 and key 2
+            //deletable config must disappear
+            //shutdown_timeout should be overwritten from 3000 to 4000 
+            //update existing capability / remove and add a capability
     }
 
     @Test
