@@ -22,6 +22,7 @@ import org.thingsplode.TestBaseWithRepos;
 import org.thingsplode.core.entities.Event;
 import org.thingsplode.core.Value;
 import org.thingsplode.core.entities.Component;
+import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Indication;
 import org.thingsplode.domain.TestFactory;
@@ -36,7 +37,7 @@ import org.thingsplode.server.JpaConfig;
 @ContextConfiguration(classes = {BaseConfig.class, JpaConfig.class})
 @TestPropertySource("classpath:/test.properties")
 //@ActiveProfiles({"dev", "integration"})
-@TransactionConfiguration(transactionManager = "txMgr", defaultRollback = false)
+@TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = false)
 //@TestExecutionListeners(listeners = {}, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 //@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RepositoryTest extends TestBaseWithRepos {
@@ -57,8 +58,12 @@ public class RepositoryTest extends TestBaseWithRepos {
 //    }
     @Test()
     public void test1Basics() throws UnknownHostException {
-        Device d1 = deviceRepo.save(TestFactory.createDevice("test_device_1", "1231234235", "1"));
-        Device d2 = deviceRepo.save(TestFactory.createDevice("test_device_2", "1231234236", "2"));
+        Device d1 = TestFactory.createDevice("test_device_1", "1231234235", "1");
+        Device d2 = TestFactory.createDevice("test_device_2", "1231234236", "2");
+
+        d1 = deviceRepo.save(d1);
+        d2 = deviceRepo.save(d2);
+
         deviceAssertions(2);
 
         deviceRepo.delete(d1);
@@ -71,14 +76,22 @@ public class RepositoryTest extends TestBaseWithRepos {
     @Test
     public void testDeleteConfigs() throws UnknownHostException {
         Device d1 = deviceRepo.save(TestFactory.createDevice("test_device_1", "1231234235", "1"));
-        deviceRepo.save(d1);
-        d1.getConfiguration().removeAll(d1.getConfiguration());
-        deviceRepo.save(d1);
-
+        d1 = deviceRepo.save(d1);
+        //d1.getConfiguration().removeAll(d1.getConfiguration());
+        d1.getConfiguration().clear();
+        d1 = deviceRepo.save(d1);
+        int orphanConfigs = this.getCountWhere(Configuration.TABLE_NAME, Component.COMP_REF + " is null");
+        Assert.assertTrue("the orphan configs should be null", orphanConfigs == 0);
+        d1.getComponents().forEach((c) -> {
+            System.out.println("=============> Clearing configurations for component: " + c.getName());
+            c.getConfiguration().clear();
+        });
+        d1 = deviceRepo.save(d1);
+        Assert.assertTrue("the orphan configs should be null", orphanConfigs == 0);
     }
 
     @Test
-    @Transactional(timeout = -1)
+    @Transactional
     public void test2Events() throws UnknownHostException {
         String deviceID = "test_device_1";
         String serialNumber = "12345";
@@ -113,13 +126,9 @@ public class RepositoryTest extends TestBaseWithRepos {
     private void deviceAssertions(int expectedNrOfDevices) {
         long deviceCnt = deviceRepo.count();
         Assert.assertTrue("There should be " + expectedNrOfDevices + " devices in the database at this stage instead [" + deviceCnt + "].", deviceCnt == expectedNrOfDevices);
-        //Assert.assertTrue("There should be " + expectedNrOfDevices + " component events in the database at this stage.", eventRepo.count() == expectedNrOfDevices);
-        //long deviceEvtCnt = eventRepo.count();
-        //Assert.assertTrue("There should be " + expectedNrOfDevices + " device events in the database at this stage instead [" + deviceEvtCnt + "].", deviceEvtCnt == expectedNrOfDevices);
-        //Assert.assertTrue("There should be " + expectedNrOfDevices * 2 + " indications in the database at this stage.", getCount("INDICATION") == expectedNrOfDevices * 2);
         Assert.assertTrue("There should be " + expectedNrOfDevices + " models in the database at this stage.", getCount("MODEL") == expectedNrOfDevices);
         Assert.assertTrue("There should be " + expectedNrOfDevices * 2 + " tresholds in the database at this stage.", getCount("TRESHOLD") == expectedNrOfDevices * 2);
-        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " configruations in the database at this stage.", getCount("CONFIGURATION") == expectedNrOfDevices * 3);
+        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " configruations in the database at this stage.", getCount("CONFIGURATION") == expectedNrOfDevices * 4);
         int compNumber = componentRepo.findbyMainType(Component.MAIN_TYPE).size();
         Assert.assertTrue("There should be " + expectedNrOfDevices * 2 + " components in the database at this stage instead of [" + compNumber + "].", compNumber == expectedNrOfDevices * 2);
         Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " capabilities in the database at this stage.", getCount("CAPABILITY") == expectedNrOfDevices * 3);

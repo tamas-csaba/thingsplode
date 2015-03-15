@@ -79,7 +79,12 @@ public class DeviceService {
             devicePage = deviceRepo.findAll(new PageRequest(pageIndex, pageSize));
             if (devicePage != null && devicePage.getSize() > 0) {
                 devicePage.getContent().stream().forEach((d) -> {
-                    d.setConfiguration(configurations);
+                    d.getConfiguration().clear();
+                });
+                deviceRepo.save(devicePage.getContent());
+                deviceRepo.flush();
+                devicePage.getContent().stream().forEach((d) -> {
+                    d.getConfiguration().addAll(configurations);
                 });
                 deviceRepo.save(devicePage.getContent());
             }
@@ -87,38 +92,85 @@ public class DeviceService {
         } while (devicePage != null && (!devicePage.isLast() || devicePage.getNumber() > 0));
     }
 
+    @Transactional
+    public Device getInitializedDeviceByDbId(Long id){
+        //todo: see todo at getInitializedDeviceByDeviceId
+        Device d = deviceRepo.findOne(id);
+        initializeComponents(d);
+        return d;
+    }
+    
+    @Transactional(readOnly = true)
+    public Device getInitializedDeviceByDeviceId(String deviceId) {
+        //todo: create a optimal fetched query
+        /**
+         * @Query("SELECT p FROM Person p JOIN FETCH p.roles WHERE p.id =
+         * (:id)") public Person findByIdAndFetchRolesEagerly(@Param("id") Long
+         * id
+         * ---- or use transaction template from where is it needed
+         * TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+         * transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+         * @Override
+         * protected void doInTransactionWithoutResult(TransactionStatus status) {
+         * ...
+         * 
+         * });
+         */
+        Device d = deviceRepo.findBydeviceId(deviceId);
+        initializeComponents(d);
+        return d;
+    }
+
+    private void initializeComponents(Component c) {
+        if (c != null) {
+            if (c.getCapabilities() != null) {
+                c.getCapabilities().size();
+            }
+            if (c.getConfiguration() != null) {
+                c.getConfiguration().size();
+            }
+            if (c.getTresholds() != null) {
+                c.getTresholds().size();
+            }
+            if (c.getComponents() != null) {
+                c.getComponents().size();
+                c.getComponents().forEach(sc -> initializeComponents((Component) sc));
+            }
+        }
+    }
+
     /**
      * Registers a new device or update with the newest status
      *
-     * @param device
+     * @param newDevice
      * @return saved device
      * @throws SrvExecutionException
      */
-    @Transactional
-    public Device registerOrUpdate(Device device) throws SrvExecutionException {
+    @Transactional(timeout = -1)
+    public Device registerOrUpdate(Device newDevice) throws SrvExecutionException {
         Device existingDevice;
-        if (device == null) {
+        if (newDevice == null) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "The device cannot be null.");
         }
-        if (device.getDeviceId().isEmpty()) {
+        if (newDevice.getDeviceId().isEmpty()) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "The device Id cannot be null.");
         }
-        if (device.getId() != null) {
-            existingDevice = deviceRepo.findOne(device.getId());
-            if (existingDevice != null && existingDevice.getDeviceId() != null && !existingDevice.getDeviceId().equalsIgnoreCase(device.getDeviceId())) {
+        if (newDevice.getId() != null) {
+            existingDevice = deviceRepo.findOne(newDevice.getId());
+            if (existingDevice != null && existingDevice.getDeviceId() != null && !existingDevice.getDeviceId().equalsIgnoreCase(newDevice.getDeviceId())) {
                 throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "Device with resgistration id [" + existingDevice.getId() + "] is already registered under a different device identification.");
             }
         } else {
-            existingDevice = deviceRepo.findBydeviceId(device.getDeviceId());
+            existingDevice = deviceRepo.findBydeviceId(newDevice.getDeviceId());
         }
 
         if (existingDevice == null && !isEnableAutoRegistration()) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.PERMISSION_DENIED, "The device is not activated and auto registration is not enabled.");
         } else if (existingDevice == null && isEnableAutoRegistration()) {
             try {
-                attachModel(device);
-                setDeviceFieldsOnRegistration(device);
-                Device d = deviceRepo.save(device);
+                attachModel(newDevice);
+                setDeviceFieldsOnRegistration(newDevice);
+                Device d = deviceRepo.save(newDevice);
                 return d;
             } catch (Exception e) {
                 logger.error("cannot register or update device, due to: " + e.getMessage(), e);
@@ -129,7 +181,7 @@ public class DeviceService {
         } else if (existingDevice != null && (existingDevice.getEnabledState() == EnabledState.UNINITIALIZED || existingDevice.getEnabledState() == EnabledState.ENABLED)) {
             try {
                 setDeviceFieldsOnRegistration(existingDevice);
-                mergeComponents(device, existingDevice);
+                mergeComponents(newDevice, existingDevice);
                 return deviceRepo.save(existingDevice);
             } catch (Exception e) {
                 logger.error("cannot register or update device, due to: " + e.getMessage(), e);
@@ -146,15 +198,15 @@ public class DeviceService {
         }
     }
 
-    public void mergeComponents(Component<?> source, Component<?> destination) {
-        source.getComponents().forEach(c -> {
-            Component<?> existingComponent = destination.getComponentByName(c.getName());
+    private void mergeComponents(Component<?> source, Component<?> destination) {
+        source.getComponents().forEach(sc -> {
+            Component<?> existingComponent = destination.getComponentByName(sc.getName());
             if (existingComponent == null) {
-                destination.addComponents(c);
+                destination.addComponents(sc);
             } else {
-                mergeComponentFields(c, existingComponent);
-                if (c.getComponents() != null || !c.getComponents().isEmpty()) {
-                    ((Component<?>) c).getComponents().forEach(ssc -> {
+                mergeComponentFields(sc, existingComponent);
+                if (sc.getComponents() != null || !sc.getComponents().isEmpty()) {
+                    ((Component<?>) sc).getComponents().forEach(ssc -> {
                         Component<?> existingSubComponent = existingComponent.getComponentByName(ssc.getName());
                         if (existingSubComponent == null) {
                             existingComponent.addComponents(ssc);
@@ -168,7 +220,6 @@ public class DeviceService {
     }
 
     private void mergeComponentFields(Component<?> source, Component<?> destination) {
-
         destination.setStatus(source.getStatus());
         source.getConfiguration().stream().filter(s -> (destination.getConfigurationByKey(s.getKey()) == null)).forEach(s -> {
             s.setSynced();

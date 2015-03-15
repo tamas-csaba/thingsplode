@@ -48,9 +48,14 @@ public class TestBaseWithRepos extends TestBase {
      */
     protected Integer getCount(String tableName) {
         Query q = entityManager.createNativeQuery("select count(*) from " + tableName);
-        return  ((BigInteger) q.getResultList().get(0)).intValue();
+        return ((BigInteger) q.getResultList().get(0)).intValue();
     }
-    
+
+    protected Integer getCountWhere(String tableName, String whereCriteria) {
+        Query q = entityManager.createNativeQuery("select count(*) from " + tableName + " where " + whereCriteria);
+        return ((BigInteger) q.getResultList().get(0)).intValue();
+    }
+
     /**
      * Executes a native SQL query for checking test results.
      *

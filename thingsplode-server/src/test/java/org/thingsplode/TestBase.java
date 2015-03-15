@@ -76,7 +76,7 @@ public abstract class TestBase extends TestCase {
      * @param array the array to be listed
      * @see #listACollection(java.lang.String, java.util.Collection)
      */
-    public static void listACollection(String prefix, Object[] array) {
+    public void listACollection(String prefix, Object[] array) {
         listACollection(prefix, Arrays.asList(array));
     }
 
@@ -90,7 +90,7 @@ public abstract class TestBase extends TestCase {
      * elements from the list will be listed
      * @param collection - the collection of whose elements you want to list
      */
-    public static void listACollection(String prefix, Collection collection) {
+    public void listACollection(String prefix, Collection collection) {
         if (collection != null) {
             System.out.println("\n*** Elements of a collection ***\n");
             for (Object thisObject : collection) {

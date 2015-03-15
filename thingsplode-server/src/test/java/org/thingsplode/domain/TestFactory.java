@@ -25,6 +25,8 @@ import org.thingsplode.core.entities.Treshold;
  * @author tamas.csaba@gmail.com
  */
 public class TestFactory {
+    
+    public static final String DEFAULT_SHUTDOWN_TIMEOUT = "3000";
 
     public static Device createDevice() throws UnknownHostException {
         return createDevice("default_test_device", "1231234235", "0");
@@ -39,7 +41,7 @@ public class TestFactory {
                 putLastHeartbeat(Calendar.getInstance()).
                 putLocation(Location.create("default", Address.create().putCity("some_city").putCountry("Some Country").putState("some state").putHouseNumber("54").putPostCode("434545")).putLatitude(100.0).putLongitude(123.4)).
                 putModel(Model.create().putManufacturer("some_manufacturer").putType("some_type").putVersion(modelVersion)).
-                putStartupDate(Calendar.getInstance()).addOrUpdateConfigurations(Configuration.create("shutdown_timeout", "3000", Configuration.Type.NUMBER), Configuration.create("deletable_config", "1000", Configuration.Type.NUMBER)).
+                putStartupDate(Calendar.getInstance()).addOrUpdateConfigurations(Configuration.create("shutdown_timeout", DEFAULT_SHUTDOWN_TIMEOUT, Configuration.Type.NUMBER), Configuration.create("deletable_config", "1000", Configuration.Type.NUMBER)).
                 addCapabilities(Capability.create(Capability.Type.READ, "meter_value", true)).
                 addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "door_control", true)).
                 addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).addOrUpdateConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).

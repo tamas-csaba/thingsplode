@@ -5,14 +5,14 @@
  */
 package org.thingsplode.server.repositories;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.thingsplode.core.entities.Model;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public interface ModelRepository extends PagingAndSortingRepository<Model, Long> {
+public interface ModelRepository extends JpaRepository<Model, Long> {
 
     Model findByManufacturerAndTypeAndVersion(String manufacturer, String type, String version);
 }

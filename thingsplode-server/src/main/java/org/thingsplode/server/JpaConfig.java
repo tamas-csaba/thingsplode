@@ -85,7 +85,7 @@ public class JpaConfig {
         return factory.getObject();
     }
 
-    @Bean(name = "txMgr")
+    @Bean(name = "transactionManager")
     public PlatformTransactionManager transactionManager() throws PropertyVetoException, SQLException {
         JpaTransactionManager txManager = new JpaTransactionManager();
         txManager.setEntityManagerFactory(entityManagerFactory());
