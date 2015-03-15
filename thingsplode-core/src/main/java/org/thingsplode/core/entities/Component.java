@@ -201,7 +201,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         this.partNumber = partNumber;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = Component.ROOT_COMP_REF)
     public Collection<Component> getComponents() {
         return components;
@@ -230,7 +230,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @param configuration the configuration to set
      */
-    public void setConfiguration(Collection<Configuration> configuration) {
+    void setConfiguration(Collection<Configuration> configuration) {
         this.configuration = configuration;
     }
 
@@ -255,7 +255,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @return the capabilities
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = Component.COMP_REF)
     public Collection<Capability> getCapabilities() {
         return capabilities;
@@ -276,7 +276,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     public Collection<Configuration> getConfiguration() {
         return configuration;
     }
-
+    
     public Configuration getConfigurationByKey(String searchKey) {
         if (configuration == null || configuration.isEmpty()) {
             return null;
@@ -308,9 +308,8 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @return the tresholds
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = Component.COMP_REF)
-
     public Collection<Treshold> getTresholds() {
         return tresholds;
     }
@@ -360,16 +359,26 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
             cfg.setSyncStatus(Configuration.SyncStatus.NEW);
         }
 
+        if (cfg.getKey() == null || cfg.getKey().isEmpty()) {
+            return false;
+        }
+
         Configuration oldConfig = this.getConfigurationByKey(cfg.getKey());
         if (oldConfig != null) {
-            this.getConfiguration().remove(oldConfig);
-            this.getConfiguration().add(cfg);
+            oldConfig.refreshValues(cfg);
             return true;
         } else {
             return false;
         }
     }
 
+    /**
+     * It will add new configurations and update existing ones based in the key
+     * value of the configuration.
+     *
+     * @param configs the configuration which need to be added or updated
+     * @return
+     */
     public T addOrUpdateConfigurations(List<Configuration> configs) {
         this.initializeConfiguration();
         if (this.getConfiguration().size() > 0 && configs != null && configs.size() > 0) {
@@ -379,12 +388,29 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         } else if (configs != null && configs.size() > 0) {
             this.getConfiguration().addAll(configs);
         }
-
         return (T) this;
     }
 
     public T addOrUpdateConfigurations(Configuration... cfgsAsArray) {
         this.addOrUpdateConfigurations(Arrays.asList(cfgsAsArray));
+        return (T) this;
+    }
+
+    public T removeConfigurations(Configuration... confs) {
+        if (this.configuration != null && this.configuration.size() > 0) {
+            Arrays.asList(confs).stream().forEach(c -> {
+                this.configuration.removeIf(oc -> oc.getKey().equalsIgnoreCase(c.getKey()));
+            });
+        }
+        return (T) this;
+    }
+
+    public T removeConfigurations(String... confKeys) {
+        if (this.configuration != null && this.configuration.size() > 0) {
+            Arrays.asList(confKeys).stream().forEach(s -> {
+                this.configuration.removeIf(oc -> oc.getKey().equalsIgnoreCase(s));
+            });
+        }
         return (T) this;
     }
 
