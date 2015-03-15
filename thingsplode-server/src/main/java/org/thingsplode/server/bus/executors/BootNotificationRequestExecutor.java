@@ -6,8 +6,7 @@
 package org.thingsplode.server.bus.executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.exceptions.SrvExecutionException;
@@ -24,18 +23,18 @@ import org.thingsplode.server.infrastructure.DeviceService;
  * @param <RSP>
  */
 @Service
-public class BootNotificationRequestExecutor<REQ extends BootNotificationRequest, RSP extends BootNotificationResponse> extends AbstractRequestExecutorService<REQ, RSP> {
+public class BootNotificationRequestExecutor<REQ extends BootNotificationRequest, RSP extends BootNotificationResponse> extends AbstractRequestResponseExecutor<REQ, RSP> {
 
     @Autowired(required = true)
     private DeviceService deviceService;
 
     @Override
-    public Message<?> executeImpl(Message<?> msg, Device d) throws SrvExecutionException {
-        BootNotificationRequest req = (BootNotificationRequest) msg.getPayload();
-        Long registrationID = deviceService.registerOrUpdate(req.getDevice()).getId();
-        BootNotificationResponse rsp = new BootNotificationResponse(registrationID, req.getMessageId(), ExecutionStatus.ACKNOWLEDGED, ResponseCode.SUCCESSFULLY_EXECUTED);
+    public BootNotificationResponse executeImpl(BootNotificationRequest req, MessageHeaders headers, Device d) throws SrvExecutionException {
+        Device initializedDevice = deviceService.registerOrUpdate(req.getDevice());
+        BootNotificationResponse rsp = new BootNotificationResponse(initializedDevice.getId(), req.getMessageId(), ExecutionStatus.ACKNOWLEDGED, ResponseCode.SUCCESSFULLY_EXECUTED);
+        rsp.addConfigurationsFromDevice(initializedDevice);
         rsp.setCurrentTimeMillis(System.currentTimeMillis());
-        return MessageBuilder.withPayload(rsp).build();
+        return rsp;
     }
 
 }

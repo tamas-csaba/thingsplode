@@ -25,6 +25,8 @@ import org.thingsplode.core.protocol.ErrorMessage;
 import org.thingsplode.core.protocol.ExecutionStatus;
 import org.thingsplode.core.protocol.ResponseCode;
 import org.thingsplode.server.bus.ThingsplodeServiceLocator;
+import org.thingsplode.server.bus.executors.AbstractRequestResponseExecutor;
+import org.thingsplode.server.bus.executors.AbstractSyncExecutor;
 import org.thingsplode.server.bus.interceptors.LoggingInterceptor;
 
 /**
@@ -45,7 +47,7 @@ import org.thingsplode.server.bus.interceptors.LoggingInterceptor;
 @Configuration
 public class BusConfig {
 
-    private Logger logger = Logger.getLogger(BusConfig.class);
+    //private Logger logger = Logger.getLogger(BusConfig.class);
 
     @Bean
     @Description("Entry to the messaging system through the gateway for requests.")
@@ -85,7 +87,7 @@ public class BusConfig {
 
             @Override
             protected void handleMessageInternal(Message<?> message) throws Exception {
-                serviceLocator.getService(message).execute(message);
+                serviceLocator.getService(message, AbstractSyncExecutor.class).process(message);
             }
         };
     }
@@ -101,7 +103,7 @@ public class BusConfig {
             @Override
             protected Object handleRequestMessage(Message<?> requestMessage) {
                 try {
-                    return serviceLocator.getService(requestMessage).execute(requestMessage);
+                    return serviceLocator.getService(requestMessage, AbstractRequestResponseExecutor.class).execute(requestMessage);
                 } catch (SrvExecutionException ex) {
                     return MessageBuilder.withPayload(new ErrorMessage(ex.getMessageCorrelationID(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, ex.getMessage(), ex)).build();
                 }

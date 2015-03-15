@@ -5,7 +5,6 @@
  */
 package org.thingsplode.server.bus;
 
-import org.thingsplode.server.bus.executors.AbstractRequestExecutorService;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -16,6 +15,7 @@ import org.thingsplode.core.exceptions.SrvExecutionException;
 import org.thingsplode.core.protocol.AbstractRequest;
 import org.thingsplode.core.protocol.ExecutionStatus;
 import org.thingsplode.core.protocol.ResponseCode;
+import org.thingsplode.server.bus.executors.AbstractExecutor;
 
 /**
  *
@@ -26,19 +26,16 @@ public class ThingsplodeServiceLocator implements ApplicationContextAware {
 
     private ApplicationContext ctx;
 
-    public AbstractRequestExecutorService getService(Message<?> message) throws SrvExecutionException {
+    public <SRV extends AbstractExecutor> SRV getService(Message<?> message, Class<SRV> type) throws SrvExecutionException {
         if (message == null || message.getPayload() == null) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "the message or the message payload cannot be null.");
         }
-
         Object request = message.getPayload();
-
-        AbstractRequestExecutorService service;
         if (request instanceof AbstractRequest) {
             AbstractRequest req = (AbstractRequest) request;
             if (req.getServiceProviderName() != null && !req.getServiceProviderName().isEmpty()) {
                 try {
-                    service = (AbstractRequestExecutorService) ctx.getBean(req.getServiceProviderName(), AbstractRequestExecutorService.class);
+                    return (SRV) ctx.getBean(req.getServiceProviderName(), type);
                 } catch (BeansException ex) {
                     throw new SrvExecutionException(((AbstractRequest) request).getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "Service of name: " + req.getServiceProviderName() + " is not installed! Try to request a different service provider name. " + ex.getMessage(), ex);
                 }
@@ -47,7 +44,7 @@ public class ThingsplodeServiceLocator implements ApplicationContextAware {
                 requestBeanName = StringUtils.uncapitalize(requestBeanName);
                 requestBeanName += "Executor";
                 try {
-                    service = (AbstractRequestExecutorService) ctx.getBean(requestBeanName, AbstractRequestExecutorService.class);
+                    return (SRV) ctx.getBean(requestBeanName, type);
                 } catch (BeansException ex) {
                     throw new SrvExecutionException(((AbstractRequest) request).getMessageId(), ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "Service of name: " + requestBeanName + " is not installed! Try to request a different service provider name. " + ex.getMessage(), ex);
                 }
@@ -55,7 +52,6 @@ public class ThingsplodeServiceLocator implements ApplicationContextAware {
         } else {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_SYSTEM_ERROR, "This locator does not support the request of type: " + request.getClass().getSimpleName());
         }
-        return service;
     }
 
     @Override

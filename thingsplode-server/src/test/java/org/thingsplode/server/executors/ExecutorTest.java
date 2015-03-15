@@ -129,8 +129,8 @@ public class ExecutorTest extends TestBaseWithRepos {
         // -- Basic Assertions on the response
         // -------------------------------------
         Assert.assertNotNull("the type should be boot notification response", rsp.expectTypeSafely(BootNotificationResponse.class));
-//-->        Assert.assertTrue("the configruation must not be empty", !rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration().isEmpty());
-        this.listACollection("CONFIGURATION: ", rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration());
+        Assert.assertTrue("the configruation must not be empty", !rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration().isEmpty());
+        this.listAMap("CONFIGURATION: ", rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration());
         // -------------------------------------
         // -- Assertions on the device state in the DB
         // -------------------------------------

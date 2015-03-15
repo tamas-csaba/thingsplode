@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import junit.framework.TestCase;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -62,10 +63,7 @@ public abstract class TestBase extends TestCase {
         Logger.getLogger("com.mchange.v2.resourcepool").setLevel(Level.INFO);
         Logger.getLogger("org.hibernate.persister.walking").setLevel(Level.INFO);
         Logger.getLogger("org.hibernate.type.BasicTypeRegistry").setLevel(Level.INFO);
-        
-        
-        
-        
+
     }
 
     /**
@@ -78,6 +76,25 @@ public abstract class TestBase extends TestCase {
      */
     public void listACollection(String prefix, Object[] array) {
         listACollection(prefix, Arrays.asList(array));
+    }
+
+    public void listAMap(String prefix, Map map) {
+        if (map != null) {
+            System.out.println("\n*** Elements of a map ***\n");
+            StringBuilder sb = new StringBuilder();
+            map.forEach((k, v) -> {
+                sb.append("[key: ").append(k.toString()).append("]").append("[value: ");
+                if (v instanceof Iterable) {
+                    ((Iterable) v).forEach(iv -> sb.append("\n\t <").append(iv).append(" >\n"));
+                } else {
+                    sb.append(v.toString()).append("]\n");
+                }
+            });
+            System.out.println(sb.toString());
+            System.out.println("----------------------------------");
+        } else {
+            System.out.println("***\n<EMPTY MAP, NOTHING TO SHOW.>\n***");
+        }
     }
 
     /**

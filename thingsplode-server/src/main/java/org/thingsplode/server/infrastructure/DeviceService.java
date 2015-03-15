@@ -92,53 +92,6 @@ public class DeviceService {
         } while (devicePage != null && (!devicePage.isLast() || devicePage.getNumber() > 0));
     }
 
-    @Transactional
-    public Device getInitializedDeviceByDbId(Long id){
-        //todo: see todo at getInitializedDeviceByDeviceId
-        Device d = deviceRepo.findOne(id);
-        initializeComponents(d);
-        return d;
-    }
-    
-    @Transactional(readOnly = true)
-    public Device getInitializedDeviceByDeviceId(String deviceId) {
-        //todo: create a optimal fetched query
-        /**
-         * @Query("SELECT p FROM Person p JOIN FETCH p.roles WHERE p.id =
-         * (:id)") public Person findByIdAndFetchRolesEagerly(@Param("id") Long
-         * id
-         * ---- or use transaction template from where is it needed
-         * TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
-         * transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-         * @Override
-         * protected void doInTransactionWithoutResult(TransactionStatus status) {
-         * ...
-         * 
-         * });
-         */
-        Device d = deviceRepo.findBydeviceId(deviceId);
-        initializeComponents(d);
-        return d;
-    }
-
-    private void initializeComponents(Component c) {
-        if (c != null) {
-            if (c.getCapabilities() != null) {
-                c.getCapabilities().size();
-            }
-            if (c.getConfiguration() != null) {
-                c.getConfiguration().size();
-            }
-            if (c.getTresholds() != null) {
-                c.getTresholds().size();
-            }
-            if (c.getComponents() != null) {
-                c.getComponents().size();
-                c.getComponents().forEach(sc -> initializeComponents((Component) sc));
-            }
-        }
-    }
-
     /**
      * Registers a new device or update with the newest status
      *
@@ -146,7 +99,7 @@ public class DeviceService {
      * @return saved device
      * @throws SrvExecutionException
      */
-    @Transactional(timeout = -1)
+    @Transactional
     public Device registerOrUpdate(Device newDevice) throws SrvExecutionException {
         Device existingDevice;
         if (newDevice == null) {
@@ -171,6 +124,7 @@ public class DeviceService {
                 attachModel(newDevice);
                 setDeviceFieldsOnRegistration(newDevice);
                 Device d = deviceRepo.save(newDevice);
+                initializeComponents(d);
                 return d;
             } catch (Exception e) {
                 logger.error("cannot register or update device, due to: " + e.getMessage(), e);
@@ -182,7 +136,9 @@ public class DeviceService {
             try {
                 setDeviceFieldsOnRegistration(existingDevice);
                 mergeComponents(newDevice, existingDevice);
-                return deviceRepo.save(existingDevice);
+                Device d = deviceRepo.save(existingDevice);
+                initializeComponents(d);
+                return d;
             } catch (Exception e) {
                 logger.error("cannot register or update device, due to: " + e.getMessage(), e);
                 throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e.getMessage(), e);
@@ -274,6 +230,52 @@ public class DeviceService {
             deviceRepo.delete(device);
         } catch (Exception e) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
+        }
+    }
+
+    @Transactional
+    public Device getInitializedDeviceByDbId(Long id) {
+        //todo: see todo at getInitializedDeviceByDeviceId
+        Device d = deviceRepo.findOne(id);
+        initializeComponents(d);
+        return d;
+    }
+
+    @Transactional(readOnly = true)
+    public Device getInitializedDeviceByDeviceId(String deviceId) {
+        //todo: create a optimal fetched query
+        /**
+         * @Query("SELECT p FROM Person p JOIN FETCH p.roles WHERE p.id =
+         * (:id)") public Person findByIdAndFetchRolesEagerly(@Param("id") Long
+         * id ---- or use transaction template from where is it needed
+         * TransactionTemplate transactionTemplate = new
+         * TransactionTemplate(transactionManager);
+         * transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+         * @Override protected void
+         * doInTransactionWithoutResult(TransactionStatus status) { ...
+         *
+         * });
+         */
+        Device d = deviceRepo.findBydeviceId(deviceId);
+        initializeComponents(d);
+        return d;
+    }
+
+    private void initializeComponents(Component c) {
+        if (c != null) {
+            if (c.getCapabilities() != null) {
+                c.getCapabilities().size();
+            }
+            if (c.getConfiguration() != null) {
+                c.getConfiguration().size();
+            }
+            if (c.getTresholds() != null) {
+                c.getTresholds().size();
+            }
+            if (c.getComponents() != null) {
+                c.getComponents().size();
+                c.getComponents().forEach(sc -> initializeComponents((Component) sc));
+            }
         }
     }
 
