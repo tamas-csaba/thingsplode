@@ -12,6 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -29,9 +30,12 @@ import org.thingsplode.core.StatusInfo;
 @Entity
 @XmlAccessorType(XmlAccessType.FIELD)
 @DiscriminatorValue(value = Device.MAIN_TYPE)
+@Table(name = Device.TABLE_NAME)
 @XmlRootElement
 public class Device extends Component<Device> {
 
+    @XmlTransient
+    public final static String TABLE_NAME = "DEVICES";
     @XmlTransient
     public final static String MAIN_TYPE = "DEVICE";
 

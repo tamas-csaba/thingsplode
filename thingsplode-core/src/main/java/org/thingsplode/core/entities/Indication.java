@@ -8,6 +8,8 @@ package org.thingsplode.core.entities;
 import javax.persistence.Basic;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.Value;
 
 /**
@@ -15,8 +17,10 @@ import org.thingsplode.core.Value;
  * @author tamas.csaba@gmail.com
  */
 @Entity
+@Table(name = Indication.TABLE_NAME)
 public class Indication extends Persistable<Long> {
-
+    @XmlTransient
+    public final static String TABLE_NAME = "INDICATIONS";
     private String name;
     private Value indicationValue;
 

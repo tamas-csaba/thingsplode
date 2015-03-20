@@ -12,6 +12,7 @@ import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -21,10 +22,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
 @Table(
+        name = Model.TABLE_NAME,
         uniqueConstraints = @UniqueConstraint(columnNames = {"manufacturer", "type", "version"})
 )
 public class Model extends Persistable<Long> {
 
+    @XmlTransient
+    public final static String TABLE_NAME = "MODELS";
     private String manufacturer;
     private String type;
     private String version;

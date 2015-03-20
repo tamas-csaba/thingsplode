@@ -5,10 +5,15 @@
  */
 package org.thingsplode.core.entities;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.Value;
 
 /**
@@ -16,12 +21,34 @@ import org.thingsplode.core.Value;
  * @author tamas.csaba@gmail.com
  */
 @Entity
+@Table(
+        name = Treshold.TABLE_NAME,
+        uniqueConstraints = @UniqueConstraint(columnNames = {"name", Component.COMP_REF})
+)
 public class Treshold extends Persistable<Long> {
+
+    @XmlTransient
+    public final static String TABLE_NAME = "TRESHOLDS";
 
     private String name;
     private Scope scope;
     private Type type;//if HIGH, the method isTriggerable will return true if the indication.value < tresholdIndication.value
     private Value tresholdValue;
+
+    void refresValues(Treshold treshold) {
+        if (treshold.getName() != null && !treshold.getName().isEmpty()) {
+            this.name = treshold.getName();
+        }
+        if (treshold.getScope() != null) {
+            this.scope = treshold.getScope();
+        }
+        if (treshold.getType() != null) {
+            this.type = treshold.getType();
+        }
+        if (treshold.getTresholdValue() != null) {
+            this.tresholdValue = treshold.getTresholdValue();
+        }
+    }
 
     public String getName() {
         return name;
@@ -86,6 +113,7 @@ public class Treshold extends Persistable<Long> {
     /**
      * @return the scope
      */
+    @Enumerated(EnumType.STRING)
     public Scope getScope() {
         return scope;
     }
@@ -109,4 +137,32 @@ public class Treshold extends Persistable<Long> {
         DEVICE,
         COMPONENT;
     }
+
+    public static class TresholdBuilder {
+
+        private final List<Treshold> tresholds = new ArrayList<>();
+
+        public static TresholdBuilder newBuilder() {
+            return new TresholdBuilder();
+        }
+
+        public TresholdBuilder add(Treshold treshold) {
+            this.tresholds.add(treshold);
+            return this;
+        }
+
+        public TresholdBuilder add(String tresholdName, Type tresholdType, Value.Type valueType, String valueContent) {
+            Treshold trsh = new Treshold();
+            trsh.setName(tresholdName);
+            trsh.setType(tresholdType);
+            trsh.setTresholdValue(Value.create(valueType, valueContent));
+            this.tresholds.add(trsh);
+            return this;
+        }
+
+        public List<Treshold> build() {
+            return tresholds;
+        }
+    }
+
 }

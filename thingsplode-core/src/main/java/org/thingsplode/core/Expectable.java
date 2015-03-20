@@ -21,4 +21,9 @@ public class Expectable implements Serializable {
             throw new MessageConversionException("The expected message is not type of " + type.getSimpleName() + ": " + ex.getMessage(), ex);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Expectable{" + '}';
+    }
 }

@@ -19,6 +19,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -33,8 +34,11 @@ import javax.xml.bind.annotation.XmlTransient;
 @Entity
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
+@Table(name = Event.TABLE_NAME)
 public class Event extends Persistable<Long> {
 
+    @XmlTransient
+    public final static String TABLE_NAME = "EVENTS";
     public final static String EVENT_REF = "EVT_ID";
     public final static String COMP_REF = "COMPONENT_ID";
     @XmlTransient

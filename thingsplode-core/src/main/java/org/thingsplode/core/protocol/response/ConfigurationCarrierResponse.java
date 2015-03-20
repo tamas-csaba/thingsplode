@@ -10,6 +10,7 @@ import java.util.HashMap;
 import org.thingsplode.core.entities.Component;
 import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
+import org.thingsplode.core.entities.Treshold;
 import org.thingsplode.core.protocol.ExecutionStatus;
 import org.thingsplode.core.protocol.Response;
 import org.thingsplode.core.protocol.ResponseCode;
@@ -20,32 +21,60 @@ import org.thingsplode.core.protocol.ResponseCode;
  * @param <T>
  */
 public abstract class ConfigurationCarrierResponse<T extends ConfigurationCarrierResponse<T>> extends Response<T> {
-
+    
     private HashMap<String, Collection<Configuration>> configuration; //component name / configurations
-
+    private HashMap<String, Collection<Treshold>> tresholds;    
+    
     public ConfigurationCarrierResponse() {
     }
-
+    
     public ConfigurationCarrierResponse(ExecutionStatus requestStatus, ResponseCode responseCode) {
         super(requestStatus, responseCode);
     }
-
+    
     public ConfigurationCarrierResponse(String responseCorrelationID, ExecutionStatus requestStatus, ResponseCode responseCode) {
         super(responseCorrelationID, requestStatus, responseCode);
     }
-
+    
     public ConfigurationCarrierResponse(String responseCorrelationID, ExecutionStatus requestStatus, ResponseCode responseCode, String resultMessage) {
         super(responseCorrelationID, requestStatus, responseCode, resultMessage);
     }
-
+    
     public HashMap<String, Collection<Configuration>> getConfiguration() {
         return configuration;
     }
-
+    
     public void setConfiguration(HashMap<String, Collection<Configuration>> configuration) {
         this.configuration = configuration;
     }
-
+    
+    public HashMap<String, Collection<Treshold>> getTresholds() {
+        return tresholds;
+    }
+    
+    public void setTresholds(HashMap<String, Collection<Treshold>> tresholds) {
+        this.tresholds = tresholds;
+    }
+    
+    public T addTresholdsFromDevice(Device d) {
+        if (d != null) {
+            initializeTresholds();
+            addTresholdsFromComponent(d);
+        }
+        return (T) this;
+    }
+    
+    private void addTresholdsFromComponent(Component<?> comp) {
+        if (comp != null) {
+            if (comp.getTresholds() != null && !comp.getTresholds().isEmpty()) {
+                this.tresholds.put(comp.getName(), comp.getTresholds());
+            }
+            if (comp.getComponents() != null && !comp.getComponents().isEmpty()) {
+                comp.getComponents().forEach(sc -> addTresholdsFromComponent(sc));
+            }
+        }
+    }
+    
     public T addConfigurationsFromDevice(Device d) {
         if (d != null) {
             initializeConfiguration();
@@ -53,7 +82,7 @@ public abstract class ConfigurationCarrierResponse<T extends ConfigurationCarrie
         }
         return (T) this;
     }
-
+    
     private void addConfigurationFromComponent(Component<?> comp) {
         if (comp != null) {
             if (comp.getConfiguration() != null && !comp.getConfiguration().isEmpty()) {
@@ -64,19 +93,25 @@ public abstract class ConfigurationCarrierResponse<T extends ConfigurationCarrie
             }
         }
     }
-
+    
     public T addConfigurations(HashMap<String, Collection<Configuration>> cfgs) {
         initializeConfiguration();
         this.getConfiguration().putAll(cfgs);
         return (T) this;
     }
-
+    
+    private void initializeTresholds() {
+        if (this.tresholds == null) {
+            this.tresholds = new HashMap<>();
+        }
+    }
+    
     private void initializeConfiguration() {
-        if (configuration == null) {
+        if (this.configuration == null) {
             this.configuration = new HashMap<>();
         }
     }
-
+    
     @Override
     public String toString() {
         return "ConfigurationCarrierResponse{ " + super.toString() + " configuration=" + configuration + '}';

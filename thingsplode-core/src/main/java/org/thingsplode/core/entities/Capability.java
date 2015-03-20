@@ -12,13 +12,23 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
 @Entity
+@Table(
+        name = Capability.TABLE_NAME,
+        uniqueConstraints = @UniqueConstraint(columnNames = {"name", Component.COMP_REF})
+)
 public class Capability extends Persistable<Long> {
+
+    @XmlTransient
+    public final static String TABLE_NAME = "CAPABILITIES";
 
     private Type type;
     private String name;
@@ -28,6 +38,12 @@ public class Capability extends Persistable<Long> {
 
         READ, //sensor information
         WRITE_OR_EXECUTE; //configuration option or command eg. ResetCapability
+    }
+
+    public void refreshValues(Capability source) {
+        this.type = source.getType() != null ? source.getType() : this.getType();
+        this.active = source.isActive();
+        this.name = source.getName();
     }
 
     /**
@@ -100,14 +116,14 @@ public class Capability extends Persistable<Long> {
 
     public static class CapabilityBuilder {
 
-        private List<Capability> capabiities = new ArrayList<>();
+        private final List<Capability> capabilities = new ArrayList<>();
 
         public static CapabilityBuilder newBuilder() {
             return new CapabilityBuilder();
         }
 
         public CapabilityBuilder add(Capability capability) {
-            this.capabiities.add(capability);
+            this.capabilities.add(capability);
             return this;
         }
 
@@ -120,7 +136,7 @@ public class Capability extends Persistable<Long> {
         }
 
         public List<Capability> build() {
-            return this.capabiities;
+            return this.capabilities;
         }
     }
 

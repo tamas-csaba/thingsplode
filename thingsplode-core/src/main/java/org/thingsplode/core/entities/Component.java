@@ -49,7 +49,7 @@ import org.thingsplode.core.StatusInfo;
 public class Component<T extends Component<?>> extends Persistable<Long> {
 
     @XmlTransient
-    public final static String MAIN_TYPE = "COMPONENT";
+    public final static String MAIN_TYPE = "COMPONENTS";
     @XmlTransient
     public final static String DISCRIMINATOR = "MAIN_TYPE";
     @XmlTransient
@@ -201,7 +201,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         this.partNumber = partNumber;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)//orphanRemoval = true
     @JoinColumn(name = Component.ROOT_COMP_REF)
     public Collection<Component> getComponents() {
         return components;
@@ -255,7 +255,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @return the capabilities
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = Component.COMP_REF)
     public Collection<Capability> getCapabilities() {
         return capabilities;
@@ -276,7 +276,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     public Collection<Configuration> getConfiguration() {
         return configuration;
     }
-    
+
     public Configuration getConfigurationByKey(String searchKey) {
         if (configuration == null || configuration.isEmpty()) {
             return null;
@@ -308,7 +308,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     /**
      * @return the tresholds
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = Component.COMP_REF)
     public Collection<Treshold> getTresholds() {
         return tresholds;
@@ -326,8 +326,22 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         return (T) this;
     }
 
+    public T removeTresholds(String... names) {
+        if (this.tresholds != null && !this.tresholds.isEmpty()) {
+            Arrays.asList(names).stream().forEach(tn -> this.tresholds.removeIf(ot -> ot.getName().equalsIgnoreCase(tn)));
+        }
+        return (T) this;
+    }
+
+    public T removeCapabilities(String... names) {
+        if (this.capabilities != null && !this.capabilities.isEmpty()) {
+            Arrays.asList(names).stream().forEach(cn -> this.capabilities.removeIf(oc -> oc.getName().equalsIgnoreCase(cn)));
+        }
+        return (T) this;
+    }
+
     public T removeCapabilities(Capability... caps) {
-        if (this.capabilities != null && this.capabilities.size() > 0) {
+        if (this.capabilities != null && !this.capabilities.isEmpty()) {
             Arrays.asList(caps).stream().forEach(c -> {
                 this.capabilities.removeIf(oc -> oc.getName().equalsIgnoreCase(c.getName()));
             });
@@ -342,6 +356,65 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         setTresholdsScope(trshs);
         getTresholds().addAll(trshs);
         return (T) this;
+    }
+
+    public T addOrUpdateTresholds(List<Treshold> trshs) {
+        this.initializeTresholds();
+        if (!this.tresholds.isEmpty() && trshs != null && !trshs.isEmpty()) {
+            List<Treshold> removables = trshs.stream().
+                    filter(nt -> this.getTresholdByName(nt.getName()) != null).
+                    peek(nt -> this.updateTreshold(nt)).
+                    collect(Collectors.toList());
+            trshs.removeAll(removables);
+            this.getTresholds().addAll(trshs);
+        } else if (trshs != null && !trshs.isEmpty()) {
+            this.getTresholds().addAll(trshs);
+        }
+        this.setTresholdsScope(this.getTresholds());
+        return (T) this;
+    }
+
+    public T setCapabilityAcitvity(String capName, boolean active) {
+        if (this.getCapabilities() != null) {
+            this.getCapabilities().stream().filter(c -> c.getName().equalsIgnoreCase(capName)).forEach(fc -> fc.setActive(active));
+        }
+        return (T) this;
+    }
+
+    public boolean updateCapability(Capability cap) {
+        if (this.getCapabilities() == null || this.getCapabilities().isEmpty()) {
+            return false;
+        }
+
+        if (cap == null || cap.getName() == null || cap.getName().isEmpty()) {
+            return false;
+        }
+
+        Capability currentCapability = this.getCapabilityByName(cap.getName());
+        if (currentCapability == null) {
+            return false;
+        } else {
+            currentCapability.refreshValues(cap);
+            return true;
+        }
+    }
+
+    public boolean updateTreshold(Treshold treshold) {
+        if (this.getTresholds() == null || this.getTresholds().isEmpty()) {
+            return false;
+        }
+
+        if (treshold == null || treshold.getName() == null || treshold.getName().isEmpty()) {
+            return false;
+        }
+
+        Treshold currentTreshold = this.getTresholdByName(treshold.getName());
+        if (currentTreshold == null) {
+            return false;
+        } else {
+            currentTreshold.refresValues(treshold);
+            return true;
+        }
     }
 
     /**
@@ -359,16 +432,16 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
             cfg.setSyncStatus(Configuration.SyncStatus.NEW);
         }
 
-        if (cfg.getKey() == null || cfg.getKey().isEmpty()) {
+        if (cfg == null || cfg.getKey() == null || cfg.getKey().isEmpty()) {
             return false;
         }
 
         Configuration oldConfig = this.getConfigurationByKey(cfg.getKey());
-        if (oldConfig != null) {
+        if (oldConfig == null) {
+            return false;
+        } else {
             oldConfig.refreshValues(cfg);
             return true;
-        } else {
-            return false;
         }
     }
 
@@ -381,11 +454,14 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
      */
     public T addOrUpdateConfigurations(List<Configuration> configs) {
         this.initializeConfiguration();
-        if (this.getConfiguration().size() > 0 && configs != null && configs.size() > 0) {
-            List<Configuration> removables = configs.stream().filter(ac -> this.getConfigurationByKey(ac.getKey()) != null).peek(ac -> this.updateConfiguration(ac)).collect(Collectors.toList());
+        if (!this.getConfiguration().isEmpty() && configs != null && !configs.isEmpty()) {
+            List<Configuration> removables = configs.stream().
+                    filter(ac -> this.getConfigurationByKey(ac.getKey()) != null).
+                    peek(ac -> this.updateConfiguration(ac)).
+                    collect(Collectors.toList());
             configs.removeAll(removables);
             this.getConfiguration().addAll(configs);
-        } else if (configs != null && configs.size() > 0) {
+        } else if (configs != null && !configs.isEmpty()) {
             this.getConfiguration().addAll(configs);
         }
         return (T) this;
@@ -393,6 +469,27 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
 
     public T addOrUpdateConfigurations(Configuration... cfgsAsArray) {
         this.addOrUpdateConfigurations(Arrays.asList(cfgsAsArray));
+        return (T) this;
+    }
+
+    public T addOrUpdateCapabilies(Capability... caps) {
+        this.addOrUpdateCapabilies(Arrays.asList(caps));
+        return (T) this;
+    }
+
+    public T addOrUpdateCapabilies(List<Capability> caps) {
+        this.initializeCapabilities();
+        if (this.getCapabilities().size() > 0 && caps != null && !caps.isEmpty()) {
+            List<Capability> removables = caps.stream().
+                    filter(nc -> this.getCapabilityByName(nc.getName()) != null).
+                    peek(nc -> this.updateCapability(nc)).
+                    collect(Collectors.toList());
+            caps.removeAll(removables);
+            this.getCapabilities().addAll(caps);
+        } else if (caps != null && !caps.isEmpty()) {
+            this.getCapabilities().addAll(caps);
+        }
+
         return (T) this;
     }
 
