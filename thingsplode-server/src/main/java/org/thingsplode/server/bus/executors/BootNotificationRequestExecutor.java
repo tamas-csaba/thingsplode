@@ -33,6 +33,7 @@ public class BootNotificationRequestExecutor<REQ extends BootNotificationRequest
         Device initializedDevice = deviceService.registerOrUpdate(req.getDevice());
         BootNotificationResponse rsp = new BootNotificationResponse(initializedDevice.getId(), req.getMessageId(), ExecutionStatus.ACKNOWLEDGED, ResponseCode.SUCCESSFULLY_EXECUTED);
         rsp.addConfigurationsFromDevice(initializedDevice);
+        rsp.addTresholdsFromDevice(initializedDevice);
         rsp.setCurrentTimeMillis(System.currentTimeMillis());
         return rsp;
     }

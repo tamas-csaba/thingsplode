@@ -23,13 +23,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 import org.thingsplode.TestBaseWithRepos;
 import org.thingsplode.core.EnabledState;
+import org.thingsplode.core.Value;
+import org.thingsplode.core.entities.Capability;
 import org.thingsplode.core.entities.Component;
 import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Event;
+import org.thingsplode.core.entities.Treshold;
 import org.thingsplode.core.exceptions.MessageConversionException;
 import org.thingsplode.core.exceptions.SrvExecutionException;
 import org.thingsplode.core.protocol.ExecutionStatus;
@@ -45,7 +47,6 @@ import org.thingsplode.server.JpaConfig;
 import org.thingsplode.server.bus.gateways.RequestGateway;
 import org.thingsplode.server.bus.gateways.SyncGateway;
 import org.thingsplode.server.infrastructure.DeviceService;
-import org.thingsplode.server.repositories.DeviceRepository;
 
 /**
  *
@@ -120,7 +121,18 @@ public class ExecutorTest extends TestBaseWithRepos {
         deviceService.setConfigurationForDevices(cfgs);
         //preparation of request
         Device bootingDevice = TestFactory.createDevice(testDeviceID, "123456789", "1");//testDevice
-        bootingDevice.putIpAddress(testHostAddress).removeConfigurations("deletable_config").addOrUpdateConfigurations(Configuration.create("booting_device_time", Long.toString(Calendar.getInstance().getTimeInMillis()), Configuration.Type.NUMBER));
+        bootingDevice.
+                putIpAddress(testHostAddress).removeCapabilities("door_control").
+                removeTresholds("alarm_high").
+                addOrUpdateTresholds(Treshold.TresholdBuilder.newBuilder().
+                        add("auxiliary_alarm", Treshold.Type.HIGH, Value.Type.NUMBER, "2000").
+                        add("temperature_activity", Treshold.Type.HIGH, Value.Type.BOOLEAN, "true").
+                        add("alarm_low", Treshold.Type.LOW, Value.Type.NUMBER, "200").build()
+                ).
+                addOrUpdateCapabilies(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "auxiliary_control", true)).
+                setCapabilityAcitvity("meter_value", false).
+                removeConfigurations("deletable_config").
+                addOrUpdateConfigurations(Configuration.create("booting_device_time", Long.toString(Calendar.getInstance().getTimeInMillis()), Configuration.Type.NUMBER));
         Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(testDevice.getDeviceId(), Calendar.getInstance().getTimeInMillis(), bootingDevice));
         //Response rsp = rspHandle.get(30, TimeUnit.SECONDS);
         Response rsp = rspHandle.get();
@@ -131,6 +143,10 @@ public class ExecutorTest extends TestBaseWithRepos {
         Assert.assertNotNull("the type should be boot notification response", rsp.expectTypeSafely(BootNotificationResponse.class));
         Assert.assertTrue("the configruation must not be empty", !rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration().isEmpty());
         this.listAMap("CONFIGURATION: ", rsp.expectMessageByType(BootNotificationResponse.class).getConfiguration());
+        this.listAMap("TRESHOLDS: ", rsp.expectMessageByType(BootNotificationResponse.class).getTresholds());
+        BootNotificationResponse bnr = rsp.expectMessageByType(BootNotificationResponse.class);
+        Assert.assertTrue("the configuration on the boot notification response cannot be empty", bnr.getConfiguration() != null && !bnr.getConfiguration().isEmpty());
+        Assert.assertTrue("the configuration on the boot notification response cannot be empty", bnr.getTresholds() != null && !bnr.getTresholds().isEmpty());
         // -------------------------------------
         // -- Assertions on the device state in the DB
         // -------------------------------------
@@ -139,12 +155,33 @@ public class ExecutorTest extends TestBaseWithRepos {
 
         Device assertableDevice = deviceService.getInitializedDeviceByDbId(rsp.expectMessageByType(BootNotificationResponse.class).getRegistrationID());
         Assert.assertTrue("the device must exist in the database", assertableDevice != null);
-//-->        Assert.assertTrue("the address should be " + testHostAddress, assertableDevice.getHostAddress().equalsIgnoreCase(testHostAddress));
-//-->        Assert.assertTrue("there should be 4 configs", assertableDevice.getConfiguration().size() == 4);
+        Assert.assertTrue("the address should be " + testHostAddress, assertableDevice.getHostAddress().equalsIgnoreCase(testHostAddress));
+        Assert.assertTrue("there should be 4 configs", assertableDevice.getConfiguration().size() == 4);
+        Assert.assertTrue("the booting_device_time configuration must exist on the entity", assertableDevice.getConfigurationByKey("booting_device_time") != null);
         Assert.assertTrue("the shutdown_timeout should be 4000", assertableDevice.getConfigurationByKey("shutdown_timeout").getValue().equalsIgnoreCase("4000"));
-//->        Assert.assertTrue("booting_device_time config should exist", assertableDevice.getConfigurationByKey("booting_device_time") != null);
         Assert.assertTrue("key_1 with woops1 value must exist", assertableDevice.getConfigurationByKey("key_1") != null && assertableDevice.getConfigurationByKey("key_1").getValue().equalsIgnoreCase("woops1"));
         Assert.assertTrue("deletable_config should have disappeared at this stage", assertableDevice.getConfigurationByKey("deletable_config") == null);
+        //------- Capability tests
+        int orphanCapabilities = this.getCountWhere(Capability.TABLE_NAME, Component.COMP_REF + " is null");
+        Assert.assertTrue("the orphan capabilities should be null", orphanCapabilities == 0);
+        Assert.assertTrue("auxiliary_control capability should exist at this stage", assertableDevice.getCapabilityByName("auxiliary_control") != null);
+        Assert.assertTrue("meter_value", assertableDevice.getCapabilityByName("meter_value") != null && !assertableDevice.getCapabilityByName("meter_value").isActive());
+        Assert.assertTrue("door_control capability should not exist at this stage", assertableDevice.getCapabilityByName("door_control") == null);
+        //------- Tresholds tests
+        int orphanTresholds = this.getCountWhere(Treshold.TABLE_NAME, Component.COMP_REF + " is null");
+        Assert.assertTrue("the orphan tresholds should be null", orphanTresholds == 0);
+        //set the treshold overwrite to true
+
+        Assert.assertTrue("auxiliary_alarm treshold should exist at this stage", assertableDevice.getTresholdByName("auxiliary_alarm") != null);
+        Assert.assertTrue("temperature_activity treshold should exist at this stage", assertableDevice.getTresholdByName("temperature_activity") != null);
+        Assert.assertTrue("alarm_low treshold should exist at this stage", assertableDevice.getTresholdByName("alarm_low") != null);
+//-->   If the boot notification request will overwrite the tresholds        
+//-->   Assert.assertTrue("alarm_low treshold should have the value 200", assertableDevice.getTresholdByName("alarm_low").getTresholdValue().getContent().equalsIgnoreCase("200"));
+//-->   Assert.assertTrue("alarm_high treshold should not exist at this stage", assertableDevice.getTresholdByName("alarm_high") == null);
+        //continue here  ... also with the components 
+        //assert -> remove alarm_high
+//--> remove door_control
+//--> add auxiliar
         // expected test outcomes:
         //update existing capability / remove and add a capability
         //component merging -> what about the subcomponents, why do have they disappeared

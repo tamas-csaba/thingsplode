@@ -127,7 +127,7 @@ public class RepositoryTest extends TestBaseWithRepos {
         long deviceCnt = deviceRepo.count();
         Assert.assertTrue("There should be " + expectedNrOfDevices + " devices in the database at this stage instead [" + deviceCnt + "].", deviceCnt == expectedNrOfDevices);
         Assert.assertTrue("There should be " + expectedNrOfDevices + " models in the database at this stage.", getCount("MODEL") == expectedNrOfDevices);
-        Assert.assertTrue("There should be " + expectedNrOfDevices * 2 + " tresholds in the database at this stage.", getCount("TRESHOLD") == expectedNrOfDevices * 2);
+        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " tresholds in the database at this stage.", getCount("TRESHOLD") == expectedNrOfDevices * 3);
         Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " configruations in the database at this stage.", getCount("CONFIGURATION") == expectedNrOfDevices * 4);
         int compNumber = componentRepo.findbyMainType(Component.MAIN_TYPE).size();
         Assert.assertTrue("There should be " + expectedNrOfDevices * 2 + " components in the database at this stage instead of [" + compNumber + "].", compNumber == expectedNrOfDevices * 2);

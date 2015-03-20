@@ -25,7 +25,7 @@ import org.thingsplode.core.entities.Treshold;
  * @author tamas.csaba@gmail.com
  */
 public class TestFactory {
-    
+
     public static final String DEFAULT_SHUTDOWN_TIMEOUT = "3000";
 
     public static Device createDevice() throws UnknownHostException {
@@ -52,9 +52,11 @@ public class TestFactory {
                                 putStatusInfo(StatusInfo.ONLINE)
                         )
                 ).
-                addTresholds(Treshold.create("alarm", Treshold.Type.HIGH, Value.Type.NUMBER, "10000")).
+                //addTresholds(Treshold.create("alarm_high", Treshold.Type.HIGH, Value.Type.NUMBER, "10000"), Treshold.create("alarm_low", Treshold.Type.LOW, Value.Type.NUMBER, "100")).
+                addOrUpdateTresholds(Treshold.TresholdBuilder.newBuilder().
+                        add("alarm_high", Treshold.Type.HIGH, Value.Type.NUMBER, "10000").
+                        add("alarm_low", Treshold.Type.LOW, Value.Type.NUMBER, "100").build()).
                 putType(Component.Type.HARDWARE);
-
         return d;
     }
 

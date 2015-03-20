@@ -36,7 +36,7 @@ import org.thingsplode.server.repositories.ModelRepository;
  */
 @Service
 public class DeviceService {
-
+    
     private static final Logger logger = Logger.getLogger(DeviceService.class);
     @Autowired
     private DeviceRepository deviceRepo;
@@ -70,7 +70,7 @@ public class DeviceService {
             return false;
         }
     }
-
+    
     @Transactional
     public void setConfigurationForDevices(List<Configuration> configurations) {
         int pageIndex = 0;
@@ -116,7 +116,7 @@ public class DeviceService {
         } else {
             existingDevice = deviceRepo.findBydeviceId(newDevice.getDeviceId());
         }
-
+        
         if (existingDevice == null && !isEnableAutoRegistration()) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.PERMISSION_DENIED, "The device is not activated and auto registration is not enabled.");
         } else if (existingDevice == null && isEnableAutoRegistration()) {
@@ -136,6 +136,7 @@ public class DeviceService {
             try {
                 setDeviceFieldsOnRegistration(existingDevice);
                 mergeComponents(newDevice, existingDevice);
+                mergeDeviceFields(newDevice, existingDevice);
                 Device d = deviceRepo.save(existingDevice);
                 initializeComponents(d);
                 return d;
@@ -146,15 +147,26 @@ public class DeviceService {
         }
         return null;
     }
-
+    
     private void attachModel(Device device) {
         Model model = modelRepo.findByManufacturerAndTypeAndVersion(device.getModel().getManufacturer(), device.getModel().getType(), device.getModel().getVersion());
         if (model != null) {
             device.setModel(model);
         }
     }
-
+    
+    private void mergeDeviceFields(Device source, Device destination) {
+        if (source.getHostAddress() != null) {
+            destination.setHostAddress(source.getHostAddress());
+        }
+        if (source.getLocation() != null) {
+            destination.setLocation(source.getLocation());
+        }
+    }
+    
     private void mergeComponents(Component<?> source, Component<?> destination) {
+        mergeComponentFields(source, destination);
+        
         source.getComponents().forEach(sc -> {
             Component<?> existingComponent = destination.getComponentByName(sc.getName());
             if (existingComponent == null) {
@@ -174,12 +186,12 @@ public class DeviceService {
             }
         });
     }
-
+    
     private void mergeComponentFields(Component<?> source, Component<?> destination) {
         destination.setStatus(source.getStatus());
-        source.getConfiguration().stream().filter(s -> (destination.getConfigurationByKey(s.getKey()) == null)).forEach(s -> {
-            s.setSynced();
-            destination.addOrUpdateConfigurations(s);
+        source.getConfiguration().stream().filter(sc -> (destination.getConfigurationByKey(sc.getKey()) == null)).forEach(newSC -> {
+            newSC.setSynced();
+            destination.addOrUpdateConfigurations(newSC);
         });
 
         //add capabilities which are new and remove the ones which are not anymore on the message
@@ -195,10 +207,9 @@ public class DeviceService {
                 filter(c -> (source.getCapabilityByName(c.getName()) == null)).
                 collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         destination.removeCapabilities(deletables.toArray(new Capability[]{}));
-
+        
         List<Treshold> newTresholds = source.getTresholds().stream().filter(st -> destination.getTresholdByName(st.getName()) == null).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         destination.addTresholds(newTresholds.toArray(new Treshold[]{}));
-
         if ((destination instanceof Device) && overwriteSerialNumberOnDevices) {
             destination.setPartNumber(source.getPartNumber());
             destination.setSerialNumber(source.getSerialNumber());
@@ -206,11 +217,12 @@ public class DeviceService {
             destination.setPartNumber(source.getPartNumber());
             destination.setSerialNumber(source.getSerialNumber());
         }
-
-        destination.setStatus(source.getStatus());
-
+        if (source.getStatus() != null) {
+            destination.setStatus(source.getStatus());
+        }
+        
     }
-
+    
     private void setDeviceFieldsOnRegistration(Device device) {
         Calendar now = Calendar.getInstance();
         device.setEnabledState(EnabledState.ENABLED);
@@ -222,7 +234,7 @@ public class DeviceService {
             device.setStatus(StatusInfo.ONLINE);
         }
     }
-
+    
     @Transactional
     public void delete(Device device) throws SrvExecutionException {
         try {
@@ -232,7 +244,7 @@ public class DeviceService {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
         }
     }
-
+    
     @Transactional
     public Device getInitializedDeviceByDbId(Long id) {
         //todo: see todo at getInitializedDeviceByDeviceId
@@ -240,7 +252,7 @@ public class DeviceService {
         initializeComponents(d);
         return d;
     }
-
+    
     @Transactional(readOnly = true)
     public Device getInitializedDeviceByDeviceId(String deviceId) {
         //todo: create a optimal fetched query
@@ -260,7 +272,7 @@ public class DeviceService {
         initializeComponents(d);
         return d;
     }
-
+    
     private void initializeComponents(Component c) {
         if (c != null) {
             if (c.getCapabilities() != null) {
@@ -308,5 +320,5 @@ public class DeviceService {
     public void setOverwriteSerialNumberOnComponents(boolean overwriteSerialNumberOnComponents) {
         this.overwriteSerialNumberOnComponents = overwriteSerialNumberOnComponents;
     }
-
+    
 }
