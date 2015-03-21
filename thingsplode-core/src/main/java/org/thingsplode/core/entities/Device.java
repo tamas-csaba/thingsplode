@@ -8,6 +8,7 @@ package org.thingsplode.core.entities;
 import java.net.InetAddress;
 import java.util.Calendar;
 import java.util.Collection;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -76,6 +77,7 @@ public class Device extends Component<Device> {
     /**
      * @return the ipAddress
      */
+    @Column(length = 50)
     public String getHostAddress() {
         return hostAddress;
     }

@@ -38,7 +38,7 @@ public class Configuration extends Persistable<Long> {
     private SyncStatus syncStatus;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public ValueType getType() {
         return type;
     }
@@ -52,6 +52,7 @@ public class Configuration extends Persistable<Long> {
      * @return
      */
     @Basic(optional = false)
+    @Column(length = 50)
     public String getKey() {
         return key;
     }
@@ -73,6 +74,7 @@ public class Configuration extends Persistable<Long> {
      * @return the syncStatus
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 30)
     public SyncStatus getSyncStatus() {
         return syncStatus;
     }

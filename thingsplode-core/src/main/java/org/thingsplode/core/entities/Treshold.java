@@ -7,6 +7,7 @@ package org.thingsplode.core.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -50,14 +51,20 @@ public class Treshold extends Persistable<Long> {
         }
     }
 
+    @Column(length = 50)
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
      * @return the type
      */
     @Enumerated(EnumType.STRING)
+    @Column(length = 30)
     public Type getType() {
         return type;
     }
@@ -76,14 +83,6 @@ public class Treshold extends Persistable<Long> {
 
     public void setTresholdValue(Value tresholdValue) {
         this.tresholdValue = tresholdValue;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isTriggerable(Indication indication) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public static Treshold create(String name, Type tresholdType) {

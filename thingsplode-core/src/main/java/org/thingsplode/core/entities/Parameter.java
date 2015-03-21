@@ -36,7 +36,7 @@ public class Parameter extends Persistable<Long> {
         this.valueType = valueType;
     }
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public String getName() {
         return name;
     }
@@ -46,7 +46,7 @@ public class Parameter extends Persistable<Long> {
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public ValueType getValueType() {
         return valueType;
     }

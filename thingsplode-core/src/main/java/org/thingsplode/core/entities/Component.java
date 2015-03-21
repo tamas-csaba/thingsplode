@@ -94,6 +94,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     }
 
     @Basic(optional = false)
+    @Column(length = 50)
     public String getIdentification() {
         return identification;
     }
@@ -106,7 +107,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
      * @return the type
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public Type getType() {
         return type;
     }
@@ -122,7 +123,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
      * @return the enabledState
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public EnabledState getEnabledState() {
         return enabledState;
     }
@@ -138,7 +139,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
      * @return the status
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public StatusInfo getStatus() {
         return status;
     }
@@ -185,6 +186,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
      * @return the partNumber
      */
     @Basic
+    @Column(length = 150)
     public String getPartNumber() {
         return partNumber;
     }
@@ -574,7 +576,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
 
     @Override
     public String toString() {
-        return "Component{ " + super.toString() + " name=" + identification + ", type=" + type + ", enabledState=" + enabledState + ", status=" + status + ", model=" + model + ", serialNumber=" + serialNumber + ", partNumber=" + partNumber + ", components=" + components + ", capabilities=" + capabilities + ", configuration=" + configuration + ", tresholds=" + tresholds + '}';
+        return "Component{ " + super.toString() + " name=" + identification + ", type=" + type + ", enabledState=" + enabledState + ", status=" + status + ", model=" + model + ", serialNumber=" + serialNumber + ", partNumber=" + partNumber + '}';
     }
 
 }

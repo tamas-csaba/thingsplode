@@ -6,6 +6,7 @@
 package org.thingsplode.core.entities;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -25,6 +26,7 @@ public class Indication extends Persistable<Long> {
     private Value indicationValue;
 
     @Basic(optional = false)
+    @Column(length = 30)
     public String getName() {
         return name;
     }

@@ -66,7 +66,7 @@ public class Capability extends Persistable<Long> {
      * @return the type
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public Type getType() {
         return type;
     }
@@ -81,7 +81,7 @@ public class Capability extends Persistable<Long> {
     /**
      * @return the name
      */
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     public String getName() {
         return name;
     }

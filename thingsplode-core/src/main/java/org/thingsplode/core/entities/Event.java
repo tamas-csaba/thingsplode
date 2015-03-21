@@ -79,6 +79,7 @@ public class Event extends Persistable<Long> {
     }
 
     @Basic(optional = false)
+    @Column(length = 100)
     public String getEventId() {
         return eventId;
     }
@@ -94,6 +95,7 @@ public class Event extends Persistable<Long> {
      * @return the eventClass
      */
     @Basic(optional = false)
+    @Column(length = 30)
     public String getEventClass() {
         return eventClass;
     }
@@ -125,7 +127,7 @@ public class Event extends Persistable<Long> {
      * @return the severity
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     public Severity getSeverity() {
         return severity;
     }
@@ -176,7 +178,7 @@ public class Event extends Persistable<Long> {
     }
 
     public static Event create(String eventId, String eventClass, Severity severity) {
-        return Event.create().putId(eventId).putClass(eventClass).putSeverity(severity);
+        return Event.create().putId(eventId).putEventClass(eventClass).putSeverity(severity);
     }
 
     public static Event create(String eventId, String eventClass, Severity severity, Calendar eventDate) {
@@ -188,7 +190,7 @@ public class Event extends Persistable<Long> {
         return this;
     }
 
-    public Event putClass(String evtClass) {
+    public Event putEventClass(String evtClass) {
         this.setEventClass(evtClass);
         return this;
     }

@@ -6,6 +6,7 @@
 package org.thingsplode.core.entities;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -56,6 +57,7 @@ public class Model extends Persistable<Long> {
      * @return the manufacturer
      */
     @Basic(optional = true)
+    @Column(length = 30)
     public String getManufacturer() {
         return manufacturer;
     }
@@ -71,6 +73,7 @@ public class Model extends Persistable<Long> {
      * @return the type
      */
     @Basic(optional = false)
+    @Column(length = 30)
     public String getType() {
         return type;
     }
@@ -86,6 +89,7 @@ public class Model extends Persistable<Long> {
      * @return the version
      */
     @Basic(optional = false)
+    @Column(length = 30)
     public String getVersion() {
         return version;
     }
