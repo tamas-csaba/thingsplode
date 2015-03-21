@@ -26,7 +26,7 @@ public abstract class AbstractSyncExecutor<REQ extends AbstractRequest> extends 
 
     public void process(Message<?> msg) {
         AbstractRequest req = (AbstractRequest) msg.getPayload();
-        Device callerDevice = getDeviceRepo().findBydeviceId(req.getDeviceId());
+        Device callerDevice = getDeviceRepo().findByIdentification(req.getDeviceId());
         if (callerDevice == null) {
             throw new IllegalStateException(String.format("The device identified by id [%s] is not registered", req.getDeviceId() != null ? req.getDeviceId() : "<NULL>"));
         }

@@ -63,6 +63,7 @@ public abstract class TestBase extends TestCase {
         Logger.getLogger("com.mchange.v2.resourcepool").setLevel(Level.INFO);
         Logger.getLogger("org.hibernate.persister.walking").setLevel(Level.INFO);
         Logger.getLogger("org.hibernate.type.BasicTypeRegistry").setLevel(Level.INFO);
+        Logger.getLogger("org.hibernate.type").setLevel(Level.TRACE);
 
     }
 

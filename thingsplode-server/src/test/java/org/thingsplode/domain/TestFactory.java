@@ -19,6 +19,8 @@ import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Model;
 import org.thingsplode.core.entities.Treshold;
+import org.thingsplode.core.ValueType;
+import org.thingsplode.core.entities.Parameter;
 
 /**
  *
@@ -33,7 +35,7 @@ public class TestFactory {
     }
 
     public static Device createDevice(String deviceId, String serialNumber, String modelVersion) throws UnknownHostException {
-        Device d = Device.create(deviceId, "test_device", EnabledState.ENABLED, StatusInfo.OFFLINE);
+        Device d = Device.create(deviceId, EnabledState.ENABLED, StatusInfo.OFFLINE);
         d.
                 putSerialNumber(serialNumber).putPartNumber("123").
                 putStatusInfo(StatusInfo.ONLINE).
@@ -41,13 +43,15 @@ public class TestFactory {
                 putLastHeartbeat(Calendar.getInstance()).
                 putLocation(Location.create("default", Address.create().putCity("some_city").putCountry("Some Country").putState("some state").putHouseNumber("54").putPostCode("434545")).putLatitude(100.0).putLongitude(123.4)).
                 putModel(Model.create().putManufacturer("some_manufacturer").putType("some_type").putVersion(modelVersion)).
-                putStartupDate(Calendar.getInstance()).addOrUpdateConfigurations(Configuration.create("shutdown_timeout", DEFAULT_SHUTDOWN_TIMEOUT, Configuration.Type.NUMBER), Configuration.create("deletable_config", "1000", Configuration.Type.NUMBER)).
-                addCapabilities(Capability.create(Capability.Type.READ, "meter_value", true)).
-                addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "door_control", true)).
-                addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).addOrUpdateConfigurations(Configuration.create("read_timeout", Configuration.Type.NUMBER).putValue("20000")).
+                putStartupDate(Calendar.getInstance()).addOrUpdateConfigurations(Configuration.create("shutdown_timeout", DEFAULT_SHUTDOWN_TIMEOUT, ValueType.NUMBER), Configuration.create("deletable_config", "1000", ValueType.NUMBER)).
+                addCapabilities(Capability.CapabilityBuilder.newBuilder().
+                        add("meter_value", Capability.Type.READ, true).
+                        add("door_control", Capability.Type.WRITE_OR_EXECUTE, true, new Parameter("open", ValueType.BOOLEAN)).build()
+                ).
+                addComponents(Component.create("card_reader", Component.Type.HARDWARE).putEnabledState(EnabledState.ENABLED).putStatusInfo(StatusInfo.ONLINE).addOrUpdateConfigurations(Configuration.create("read_timeout", ValueType.NUMBER).putValue("20000")).
                         addTresholds(Treshold.create("nr_of_transactions", Treshold.Type.HIGH, Value.Type.NUMBER, "100000")).
                         addCapabilities(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "read_card", true)).
-                        addComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).addOrUpdateConfigurations(Configuration.create("chip_installed", "true", Configuration.Type.BOOLEAN)).
+                        addComponents(Component.create("EMC68", Component.Type.HARDWARE, EnabledState.ENABLED).addOrUpdateConfigurations(Configuration.create("chip_installed", "true", ValueType.BOOLEAN)).
                                 putEnabledState(EnabledState.ENABLED).
                                 putStatusInfo(StatusInfo.ONLINE)
                         )

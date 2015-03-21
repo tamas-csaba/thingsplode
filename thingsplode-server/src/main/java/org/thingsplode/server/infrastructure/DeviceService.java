@@ -36,7 +36,7 @@ import org.thingsplode.server.repositories.ModelRepository;
  */
 @Service
 public class DeviceService {
-    
+
     private static final Logger logger = Logger.getLogger(DeviceService.class);
     @Autowired
     private DeviceRepository deviceRepo;
@@ -61,7 +61,7 @@ public class DeviceService {
      */
     @Transactional
     public boolean setDeviceEnabledState(String deviceID, EnabledState state) {
-        Device d = deviceRepo.findBydeviceId(deviceID);
+        Device d = deviceRepo.findByIdentification(deviceID);
         if (d != null) {
             d.setEnabledState(state);
             deviceRepo.save(d);
@@ -70,7 +70,7 @@ public class DeviceService {
             return false;
         }
     }
-    
+
     @Transactional
     public void setConfigurationForDevices(List<Configuration> configurations) {
         int pageIndex = 0;
@@ -105,18 +105,18 @@ public class DeviceService {
         if (newDevice == null) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "The device cannot be null.");
         }
-        if (newDevice.getDeviceId().isEmpty()) {
+        if (newDevice.getIdentification().isEmpty()) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "The device Id cannot be null.");
         }
         if (newDevice.getId() != null) {
             existingDevice = deviceRepo.findOne(newDevice.getId());
-            if (existingDevice != null && existingDevice.getDeviceId() != null && !existingDevice.getDeviceId().equalsIgnoreCase(newDevice.getDeviceId())) {
+            if (existingDevice != null && existingDevice.getIdentification() != null && !existingDevice.getIdentification().equalsIgnoreCase(newDevice.getIdentification())) {
                 throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.VALIDATION_ERROR, "Device with resgistration id [" + existingDevice.getId() + "] is already registered under a different device identification.");
             }
         } else {
-            existingDevice = deviceRepo.findBydeviceId(newDevice.getDeviceId());
+            existingDevice = deviceRepo.findByIdentification(newDevice.getIdentification());
         }
-        
+
         if (existingDevice == null && !isEnableAutoRegistration()) {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.PERMISSION_DENIED, "The device is not activated and auto registration is not enabled.");
         } else if (existingDevice == null && isEnableAutoRegistration()) {
@@ -147,14 +147,14 @@ public class DeviceService {
         }
         return null;
     }
-    
+
     private void attachModel(Device device) {
         Model model = modelRepo.findByManufacturerAndTypeAndVersion(device.getModel().getManufacturer(), device.getModel().getType(), device.getModel().getVersion());
         if (model != null) {
             device.setModel(model);
         }
     }
-    
+
     private void mergeDeviceFields(Device source, Device destination) {
         if (source.getHostAddress() != null) {
             destination.setHostAddress(source.getHostAddress());
@@ -163,30 +163,31 @@ public class DeviceService {
             destination.setLocation(source.getLocation());
         }
     }
-    
+
     private void mergeComponents(Component<?> source, Component<?> destination) {
         mergeComponentFields(source, destination);
-        
-        source.getComponents().forEach(sc -> {
-            Component<?> existingComponent = destination.getComponentByName(sc.getName());
-            if (existingComponent == null) {
-                destination.addComponents(sc);
-            } else {
-                mergeComponentFields(sc, existingComponent);
-                if (sc.getComponents() != null || !sc.getComponents().isEmpty()) {
-                    ((Component<?>) sc).getComponents().forEach(ssc -> {
-                        Component<?> existingSubComponent = existingComponent.getComponentByName(ssc.getName());
-                        if (existingSubComponent == null) {
-                            existingComponent.addComponents(ssc);
-                        } else {
-                            mergeComponents(ssc, existingSubComponent);
-                        }
-                    });
+        if (source.getComponents() != null) {
+            source.getComponents().forEach(sc -> {
+                Component<?> existingComponent = destination.getComponentByName(sc.getIdentification());
+                if (existingComponent == null) {
+                    destination.addComponents(sc);
+                } else {
+                    mergeComponentFields(sc, existingComponent);
+                    if (sc.getComponents() != null || !sc.getComponents().isEmpty()) {
+                        ((Component<?>) sc).getComponents().forEach(ssc -> {
+                            Component<?> existingSubComponent = existingComponent.getComponentByName(ssc.getIdentification());
+                            if (existingSubComponent == null) {
+                                existingComponent.addComponents(ssc);
+                            } else {
+                                mergeComponents(ssc, existingSubComponent);
+                            }
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
-    
+
     private void mergeComponentFields(Component<?> source, Component<?> destination) {
         destination.setStatus(source.getStatus());
         source.getConfiguration().stream().filter(sc -> (destination.getConfigurationByKey(sc.getKey()) == null)).forEach(newSC -> {
@@ -195,21 +196,27 @@ public class DeviceService {
         });
 
         //add capabilities which are new and remove the ones which are not anymore on the message
-        destination.getCapabilities().stream().forEach(dc -> {
-            Capability sourceCapability = source.getCapabilityByName(dc.getName());
-            if (sourceCapability != null) {
-                dc.setActive(sourceCapability.isActive());
-                dc.setType(sourceCapability.getType());
-            }
-        });
-        source.getCapabilities().stream().filter(c -> (destination.getCapabilityByName(c.getName()) == null)).forEach(c -> destination.addCapabilities(c));
+        if (destination.getCapabilities() != null) {
+            destination.getCapabilities().stream().forEach(dc -> {
+                Capability sourceCapability = source.getCapabilityByName(dc.getName());
+                if (sourceCapability != null) {
+                    dc.setActive(sourceCapability.isActive());
+                    dc.setType(sourceCapability.getType());
+                }
+            });
+        }
+        if (source.getCapabilities() != null) {
+            source.getCapabilities().stream().filter(c -> (destination.getCapabilityByName(c.getName()) == null)).forEach(c -> destination.addCapabilities(c));
+        }
         List<Capability> deletables = destination.getCapabilities().stream().
                 filter(c -> (source.getCapabilityByName(c.getName()) == null)).
                 collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         destination.removeCapabilities(deletables.toArray(new Capability[]{}));
-        
-        List<Treshold> newTresholds = source.getTresholds().stream().filter(st -> destination.getTresholdByName(st.getName()) == null).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        destination.addTresholds(newTresholds.toArray(new Treshold[]{}));
+
+        if (source.getTresholds() != null) {
+            List<Treshold> newTresholds = source.getTresholds().stream().filter(st -> destination.getTresholdByName(st.getName()) == null).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+            destination.addTresholds(newTresholds.toArray(new Treshold[]{}));
+        }
         if ((destination instanceof Device) && overwriteSerialNumberOnDevices) {
             destination.setPartNumber(source.getPartNumber());
             destination.setSerialNumber(source.getSerialNumber());
@@ -220,9 +227,9 @@ public class DeviceService {
         if (source.getStatus() != null) {
             destination.setStatus(source.getStatus());
         }
-        
+
     }
-    
+
     private void setDeviceFieldsOnRegistration(Device device) {
         Calendar now = Calendar.getInstance();
         device.setEnabledState(EnabledState.ENABLED);
@@ -234,7 +241,7 @@ public class DeviceService {
             device.setStatus(StatusInfo.ONLINE);
         }
     }
-    
+
     @Transactional
     public void delete(Device device) throws SrvExecutionException {
         try {
@@ -244,7 +251,7 @@ public class DeviceService {
             throw new SrvExecutionException(ExecutionStatus.DECLINED, ResponseCode.INTERNAL_PERSISTENCY_ERROR, e);
         }
     }
-    
+
     @Transactional
     public Device getInitializedDeviceByDbId(Long id) {
         //todo: see todo at getInitializedDeviceByDeviceId
@@ -252,7 +259,7 @@ public class DeviceService {
         initializeComponents(d);
         return d;
     }
-    
+
     @Transactional(readOnly = true)
     public Device getInitializedDeviceByDeviceId(String deviceId) {
         //todo: create a optimal fetched query
@@ -268,11 +275,11 @@ public class DeviceService {
          *
          * });
          */
-        Device d = deviceRepo.findBydeviceId(deviceId);
+        Device d = deviceRepo.findByIdentification(deviceId);
         initializeComponents(d);
         return d;
     }
-    
+
     private void initializeComponents(Component c) {
         if (c != null) {
             if (c.getCapabilities() != null) {
@@ -320,5 +327,5 @@ public class DeviceService {
     public void setOverwriteSerialNumberOnComponents(boolean overwriteSerialNumberOnComponents) {
         this.overwriteSerialNumberOnComponents = overwriteSerialNumberOnComponents;
     }
-    
+
 }

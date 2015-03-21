@@ -29,7 +29,7 @@ public abstract class AbstractRequestResponseExecutor<REQ extends AbstractReques
     public Message<?> execute(Message<?> msg) {
         AbstractRequest req = (AbstractRequest) msg.getPayload();
         try {
-            RSP response = executeImpl((REQ) msg.getPayload(), msg.getHeaders(), getDeviceRepo().findBydeviceId(req.getDeviceId()));
+            RSP response = executeImpl((REQ) msg.getPayload(), msg.getHeaders(), getDeviceRepo().findByIdentification(req.getDeviceId()));
             if (response != null) {
                 return MessageBuilder.withPayload(configureCommonFields(req, response)).build();
             } else {

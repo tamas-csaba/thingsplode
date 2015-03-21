@@ -32,6 +32,7 @@ import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Event;
 import org.thingsplode.core.entities.Treshold;
+import org.thingsplode.core.ValueType;
 import org.thingsplode.core.exceptions.MessageConversionException;
 import org.thingsplode.core.exceptions.SrvExecutionException;
 import org.thingsplode.core.protocol.ExecutionStatus;
@@ -69,6 +70,7 @@ public class ExecutorTest extends TestBaseWithRepos {
     private SyncGateway syncGw;
     @Autowired(required = true)
     private DeviceService deviceService;
+    private boolean setup = false;
 
     public ExecutorTest() {
         super();
@@ -81,14 +83,17 @@ public class ExecutorTest extends TestBaseWithRepos {
             testDevice = TestFactory.createDevice(testDeviceID, "123456789", "1");
             testDevice = deviceService.registerOrUpdate(testDevice);
         }
-        Assert.assertTrue("deletable_config should exists", testDevice.getConfigurationByKey("deletable_config") != null);
-        Assert.assertTrue("the shutdown_timeout should be " + TestFactory.DEFAULT_SHUTDOWN_TIMEOUT, testDevice.getConfigurationByKey("shutdown_timeout").getValue().equalsIgnoreCase(TestFactory.DEFAULT_SHUTDOWN_TIMEOUT));
+        if (!setup) {
+            Assert.assertTrue("deletable_config should exists", testDevice.getConfigurationByKey("deletable_config") != null);
+            Assert.assertTrue("the shutdown_timeout should be " + TestFactory.DEFAULT_SHUTDOWN_TIMEOUT, testDevice.getConfigurationByKey("shutdown_timeout").getValue().equalsIgnoreCase(TestFactory.DEFAULT_SHUTDOWN_TIMEOUT));
+        }
+        setup = true;
     }
 
     @Test
     public void testBootNotificationRequest() throws UnknownHostException, InterruptedException, ExecutionException, TimeoutException, MessageConversionException {
         Device d = TestFactory.createDevice("test_device_2", "987654321", "1");
-        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(d.getDeviceId(), Calendar.getInstance().getTimeInMillis(), d));
+        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(d.getIdentification(), Calendar.getInstance().getTimeInMillis(), d));
         Response rsp = rspHandle.get(30, TimeUnit.SECONDS);
         Assert.assertNotNull("The resposne message cannot be null.", rsp);
         Assert.assertFalse(rsp.isErrorType());
@@ -101,23 +106,25 @@ public class ExecutorTest extends TestBaseWithRepos {
 
     @Test
     public void testBootNotificationRequestWithDisabledDevice() throws InterruptedException, ExecutionException, TimeoutException {
-        boolean updated = deviceService.setDeviceEnabledState(testDevice.getDeviceId(), EnabledState.DISABLED);
+        boolean updated = deviceService.setDeviceEnabledState(testDevice.getIdentification(), EnabledState.DISABLED);
         Assert.assertTrue("The device should have been found.", updated);
-        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(testDevice.getDeviceId(), Calendar.getInstance().getTimeInMillis(), testDevice));
+        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(testDevice.getIdentification(), Calendar.getInstance().getTimeInMillis(), testDevice));
         Response rsp = rspHandle.get(30, TimeUnit.SECONDS);
         Assert.assertTrue("the request should be declined", rsp.getRequestStatus() == ExecutionStatus.DECLINED);
         Assert.assertTrue("the request should be declined with permission denied", rsp.getResponseCode() == ResponseCode.PERMISSION_DENIED);
         System.out.println("\n\n\n ***** RESULT MESSAGE \n " + rsp.getResultMessage());
+        updated = deviceService.setDeviceEnabledState(testDevice.getIdentification(), EnabledState.ENABLED);
+        Assert.assertTrue("The device should have been found.", updated);
+
     }
 
     @Test
-    //@Transactional
     public void testBootNotificationReqyestWithNewConfigs() throws InterruptedException, ExecutionException, TimeoutException, MessageConversionException, UnknownHostException {
         //pre-preparation of the database
         String testHostAddress = "111.111.111.111";
-        boolean updated = deviceService.setDeviceEnabledState(testDevice.getDeviceId(), EnabledState.ENABLED);
+        boolean updated = deviceService.setDeviceEnabledState(testDevice.getIdentification(), EnabledState.ENABLED);
         Assert.assertTrue("The device should have been found.", updated);
-        List<Configuration> cfgs = Configuration.ConfigurationBuilder.newBuilder().addConfiguration("key_1", Configuration.Type.STRING, "woops1").addConfiguration("key_2", Configuration.Type.STRING, "woops2").addConfiguration("shutdown_timeout", Configuration.Type.NUMBER, "4000").build();
+        List<Configuration> cfgs = Configuration.ConfigurationBuilder.newBuilder().addConfiguration("key_1", ValueType.STRING, "woops1").addConfiguration("key_2", ValueType.STRING, "woops2").addConfiguration("shutdown_timeout", ValueType.NUMBER, "4000").build();
         deviceService.setConfigurationForDevices(cfgs);
         //preparation of request
         Device bootingDevice = TestFactory.createDevice(testDeviceID, "123456789", "1");//testDevice
@@ -132,8 +139,8 @@ public class ExecutorTest extends TestBaseWithRepos {
                 addOrUpdateCapabilies(Capability.create(Capability.Type.WRITE_OR_EXECUTE, "auxiliary_control", true)).
                 setCapabilityAcitvity("meter_value", false).
                 removeConfigurations("deletable_config").
-                addOrUpdateConfigurations(Configuration.create("booting_device_time", Long.toString(Calendar.getInstance().getTimeInMillis()), Configuration.Type.NUMBER));
-        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(testDevice.getDeviceId(), Calendar.getInstance().getTimeInMillis(), bootingDevice));
+                addOrUpdateConfigurations(Configuration.create("booting_device_time", Long.toString(Calendar.getInstance().getTimeInMillis()), ValueType.NUMBER));
+        Future<Response> rspHandle = requestGw.execute(new BootNotificationRequest(testDevice.getIdentification(), Calendar.getInstance().getTimeInMillis(), bootingDevice));
         //Response rsp = rspHandle.get(30, TimeUnit.SECONDS);
         Response rsp = rspHandle.get();
         System.out.println("\n\n RESPONSE: \n" + rsp != null ? rsp.toString() : "<NULL>");
@@ -165,7 +172,7 @@ public class ExecutorTest extends TestBaseWithRepos {
         int orphanCapabilities = this.getCountWhere(Capability.TABLE_NAME, Component.COMP_REF + " is null");
         Assert.assertTrue("the orphan capabilities should be null", orphanCapabilities == 0);
         Assert.assertTrue("auxiliary_control capability should exist at this stage", assertableDevice.getCapabilityByName("auxiliary_control") != null);
-        Assert.assertTrue("meter_value", assertableDevice.getCapabilityByName("meter_value") != null && !assertableDevice.getCapabilityByName("meter_value").isActive());
+        Assert.assertTrue("meter_value should be inactive", assertableDevice.getCapabilityByName("meter_value") != null && !assertableDevice.getCapabilityByName("meter_value").isActive());
         Assert.assertTrue("door_control capability should not exist at this stage", assertableDevice.getCapabilityByName("door_control") == null);
         //------- Tresholds tests
         int orphanTresholds = this.getCountWhere(Treshold.TABLE_NAME, Component.COMP_REF + " is null");
@@ -178,26 +185,21 @@ public class ExecutorTest extends TestBaseWithRepos {
 //-->   If the boot notification request will overwrite the tresholds        
 //-->   Assert.assertTrue("alarm_low treshold should have the value 200", assertableDevice.getTresholdByName("alarm_low").getTresholdValue().getContent().equalsIgnoreCase("200"));
 //-->   Assert.assertTrue("alarm_high treshold should not exist at this stage", assertableDevice.getTresholdByName("alarm_high") == null);
-        //continue here  ... also with the components 
-        //assert -> remove alarm_high
-//--> remove door_control
-//--> add auxiliar
+
+//continue here  ... also with the components 
         // expected test outcomes:
-        //update existing capability / remove and add a capability
-        //component merging -> what about the subcomponents, why do have they disappeared
         //what happens if the device is disabled
         ///!!!! logical problem: non-synced configuration which is not coming from the device need not to be removed, because it can be configured by the user;
         // it would be nice to decide how this stuff shoudl look like -> who is leading the configuration
         //why would overwrite a boot notification a confguration which may have been reset on purpose by the user lately
-        //of course the capabilities need to be driven by the device.
         //test it with persisted and non persisted device as well
         //remove transaction and request timeouts
     }
 
-    @Test
+    //@Test
     public void testEventSync() {
         Event evt = new Event().putId("some_event_id").putClass("some_class").putSeverity(Event.Severity.DEBUG).putEventDate(Calendar.getInstance()).putReceiveDate(Calendar.getInstance());
-        syncGw.process(new EventSync(testDevice.getDeviceId(), testDevice.getName(), evt, Calendar.getInstance().getTimeInMillis()));
+        syncGw.process(new EventSync(testDevice.getIdentification(), testDevice.getIdentification(), evt, Calendar.getInstance().getTimeInMillis()));
     }
     //todo: test exceptions and error messages
     //http://xpadro.blogspot.co.at/2013/11/how-error-handling-works-in-spring.html

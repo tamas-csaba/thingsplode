@@ -27,6 +27,6 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     <S extends Device> List<S> save(Iterable<S> itrbl);
     
     @Cacheable("bydeviceId")
-    Device findBydeviceId(String deviceId);
+    Device findByIdentification(String deviceId);
 
 }

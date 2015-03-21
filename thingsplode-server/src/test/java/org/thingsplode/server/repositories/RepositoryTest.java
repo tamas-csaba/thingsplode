@@ -21,10 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thingsplode.TestBaseWithRepos;
 import org.thingsplode.core.entities.Event;
 import org.thingsplode.core.Value;
+import org.thingsplode.core.entities.Capability;
 import org.thingsplode.core.entities.Component;
 import org.thingsplode.core.entities.Configuration;
 import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Indication;
+import org.thingsplode.core.entities.Model;
+import org.thingsplode.core.entities.Treshold;
 import org.thingsplode.domain.TestFactory;
 import org.thingsplode.server.BaseConfig;
 import org.thingsplode.server.JpaConfig;
@@ -83,7 +86,7 @@ public class RepositoryTest extends TestBaseWithRepos {
         int orphanConfigs = this.getCountWhere(Configuration.TABLE_NAME, Component.COMP_REF + " is null");
         Assert.assertTrue("the orphan configs should be null", orphanConfigs == 0);
         d1.getComponents().forEach((c) -> {
-            System.out.println("=============> Clearing configurations for component: " + c.getName());
+            System.out.println("=============> Clearing configurations for component: " + c.getIdentification());
             c.getConfiguration().clear();
         });
         d1 = deviceRepo.save(d1);
@@ -96,12 +99,12 @@ public class RepositoryTest extends TestBaseWithRepos {
         String deviceID = "test_device_1";
         String serialNumber = "12345";
         deviceRepo.save(TestFactory.createDevice(deviceID, serialNumber, "1"));
-        Device d = deviceRepo.findBydeviceId(deviceID);
+        Device d = deviceRepo.findByIdentification(deviceID);
         Assert.assertTrue("The serial number should match", serialNumber.equalsIgnoreCase(d.getSerialNumber()));
         Assert.assertTrue("The version should be 1", "1".equalsIgnoreCase(d.getModel().getVersion()));
         d.getModel().setVersion("2");
         deviceRepo.save(d);
-        d = deviceRepo.findBydeviceId(deviceID);
+        d = deviceRepo.findByIdentification(deviceID);
         Assert.assertTrue("The version should be 2", "2".equalsIgnoreCase(d.getModel().getVersion()));
         Assert.assertNotNull("The device id shall not be null at this stage", d.getId());
         for (int i = 1; i <= 100; i++) {
@@ -126,11 +129,11 @@ public class RepositoryTest extends TestBaseWithRepos {
     private void deviceAssertions(int expectedNrOfDevices) {
         long deviceCnt = deviceRepo.count();
         Assert.assertTrue("There should be " + expectedNrOfDevices + " devices in the database at this stage instead [" + deviceCnt + "].", deviceCnt == expectedNrOfDevices);
-        Assert.assertTrue("There should be " + expectedNrOfDevices + " models in the database at this stage.", getCount("MODEL") == expectedNrOfDevices);
-        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " tresholds in the database at this stage.", getCount("TRESHOLD") == expectedNrOfDevices * 3);
-        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " configruations in the database at this stage.", getCount("CONFIGURATION") == expectedNrOfDevices * 4);
+        Assert.assertTrue("There should be " + expectedNrOfDevices + " models in the database at this stage.", getCount(Model.TABLE_NAME) == expectedNrOfDevices);
+        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " tresholds in the database at this stage.", getCount(Treshold.TABLE_NAME) == expectedNrOfDevices * 3);
+        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " configruations in the database at this stage.", getCount(Configuration.TABLE_NAME) == expectedNrOfDevices * 4);
         int compNumber = componentRepo.findbyMainType(Component.MAIN_TYPE).size();
         Assert.assertTrue("There should be " + expectedNrOfDevices * 2 + " components in the database at this stage instead of [" + compNumber + "].", compNumber == expectedNrOfDevices * 2);
-        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " capabilities in the database at this stage.", getCount("CAPABILITY") == expectedNrOfDevices * 3);
+        Assert.assertTrue("There should be " + expectedNrOfDevices * 3 + " capabilities in the database at this stage.", getCount(Capability.TABLE_NAME) == expectedNrOfDevices * 3);
     }
 }
