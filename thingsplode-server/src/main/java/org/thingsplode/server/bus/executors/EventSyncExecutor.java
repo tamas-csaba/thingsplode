@@ -28,6 +28,7 @@ public class EventSyncExecutor<REQ extends EventSync> extends AbstractSyncExecut
     @Override
     public void executeImpl(EventSync sync, MessageHeaders headers, Device device) {
         Event evt = sync.getEvent();
+        //is it the device? or it is an event on the component
         evt.setComponent(device);
         Calendar now = Calendar.getInstance();
         if (evt.getReceiveDate() == null) {

@@ -24,14 +24,13 @@ public class LoggingInterceptor extends ChannelInterceptorAdapter {
 //        System.out.println("\n\n\n\n PRESEND --> message on channel [" + channel.toString() + "]: \n " + message.toString());
 //        return message;
 //    }
-
     @Override
-    public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
         if (logger.isDebugEnabled()) {
             logger.debug("On channel: " + channel.toString() + " -> Message: " + message.toString());
-
         }
+        return message;
 
 //        if (message == null) {
 //            return;

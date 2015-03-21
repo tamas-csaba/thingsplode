@@ -33,6 +33,7 @@ import org.thingsplode.core.entities.Device;
 import org.thingsplode.core.entities.Event;
 import org.thingsplode.core.entities.Treshold;
 import org.thingsplode.core.ValueType;
+import org.thingsplode.core.entities.Indication;
 import org.thingsplode.core.exceptions.MessageConversionException;
 import org.thingsplode.core.exceptions.SrvExecutionException;
 import org.thingsplode.core.protocol.ExecutionStatus;
@@ -48,6 +49,7 @@ import org.thingsplode.server.JpaConfig;
 import org.thingsplode.server.bus.gateways.RequestGateway;
 import org.thingsplode.server.bus.gateways.SyncGateway;
 import org.thingsplode.server.infrastructure.DeviceService;
+import org.thingsplode.server.repositories.DeviceRepository;
 
 /**
  *
@@ -70,7 +72,10 @@ public class ExecutorTest extends TestBaseWithRepos {
     private SyncGateway syncGw;
     @Autowired(required = true)
     private DeviceService deviceService;
-    private boolean setup = false;
+//    @Autowired(required = true)
+//    private EventRepository eventRepo;
+    @Autowired(required = true)
+    private DeviceRepository deviceRepo;
 
     public ExecutorTest() {
         super();
@@ -80,14 +85,14 @@ public class ExecutorTest extends TestBaseWithRepos {
     public void setupTest() throws UnknownHostException, SrvExecutionException {
         deviceService.setEnableAutoRegistration(true);
         if (testDevice == null || testDevice.getId() == null) {
-            testDevice = TestFactory.createDevice(testDeviceID, "123456789", "1");
-            testDevice = deviceService.registerOrUpdate(testDevice);
+            testDevice = deviceRepo.findByIdentification(testDeviceID);
+            if (testDevice == null) {
+                testDevice = TestFactory.createDevice(testDeviceID, "123456789", "1");
+                testDevice = deviceService.registerOrUpdate(testDevice);
+                Assert.assertTrue("deletable_config should exists", testDevice.getConfigurationByKey("deletable_config") != null);
+                Assert.assertTrue("the shutdown_timeout should be " + TestFactory.DEFAULT_SHUTDOWN_TIMEOUT, testDevice.getConfigurationByKey("shutdown_timeout").getValue().equalsIgnoreCase(TestFactory.DEFAULT_SHUTDOWN_TIMEOUT));
+            }
         }
-        if (!setup) {
-            Assert.assertTrue("deletable_config should exists", testDevice.getConfigurationByKey("deletable_config") != null);
-            Assert.assertTrue("the shutdown_timeout should be " + TestFactory.DEFAULT_SHUTDOWN_TIMEOUT, testDevice.getConfigurationByKey("shutdown_timeout").getValue().equalsIgnoreCase(TestFactory.DEFAULT_SHUTDOWN_TIMEOUT));
-        }
-        setup = true;
     }
 
     @Test
@@ -124,7 +129,10 @@ public class ExecutorTest extends TestBaseWithRepos {
         String testHostAddress = "111.111.111.111";
         boolean updated = deviceService.setDeviceEnabledState(testDevice.getIdentification(), EnabledState.ENABLED);
         Assert.assertTrue("The device should have been found.", updated);
-        List<Configuration> cfgs = Configuration.ConfigurationBuilder.newBuilder().addConfiguration("key_1", ValueType.STRING, "woops1").addConfiguration("key_2", ValueType.STRING, "woops2").addConfiguration("shutdown_timeout", ValueType.NUMBER, "4000").build();
+        List<Configuration> cfgs = Configuration.ConfigurationBuilder.newBuilder().
+                addConfiguration("key_1", ValueType.STRING, "woops1").
+                addConfiguration("key_2", ValueType.STRING, "woops2").
+                addConfiguration("shutdown_timeout", ValueType.NUMBER, "4000").build();
         deviceService.setConfigurationForDevices(cfgs);
         //preparation of request
         Device bootingDevice = TestFactory.createDevice(testDeviceID, "123456789", "1");//testDevice
@@ -182,6 +190,7 @@ public class ExecutorTest extends TestBaseWithRepos {
         Assert.assertTrue("auxiliary_alarm treshold should exist at this stage", assertableDevice.getTresholdByName("auxiliary_alarm") != null);
         Assert.assertTrue("temperature_activity treshold should exist at this stage", assertableDevice.getTresholdByName("temperature_activity") != null);
         Assert.assertTrue("alarm_low treshold should exist at this stage", assertableDevice.getTresholdByName("alarm_low") != null);
+//-->   set synced the config which comes with boot notification (mean that the device is also aware of it)        
 //-->   If the boot notification request will overwrite the tresholds        
 //-->   Assert.assertTrue("alarm_low treshold should have the value 200", assertableDevice.getTresholdByName("alarm_low").getTresholdValue().getContent().equalsIgnoreCase("200"));
 //-->   Assert.assertTrue("alarm_high treshold should not exist at this stage", assertableDevice.getTresholdByName("alarm_high") == null);
@@ -196,10 +205,16 @@ public class ExecutorTest extends TestBaseWithRepos {
         //remove transaction and request timeouts
     }
 
-    //@Test
+    @Test
     public void testEventSync() {
-        Event evt = new Event().putId("some_event_id").putClass("some_class").putSeverity(Event.Severity.DEBUG).putEventDate(Calendar.getInstance()).putReceiveDate(Calendar.getInstance());
+        int expectedNrOfEvents = 1;
+        int expectedNrOfIndications = 2;
+        Event evt = new Event().putId("some_event_id").putEventClass("some_class").putSeverity(Event.Severity.DEBUG).putEventDate(Calendar.getInstance()).
+                addIndications(Indication.create("indication1", Value.Type.TEXT, "some value"), Indication.create("indication2", Value.Type.TEXT, "some other value"));
         syncGw.process(new EventSync(testDevice.getIdentification(), testDevice.getIdentification(), evt, Calendar.getInstance().getTimeInMillis()));
+        Assert.assertTrue("There should be " + expectedNrOfEvents + " events in the database at this stage.", getCount(Event.TABLE_NAME) == expectedNrOfEvents);
+        Assert.assertTrue("There should be " + expectedNrOfIndications + " indications in the database at this stage.", getCount(Indication.TABLE_NAME) == expectedNrOfIndications);
+
     }
     //todo: test exceptions and error messages
     //http://xpadro.blogspot.co.at/2013/11/how-error-handling-works-in-spring.html
