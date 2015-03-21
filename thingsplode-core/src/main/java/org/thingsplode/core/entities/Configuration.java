@@ -5,6 +5,7 @@
  */
 package org.thingsplode.core.entities;
 
+import org.thingsplode.core.ValueType;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Basic;
@@ -22,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Table(
         name = Configuration.TABLE_NAME,
-        uniqueConstraints = @UniqueConstraint(columnNames = {"key", Component.COMP_REF})
+        uniqueConstraints = @UniqueConstraint(name = "unique_conf", columnNames = {"key", Component.COMP_REF})
 )
 @Entity
 public class Configuration extends Persistable<Long> {
@@ -30,7 +31,7 @@ public class Configuration extends Persistable<Long> {
     @XmlTransient
     public final static String TABLE_NAME = "CONFIGURATION";
     
-    private Type type;
+    private ValueType type;
     private String key;
     private String value;
     @XmlTransient
@@ -38,11 +39,11 @@ public class Configuration extends Persistable<Long> {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    public Type getType() {
+    public ValueType getType() {
         return type;
     }
     
-    public void setType(Type type) {
+    public void setType(ValueType type) {
         this.type = type;
     }
 
@@ -91,18 +92,12 @@ public class Configuration extends Persistable<Long> {
         this.setSyncStatus(SyncStatus.SYNCED);
     }
     
-    public static enum Type {
-        
-        STRING,
-        BOOLEAN,
-        NUMBER,
-    }
     
     public static Configuration create() {
         return new Configuration();
     }
     
-    public static Configuration create(String key, Configuration.Type type) {
+    public static Configuration create(String key, ValueType type) {
         Configuration c = new Configuration();
         c.setKey(key);
         c.setType(type);
@@ -110,7 +105,7 @@ public class Configuration extends Persistable<Long> {
         return c;
     }
     
-    public static Configuration create(String key, String value, Configuration.Type type) {
+    public static Configuration create(String key, String value, ValueType type) {
         Configuration c = Configuration.create(key, type);
         c.setValue(value);
         return c;
@@ -152,11 +147,11 @@ public class Configuration extends Persistable<Long> {
             return this;
         }
         
-        public ConfigurationBuilder addConfiguration(String key, Type type, String value) {
+        public ConfigurationBuilder addConfiguration(String key, ValueType type, String value) {
             return addConfiguration(key, type, value, SyncStatus.NEW);
         }
         
-        public ConfigurationBuilder addConfiguration(String key, Type type, String value, SyncStatus syncStatus) {
+        public ConfigurationBuilder addConfiguration(String key, ValueType type, String value, SyncStatus syncStatus) {
             Configuration cfg = new Configuration();
             cfg.setKey(key);
             cfg.setType(type);

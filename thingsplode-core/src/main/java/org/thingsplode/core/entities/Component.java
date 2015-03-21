@@ -26,6 +26,8 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlTransient;
 import org.thingsplode.core.EnabledState;
@@ -40,11 +42,10 @@ import org.thingsplode.core.StatusInfo;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = Component.DISCRIMINATOR, discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue(value = Component.MAIN_TYPE)
-
-//@Table(
-//        name = Component.TABLE_NAME,
-//        uniqueConstraints = @UniqueConstraint(columnNames = {"name", Component.ROOT_COMP_REF})
-//)
+@Table(
+        name = Component.TABLE_NAME,
+        uniqueConstraints = @UniqueConstraint(name = "unique_ids", columnNames = {"identification", Component.ROOT_COMP_REF})
+)
 //todo: serial number also should be unique
 public class Component<T extends Component<?>> extends Persistable<Long> {
 
@@ -59,9 +60,10 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     @XmlTransient
     public final static String ROOT_COMP_REF = "ROOT_COMP_ID";
     @NotNull
-    private String name;
+    private String identification;
     @NotNull
     private Type type;
+    private String deviceClass;
     @NotNull
     private EnabledState enabledState;
     @NotNull
@@ -78,9 +80,9 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         return new Component();
     }
 
-    public static Component create(String name, Type type) {
+    public static Component create(String identification, Type type) {
         Component comp = Component.create();
-        comp.setName(name);
+        comp.setIdentification(identification);
         comp.setType(type);
         return comp;
     }
@@ -91,20 +93,13 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         return comp;
     }
 
-    /**
-     * @return the name
-     */
     @Basic(optional = false)
-    @Column()
-    public String getName() {
-        return name;
+    public String getIdentification() {
+        return identification;
     }
 
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
+    public void setIdentification(String identification) {
+        this.identification = identification;
     }
 
     /**
@@ -201,7 +196,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         this.partNumber = partNumber;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)//orphanRemoval = true
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = Component.ROOT_COMP_REF)
     public Collection<Component> getComponents() {
         return components;
@@ -272,7 +267,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
      * @return the configuration
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = Component.COMP_REF)
+    @JoinColumn(name = Component.COMP_REF, nullable = false)
     public Collection<Configuration> getConfiguration() {
         return configuration;
     }
@@ -291,11 +286,11 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         return capabilities.stream().filter(c -> c.getName().equalsIgnoreCase(capabilityName)).findFirst().orElse(null);
     }
 
-    public Component getComponentByName(String componentName) {
+    public Component getComponentByName(String componentIdentification) {
         if (components == null || components.isEmpty()) {
             return null;
         }
-        return components.stream().filter(c -> c.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+        return components.stream().filter(c -> c.getIdentification().equalsIgnoreCase(componentIdentification)).findFirst().orElse(null);
     }
 
     public Treshold getTresholdByName(String tresholdName) {
@@ -321,8 +316,16 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     }
 
     public T addCapabilities(Capability... capabilities) {
+        if (capabilities != null) {
+            this.initializeCapabilities();
+            Collections.addAll(this.getCapabilities(), capabilities);
+        }
+        return (T) this;
+    }
+
+    public T addCapabilities(List<Capability> capabilities) {
         this.initializeCapabilities();
-        Collections.addAll(this.getCapabilities(), capabilities);
+        this.getCapabilities().addAll(capabilities);
         return (T) this;
     }
 
@@ -517,6 +520,22 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         }
     }
 
+    /**
+     * @return the deviceClass
+     */
+    @Basic
+    @Column(length = 30)
+    public String getDeviceClass() {
+        return deviceClass;
+    }
+
+    /**
+     * @param deviceClass the deviceClass to set
+     */
+    public void setDeviceClass(String deviceClass) {
+        this.deviceClass = deviceClass;
+    }
+
     static public enum Type {
 
         HARDWARE,
@@ -555,7 +574,7 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
 
     @Override
     public String toString() {
-        return "Component{ " + super.toString() + " name=" + name + ", type=" + type + ", enabledState=" + enabledState + ", status=" + status + ", model=" + model + ", serialNumber=" + serialNumber + ", partNumber=" + partNumber + ", components=" + components + ", capabilities=" + capabilities + ", configuration=" + configuration + ", tresholds=" + tresholds + '}';
+        return "Component{ " + super.toString() + " name=" + identification + ", type=" + type + ", enabledState=" + enabledState + ", status=" + status + ", model=" + model + ", serialNumber=" + serialNumber + ", partNumber=" + partNumber + ", components=" + components + ", capabilities=" + capabilities + ", configuration=" + configuration + ", tresholds=" + tresholds + '}';
     }
 
 }

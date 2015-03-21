@@ -39,7 +39,9 @@ public class Event extends Persistable<Long> {
 
     @XmlTransient
     public final static String TABLE_NAME = "EVENTS";
+    @XmlTransient
     public final static String EVENT_REF = "EVT_ID";
+    @XmlTransient
     public final static String COMP_REF = "COMPONENT_ID";
     @XmlTransient
     private Component component;

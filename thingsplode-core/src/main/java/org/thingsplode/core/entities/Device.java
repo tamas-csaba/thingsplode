@@ -8,13 +8,11 @@ package org.thingsplode.core.entities;
 import java.net.InetAddress;
 import java.util.Calendar;
 import java.util.Collection;
-import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,30 +36,12 @@ public class Device extends Component<Device> {
     public final static String TABLE_NAME = "DEVICES";
     @XmlTransient
     public final static String MAIN_TYPE = "DEVICE";
-
-    private String deviceId;
     @XmlTransient
     private Calendar startupDate;
     @XmlTransient
     private Calendar lastHeartBeat;
     private Location location;
     private String hostAddress;
-
-    /**
-     * @return the deviceId
-     */
-    @Column(nullable = false, unique = true)
-    @NotNull
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    /**
-     * @param deviceId the deviceId to set
-     */
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
 
     /**
      * @return the lastHeartBeat
@@ -126,17 +106,16 @@ public class Device extends Component<Device> {
         return new Device();
     }
 
-    public static Device create(String deviceId, String deviceName, EnabledState enabledState, StatusInfo statusInfo) {
+    public static Device create(String deviceIdentification, EnabledState enabledState, StatusInfo statusInfo) {
         Device d = Device.create();
-        d.setDeviceId(deviceId);
-        d.setName(deviceName);
+        d.setIdentification(deviceIdentification);
         d.setEnabledState(enabledState);
         d.setStatus(statusInfo);
         return d;
     }
 
-    public Device putDeviceId(String deviceId) {
-        this.setDeviceId(deviceId);
+    public Device putDeviceId(String deviceIdentification) {
+        this.setIdentification(deviceIdentification);
         return this;
     }
 
@@ -176,6 +155,6 @@ public class Device extends Component<Device> {
 
     @Override
     public String toString() {
-        return "Device{ " + super.toString() + " deviceId=" + deviceId + ", startupDate=" + startupDate + ", lastHeartBeat=" + lastHeartBeat + ", location=" + location + ", hostAddress=" + hostAddress + '}';
+        return "Device{ " + super.toString() + ", startupDate=" + startupDate + ", lastHeartBeat=" + lastHeartBeat + ", location=" + location + ", hostAddress=" + hostAddress + '}';
     }
 }

@@ -67,7 +67,7 @@ public abstract class ConfigurationCarrierResponse<T extends ConfigurationCarrie
     private void addTresholdsFromComponent(Component<?> comp) {
         if (comp != null) {
             if (comp.getTresholds() != null && !comp.getTresholds().isEmpty()) {
-                this.tresholds.put(comp.getName(), comp.getTresholds());
+                this.tresholds.put(comp.getIdentification(), comp.getTresholds());
             }
             if (comp.getComponents() != null && !comp.getComponents().isEmpty()) {
                 comp.getComponents().forEach(sc -> addTresholdsFromComponent(sc));
@@ -86,7 +86,7 @@ public abstract class ConfigurationCarrierResponse<T extends ConfigurationCarrie
     private void addConfigurationFromComponent(Component<?> comp) {
         if (comp != null) {
             if (comp.getConfiguration() != null && !comp.getConfiguration().isEmpty()) {
-                this.configuration.put(comp.getName(), comp.getConfiguration());
+                this.configuration.put(comp.getIdentification(), comp.getConfiguration());
             }
             if (comp.getComponents() != null && !comp.getComponents().isEmpty()) {
                 comp.getComponents().forEach(sc -> addConfigurationFromComponent(sc));
