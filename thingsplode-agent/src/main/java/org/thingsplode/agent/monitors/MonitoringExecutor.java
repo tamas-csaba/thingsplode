@@ -36,7 +36,7 @@ public class MonitoringExecutor {
     @Value("${scheduler.threadpool.size:3}")
     private int schedulerThreadPoolSize;
     private HashMap<SamplingProvider, Long> samplingProviders;
-    @Value("${scheduler.threadpool.size:10}")
+    @Value("${scheduler.initial_delay:10}")
     private long initialDelay;
     @Value("${scheduler.autoinitialize.system_metrics:true}")
     private boolean autoInitializeSystemMetricProvider;
