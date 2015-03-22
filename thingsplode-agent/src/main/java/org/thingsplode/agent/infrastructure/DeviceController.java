@@ -5,6 +5,11 @@
  */
 package org.thingsplode.agent.infrastructure;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
@@ -32,8 +37,15 @@ public class DeviceController implements ApplicationListener<ApplicationEvent> {
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ContextRefreshedEvent) {
+            ContextRefreshedEvent crevt = ((ContextRefreshedEvent) event);
             device = Device.create(deviceId, EnabledState.DISABLED, StatusInfo.OFFLINE);
             device.addComponents(systemComponentProvider.collect());
+            try {
+                device.putIpAddress(InetAddress.getLocalHost());
+                device.putStartupDate(Calendar.getInstance());
+            } catch (UnknownHostException ex) {
+                Logger.getLogger(DeviceController.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

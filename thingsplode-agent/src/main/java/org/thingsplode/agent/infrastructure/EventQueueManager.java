@@ -6,7 +6,9 @@
 package org.thingsplode.agent.infrastructure;
 
 import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.thingsplode.core.Value;
 import org.thingsplode.core.entities.Event;
 
 /**
@@ -16,6 +18,7 @@ import org.thingsplode.core.entities.Event;
 @Component
 public class EventQueueManager {
 
+    @Autowired(required = true)
     private BufferQueue<Event> eventQueue;
 
     @PostConstruct
@@ -24,6 +27,14 @@ public class EventQueueManager {
 
     public BufferQueue<Event> getEventQueue() {
         return eventQueue;
+    }
+
+    public void sendFaultEvent(Event.Severity severity, String message) {
+        Event errorEvent = Event.create(Event.Classes.SYSTEM.GENERAL_ERROR.toString(), Event.Classes.SYSTEM.toString(), Event.EventType.FAULT, severity);
+        errorEvent.addIndication("message", Value.Type.TEXT, message);
+        if (this.eventQueue != null) {
+            this.eventQueue.offer(errorEvent);
+        }
     }
 
 }

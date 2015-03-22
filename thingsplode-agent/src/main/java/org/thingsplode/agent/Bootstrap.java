@@ -8,6 +8,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.thingsplode.agent.infrastructure.BufferQueue;
+import org.thingsplode.agent.infrastructure.InMemoryBufferQueue;
+import org.thingsplode.core.entities.Event;
 
 /**
  * Hello world!
@@ -33,5 +36,11 @@ public class Bootstrap {
     static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
         PropertySourcesPlaceholderConfigurer ppc = new PropertySourcesPlaceholderConfigurer();
         return ppc;
+    }
+
+    @Bean
+    public BufferQueue<Event> eventQueue() {
+        //todo: create different ones depending on the profile
+        return new InMemoryBufferQueue<>();
     }
 }

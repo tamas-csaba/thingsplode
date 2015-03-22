@@ -105,9 +105,7 @@ public class SystemComponentProvider extends StaticProvider<Component> {
     private void logAndSendError(Exception ex) {
         String e = String.format("%s error caught while reading networks states with message: %s", ex.getClass().getSimpleName(), ex.getMessage());
         logger.error(e, ex);
-        Event errorEvent = Event.create(Event.Classes.SYSTEM.GENERAL_ERROR.toString(), Event.Classes.SYSTEM.toString(), Event.EventType.FAULT, Event.Severity.WARNING);
-        errorEvent.addIndication("message", Value.Type.TEXT, e);
-        eventQueueManager.getEventQueue().offer(errorEvent);
+        eventQueueManager.sendFaultEvent(Event.Severity.WARNING, e);
     }
 
     private List<Component> getStorage() {

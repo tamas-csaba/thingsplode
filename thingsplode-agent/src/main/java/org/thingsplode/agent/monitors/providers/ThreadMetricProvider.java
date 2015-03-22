@@ -11,7 +11,6 @@ import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.List;
 import org.thingsplode.agent.infrastructure.SamplingProvider;
 import org.thingsplode.core.Value;
