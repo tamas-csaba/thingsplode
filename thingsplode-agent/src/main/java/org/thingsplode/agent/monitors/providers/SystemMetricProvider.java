@@ -8,12 +8,11 @@ package org.thingsplode.agent.monitors.providers;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import org.thingsplode.agent.structures.SamplingProvider;
+import java.util.List;
+import org.thingsplode.agent.infrastructure.SamplingProvider;
 import org.thingsplode.core.Value;
 import org.thingsplode.core.entities.Event;
 import org.thingsplode.core.entities.Event.Classes;
@@ -27,12 +26,11 @@ public class SystemMetricProvider extends SamplingProvider<Event> {
 
     private final OperatingSystemMXBean osMxBean = ManagementFactory.getOperatingSystemMXBean();
     private final MemoryMXBean memMxBean = ManagementFactory.getMemoryMXBean();
-    private RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
-    private ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
+    private final ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
 
     @Override
-    public Collection<Event> collect() {
-        Collection<Event> events = new ArrayList<>();
+    public List<Event> collect() {
+        List<Event> events = new ArrayList<>();
         Calendar now = Calendar.getInstance();
 
         events.add(Event.create().

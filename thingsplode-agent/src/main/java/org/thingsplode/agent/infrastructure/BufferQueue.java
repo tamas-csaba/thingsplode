@@ -3,12 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.thingsplode.agent.structures;
+package org.thingsplode.agent.infrastructure;
 
 /**
  *
  * @author tamas.csaba@gmail.com
+ * @param <ITEM>
  */
-public abstract class StateChangeProvider<ITEM> extends StaticProvider<ITEM> {
-    
+public interface BufferQueue<ITEM> {
+
+    void offer(ITEM item);
+    ITEM take() throws InterruptedException;
 }

@@ -6,16 +6,23 @@
 package org.thingsplode.agent.monitors.providers;
 
 import java.io.File;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import org.thingsplode.agent.structures.StaticProvider;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.thingsplode.agent.infrastructure.EventQueueManager;
+import org.thingsplode.agent.infrastructure.StaticProvider;
 import org.thingsplode.core.EnabledState;
 import org.thingsplode.core.StatusInfo;
 import org.thingsplode.core.Value;
 import org.thingsplode.core.entities.Capability;
+import org.thingsplode.core.entities.Capability.CapabilityBuilder;
 import org.thingsplode.core.entities.Component;
+import org.thingsplode.core.entities.Event;
 
 /**
  *
@@ -24,8 +31,13 @@ import org.thingsplode.core.entities.Component;
 @org.springframework.stereotype.Component
 public class SystemComponentProvider extends StaticProvider<Component> {
 
+    private static final Logger logger = Logger.getLogger(SystemComponentProvider.class);
+
+    @Autowired(required = true)
+    private EventQueueManager eventQueueManager;
+
     @Override
-    public Collection<Component> collect() {
+    public List<Component> collect() {
         List<Component> components = new ArrayList<>();
 
         components.add(Component.create("java_vm", Component.Type.SOFTWARE, EnabledState.ENABLED).addCapabilities(
@@ -45,16 +57,57 @@ public class SystemComponentProvider extends StaticProvider<Component> {
                 add("os_version", Capability.Type.READ, true, Value.Type.TEXT, System.getProperty("os.version")).
                 build()
         ));
-        
+
         Component computer = Component.create("computing_unit", Component.Type.HARDWARE, EnabledState.ENABLED).addCapabilities(
                 Capability.CapabilityBuilder.newBuilder().
                 add("cpus", Capability.Type.READ, true, Value.Type.NUMBER, String.valueOf(Runtime.getRuntime().availableProcessors())).
                 build()
         );
-        computer.addComponents((Component[]) getStorage().toArray());
+        computer.addComponents(getStorage());
+        computer.addComponents(getNetwork());
         components.add(computer);
 
         return components;
+    }
+
+    private List<Component> getNetwork() {
+        try {
+            List<Component> networkComps = new ArrayList<>();
+            Collections.list(NetworkInterface.getNetworkInterfaces()).forEach(n -> {
+                try {
+
+                    CapabilityBuilder cb = Capability.CapabilityBuilder.newBuilder();
+                    cb.add("hw_address", Capability.Type.READ, true, Value.Type.TEXT, Arrays.toString(n.getHardwareAddress())).
+                            add("hw_index", Capability.Type.READ, true, Value.Type.TEXT, String.valueOf(n.getIndex()));
+
+                    if (n.getInetAddresses() != null) {
+                        Collections.list(n.getInetAddresses()).forEach(ia -> {
+                            cb.add("host_address", Capability.Type.READ, true, Value.Type.TEXT, ia.getHostAddress());
+                        });
+                    }
+
+                    Component nic = Component.create(n.getDisplayName(), Component.Type.HARDWARE, EnabledState.ENABLED).
+                            putStatusInfo(n.isUp() ? StatusInfo.ONLINE : StatusInfo.OFFLINE).addCapabilities(cb.build());
+
+                    networkComps.add(nic);
+
+                } catch (SocketException ex) {
+                    logAndSendError(ex);
+                }
+            });
+            return networkComps;
+        } catch (SocketException ex) {
+            logAndSendError(ex);
+            return null;
+        }
+    }
+
+    private void logAndSendError(Exception ex) {
+        String e = String.format("%s error caught while reading networks states with message: %s", ex.getClass().getSimpleName(), ex.getMessage());
+        logger.error(e, ex);
+        Event errorEvent = Event.create(Event.Classes.SYSTEM.GENERAL_ERROR.toString(), Event.Classes.SYSTEM.toString(), Event.EventType.FAULT, Event.Severity.WARNING);
+        errorEvent.addIndication("message", Value.Type.TEXT, e);
+        eventQueueManager.getEventQueue().offer(errorEvent);
     }
 
     private List<Component> getStorage() {

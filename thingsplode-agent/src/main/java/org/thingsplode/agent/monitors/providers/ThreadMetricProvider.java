@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-import org.thingsplode.agent.structures.SamplingProvider;
+import org.thingsplode.agent.infrastructure.SamplingProvider;
 import org.thingsplode.core.Value;
 import org.thingsplode.core.entities.Event;
 
@@ -30,8 +30,8 @@ public class ThreadMetricProvider extends SamplingProvider<Event> {
     }
 
     @Override
-    public Collection<Event> collect() {
-        Collection<Event> events = new ArrayList<>();
+    public List<Event> collect() {
+        List<Event> events = new ArrayList<>();
         Calendar now = Calendar.getInstance();
         
         Event evt = Event.create().
@@ -49,7 +49,6 @@ public class ThreadMetricProvider extends SamplingProvider<Event> {
         });
         
         events.add(evt);
-        
         return events;
     }
 

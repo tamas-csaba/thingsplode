@@ -11,9 +11,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.thingsplode.agent.structures.SamplingProvider;
+import org.thingsplode.agent.infrastructure.EventQueueManager;
+import org.thingsplode.agent.infrastructure.SamplingProvider;
 
 /**
  *
@@ -23,10 +25,12 @@ import org.thingsplode.agent.structures.SamplingProvider;
 public class MonitoringExecutor {
 
     private static final Logger logger = Logger.getLogger(MonitoringExecutor.class);
+    @Autowired(required = true)
+    private EventQueueManager queueManager;
     private ScheduledExecutorService scheduler;
     @Value("${scheduler.threadpool.size:3}")
     private int schedulerThreadPoolSize;
-    private HashMap<Long, SamplingProvider> metricProviders;
+    private HashMap<Long, SamplingProvider> samplingProviders;
     @Value("${scheduler.threadpool.size:10}")
     private long initialDelay;
 
@@ -41,8 +45,11 @@ public class MonitoringExecutor {
             return t;
         });
 
-        if (metricProviders != null && !metricProviders.isEmpty()) {
-            metricProviders.forEach((k, v) -> scheduler.scheduleAtFixedRate(v, initialDelay, k, TimeUnit.SECONDS));
+        if (samplingProviders != null && !samplingProviders.isEmpty()) {
+            samplingProviders.forEach((k, v) -> {
+                v.setItemQueue(queueManager.getEventQueue());
+                scheduler.scheduleAtFixedRate(v, initialDelay, k, TimeUnit.SECONDS);
+            });
         }
 
     }

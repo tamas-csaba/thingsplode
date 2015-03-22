@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.thingsplode.agent.structures;
+package org.thingsplode.agent.infrastructure;
+
+import java.util.List;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  * @param <ITEM>
  */
-public interface BufferQueue<ITEM> {
+public abstract class StaticProvider<ITEM> {
 
-    public void offer(ITEM item) throws InterruptedException;
-
-    public ITEM take() throws InterruptedException;
+    public abstract List<ITEM> collect();
 }

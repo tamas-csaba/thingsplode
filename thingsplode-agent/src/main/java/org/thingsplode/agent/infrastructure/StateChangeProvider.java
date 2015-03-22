@@ -3,16 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.thingsplode.agent.structures;
-
-import java.util.Collection;
+package org.thingsplode.agent.infrastructure;
 
 /**
  *
  * @author tamas.csaba@gmail.com
- * @param <ITEM>
  */
-public abstract class StaticProvider<ITEM> {
-
-    public abstract Collection<ITEM> collect();
+public abstract class StateChangeProvider<ITEM> extends StaticProvider<ITEM> {
+    
 }
