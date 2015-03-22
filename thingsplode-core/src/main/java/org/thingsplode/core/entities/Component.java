@@ -312,8 +312,18 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
     }
 
     public T addComponents(Component... componentArray) {
-        this.initializeComponents();
-        Collections.addAll(this.getComponents(), componentArray);
+        if (componentArray != null && componentArray.length > 0) {
+            this.initializeComponents();
+            Collections.addAll(this.getComponents(), componentArray);
+        }
+        return (T) this;
+    }
+
+    public T addComponents(List<Component> components) {
+        if (components != null && !components.isEmpty()) {
+            this.initializeComponents();
+            this.getComponents().addAll(components);
+        }
         return (T) this;
     }
 
@@ -574,6 +584,28 @@ public class Component<T extends Component<?>> extends Persistable<Long> {
         return (T) this;
     }
 
+//    public static class ComponentBuilder<R extends Component<?>> {
+//
+//        private final List<Component<R>> comps = new ArrayList<>();
+//
+//        public static ComponentBuilder newBuilder() {
+//            return new ComponentBuilder();
+//        }
+//        
+//        public ComponentBuilder add(Component<R> component) {
+//            this.comps.add(component);
+//            return this;
+//        }
+//        
+//        public ComponentBuilder add(String name, Type type, EnabledState state, String deviceClass, StatusInfo status, List<Capability> capabilities, List<Component> compoenents){
+//            this.comps.add(null)
+//        }
+//        
+//
+//        public List<Component<R>> build() {
+//            return this.comps;
+//        }
+//    }
     @Override
     public String toString() {
         return "Component{ " + super.toString() + " name=" + identification + ", type=" + type + ", enabledState=" + enabledState + ", status=" + status + ", model=" + model + ", serialNumber=" + serialNumber + ", partNumber=" + partNumber + '}';

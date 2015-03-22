@@ -5,6 +5,8 @@
  */
 package org.thingsplode.core.protocol.sync;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -20,7 +22,7 @@ import org.thingsplode.core.protocol.AbstractRequest;
 public class EventSync extends AbstractRequest {
 
     private String componentName;
-    private Event event;
+    private Collection<Event> events;
 
     public EventSync() {
         super();
@@ -29,13 +31,23 @@ public class EventSync extends AbstractRequest {
     public EventSync(String deviceId, String componentName, Event event, Long timeStamp) {
         super(deviceId, timeStamp);
         this.componentName = componentName;
-        this.event = event;
+        this.addEvent(event);
     }
 
     public EventSync(String deviceId, String componentName, Event event, Long timeStamp, String serviceProviderName) {
         super(deviceId, timeStamp, serviceProviderName);
         this.componentName = componentName;
-        this.event = event;
+        this.addEvent(event);
+    }
+
+    public final EventSync addEvent(Event evt) {
+        if (evt != null) {
+            if (events == null) {
+                events = new ArrayList<>();
+            }
+            events.add(evt);
+        }
+        return this;
     }
 
     /**
@@ -52,22 +64,22 @@ public class EventSync extends AbstractRequest {
         this.componentName = componentName;
     }
 
-    /**
-     * @return the event
-     */
-    public Event getEvent() {
-        return event;
-    }
-
-    /**
-     * @param event the event to set
-     */
-    public void setEvent(Event event) {
-        this.event = event;
-    }
-
     @Override
     public String toString() {
-        return "EventSync{ " + super.toString() + " componentName=" + componentName + ", event=" + event + '}';
+        return "EventSync{ " + super.toString() + " componentName=" + componentName + ", event=" + (getEvents() != null ? getEvents() : "NO EVENTS") + '}';
+    }
+
+    /**
+     * @return the events
+     */
+    public Collection<Event> getEvents() {
+        return events;
+    }
+
+    /**
+     * @param events the events to set
+     */
+    public void setEvents(Collection<Event> events) {
+        this.events = events;
     }
 }

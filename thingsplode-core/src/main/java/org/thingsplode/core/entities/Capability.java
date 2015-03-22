@@ -12,6 +12,7 @@ import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -21,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlTransient;
+import org.thingsplode.core.Value;
 
 /**
  *
@@ -37,10 +39,10 @@ public class Capability extends Persistable<Long> {
     public final static String TABLE_NAME = "CAPABILITIES";
     @XmlTransient
     public final static String CAPABILITY_REF = "CAP_ID";
-
     private Type type;
     private String name;
     private boolean active;
+    private Value value;
     private Collection<Parameter> parameters;
 
     static public enum Type {
@@ -58,9 +60,9 @@ public class Capability extends Persistable<Long> {
         this.type = source.getType() != null ? source.getType() : this.getType();
         this.active = source.isActive();
         this.name = source.getName();
+        this.value = source.getValue();
+        this.parameters = source.getParameters();
     }
-    
-    
 
     /**
      * @return the type
@@ -91,6 +93,15 @@ public class Capability extends Persistable<Long> {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Embedded
+    public Value getValue() {
+        return value;
+    }
+
+    public void setValue(Value value) {
+        this.value = value;
     }
 
     /**
@@ -169,6 +180,16 @@ public class Capability extends Persistable<Long> {
 
         public CapabilityBuilder add(String name, Type type, boolean active) {
             return this.add(createCapability(name, type, active));
+        }
+
+        public CapabilityBuilder add(String name, Type type, boolean active, Value value) {
+            Capability c = createCapability(name, type, active);
+            c.setValue(value);
+            return this.add(c);
+        }
+
+        public CapabilityBuilder add(String name, Type type, boolean active, Value.Type valueType, String valueString) {
+            return add(name, type, active, Value.create(valueType, valueString));
         }
 
         public CapabilityBuilder add(String name, Type type, boolean active, Parameter... params) {

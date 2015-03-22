@@ -8,7 +8,6 @@ package org.thingsplode.core.entities;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,6 +24,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.thingsplode.core.Value;
 
 /**
  *
@@ -48,10 +48,24 @@ public class Event extends Persistable<Long> {
     private String eventId;
     private String eventClass;
     private Severity severity;
+    private EventType type;
     private Calendar eventDate;
     @XmlTransient
     private Calendar receiveDate;
     private Collection<Indication> indications;
+
+    public static class Classes {
+
+        public static System_EventNames SYSTEM;
+
+        public enum System_EventNames {
+            HEAP,
+            THREADS,
+            THREAD_DETAILS,
+            LOAD,
+            GENERAL_ERROR;
+        }
+    }
 
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.AUTO)
@@ -177,12 +191,12 @@ public class Event extends Persistable<Long> {
         return evt;
     }
 
-    public static Event create(String eventId, String eventClass, Severity severity) {
-        return Event.create().putId(eventId).putEventClass(eventClass).putSeverity(severity);
+    public static Event create(String eventId, String eventClass, EventType type, Severity severity) {
+        return Event.create().putId(eventId).putEventClass(eventClass).putSeverity(severity).putType(type);
     }
 
-    public static Event create(String eventId, String eventClass, Severity severity, Calendar eventDate) {
-        return Event.create(eventId, eventClass, severity).putEventDate(eventDate);
+    public static Event create(String eventId, String eventClass, EventType type, Severity severity, Calendar eventDate) {
+        return Event.create(eventId, eventClass, type, severity).putEventDate(eventDate);
     }
 
     public Event putId(String eventID) {
@@ -195,9 +209,20 @@ public class Event extends Persistable<Long> {
         return this;
     }
 
-    public Event addIndications(Indication... indicationArray) {
+    public Event putType(EventType type) {
+        this.setType(type);
+        return this;
+    }
+
+    public Event addIndication(Indication indication) {
         initializeIndications();
-        Collections.addAll(this.indications, indicationArray);
+        this.getIndications().add(indication);
+        return this;
+    }
+    
+    public Event addIndication(String name, Value.Type valueType, String value){
+        initializeIndications();
+        this.getIndications().add(Indication.create(name, valueType, value));
         return this;
     }
 
@@ -220,6 +245,26 @@ public class Event extends Persistable<Long> {
     public Event putEventDate(Calendar evtDate) {
         this.setEventDate(eventDate);
         return this;
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30, nullable = false)
+    public EventType getType() {
+        return type;
+    }
+
+    public void setType(EventType type) {
+        this.type = type;
+    }
+
+    static public enum EventType {
+
+        STATE_CHANGE,
+        STATE_UPDATE,
+        TRESHOLD_TRIGGER,
+        SAMPLING,
+        FAULT
+        
     }
 
     static public enum Severity {

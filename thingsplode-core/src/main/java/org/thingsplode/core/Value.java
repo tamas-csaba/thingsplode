@@ -52,6 +52,7 @@ public class Value implements Serializable {
     /**
      * @return the content
      */
+    @Column(length = 500)
     public String getContent() {
         return content;
     }
@@ -60,12 +61,17 @@ public class Value implements Serializable {
      * @param content the content to set
      */
     public void setContent(String content) {
+        if (content != null && content.length() > 500) {
+            content = content.substring(0, 798) + "...";
+        }
         this.content = content;
     }
 
     public static enum Type {
+
         NUMBER,
         TEXT,
-        BOOLEAN
+        BOOLEAN,
+        TIMESTAMP
     }
 }
