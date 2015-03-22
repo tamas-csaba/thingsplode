@@ -210,7 +210,7 @@ public class ExecutorTest extends TestBaseWithRepos {
         int expectedNrOfEvents = 1;
         int expectedNrOfIndications = 2;
         Event evt = new Event().putId("some_event_id").putEventClass("some_class").putSeverity(Event.Severity.DEBUG).putEventDate(Calendar.getInstance()).
-                addIndications(Indication.create("indication1", Value.Type.TEXT, "some value"), Indication.create("indication2", Value.Type.TEXT, "some other value"));
+                addIndication("indication1", Value.Type.TEXT, "some value").addIndication("indication2", Value.Type.TEXT, "some other value");
         syncGw.process(new EventSync(testDevice.getIdentification(), testDevice.getIdentification(), evt, Calendar.getInstance().getTimeInMillis()));
         Assert.assertTrue("There should be " + expectedNrOfEvents + " events in the database at this stage.", getCount(Event.TABLE_NAME) == expectedNrOfEvents);
         Assert.assertTrue("There should be " + expectedNrOfIndications + " indications in the database at this stage.", getCount(Indication.TABLE_NAME) == expectedNrOfIndications);

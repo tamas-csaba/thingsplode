@@ -108,10 +108,10 @@ public class RepositoryTest extends TestBaseWithRepos {
         Assert.assertTrue("The version should be 2", "2".equalsIgnoreCase(d.getModel().getVersion()));
         Assert.assertNotNull("The device id shall not be null at this stage", d.getId());
         for (int i = 1; i <= 100; i++) {
-            Event devt = Event.create("some-special-event", "some-special-event-class", Event.Severity.INFO, Calendar.getInstance()).putComponent(d).putReceiveDate(Calendar.getInstance()).
-                    addIndications(Indication.create("peak", Value.Type.NUMBER, Integer.toString(i)));
-            Event cevt = Event.create("a component event", "comp event class", Event.Severity.ERROR, Calendar.getInstance()).putComponent((Component) d.getComponents().toArray()[0]).putReceiveDate(Calendar.getInstance()).
-                    addIndications(Indication.create("peak", Value.Type.TEXT, "componnent indication"));
+            Event devt = Event.create("some-special-event", "some-special-event-class", Event.EventType.STATE_UPDATE, Event.Severity.INFO, Calendar.getInstance()).putComponent(d).putReceiveDate(Calendar.getInstance()).
+                    addIndication("peak", Value.Type.NUMBER, Integer.toString(i));
+            Event cevt = Event.create("a component event", "comp event class", Event.EventType.STATE_UPDATE, Event.Severity.ERROR, Calendar.getInstance()).putComponent((Component) d.getComponents().toArray()[0]).putReceiveDate(Calendar.getInstance()).
+                    addIndication("peak", Value.Type.TEXT, "componnent indication");
             eventRepo.save(devt);
             eventRepo.save(cevt);
         }

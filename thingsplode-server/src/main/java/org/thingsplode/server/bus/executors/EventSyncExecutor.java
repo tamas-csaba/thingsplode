@@ -6,6 +6,7 @@
 package org.thingsplode.server.bus.executors;
 
 import java.util.Calendar;
+import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
@@ -27,18 +28,24 @@ public class EventSyncExecutor<REQ extends EventSync> extends AbstractSyncExecut
 
     @Override
     public void executeImpl(EventSync sync, MessageHeaders headers, Device device) {
-        Event evt = sync.getEvent();
-        //is it the device? or it is an event on the component
-        evt.setComponent(device);
         Calendar now = Calendar.getInstance();
-        if (evt.getReceiveDate() == null) {
-            evt.setReceiveDate(now);
-        }
 
-        if (evt.getEventDate() == null) {
-            evt.setEventDate(now);
-        }
-        eventRepo.save(evt);
+        Collection<Event> evts = sync.getEvents();
+        evts.forEach(e -> {
+            if (sync.getComponentName().equalsIgnoreCase(device.getIdentification())) {
+                e.setComponent(device);
+            } else {
+                e.setComponent(device.getComponentByName(sync.getComponentName()));
+            }
+            if (e.getReceiveDate() == null) {
+                e.setReceiveDate(now);
+            }
+
+            if (e.getEventDate() == null) {
+                e.setEventDate(now);
+            }
+        });
+        eventRepo.save(evts);
 
     }
 
