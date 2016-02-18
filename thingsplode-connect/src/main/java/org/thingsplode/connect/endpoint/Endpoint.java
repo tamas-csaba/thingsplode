@@ -20,6 +20,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
 import io.netty.channel.group.ChannelGroup;
@@ -28,13 +29,24 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.unix.DomainSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import org.thingsplode.connect.core.Transport;
+import java.net.SocketException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.thingsplode.connect.core.handlers.WebsocketHandler;
+import org.thingsplode.connect.util.NetworkUtil;
 
 /**
  *
@@ -49,15 +61,24 @@ public class Endpoint {
     private EventLoopGroup workerGroup = null;//the event loop group used for the connected clients
     private final ChannelGroup channelRegistry = new DefaultChannelGroup(ALL_CHANNEL_GROUP_NAME, GlobalEventExecutor.INSTANCE);//all active channels are listed here
     private String endpointId;
-    private Transport transport;
+    private Connections connections;
+    private LogLevel logLevel;
     private final ServerBootstrap bootstrap = new ServerBootstrap();
+    private TransportType transportType = TransportType.DOMAIN_SOCKET;
+    private Protocol protocol = Protocol.JSON;
+    private Lifecycle lifecycle = Lifecycle.UNITIALIZED;
+    
+    private enum Lifecycle {
+        UNITIALIZED,
+        STARTED
+    }
 
     private Endpoint() {
     }
 
-    private Endpoint(String id, Transport trp) {
+    private Endpoint(String id, Connections cncts) {
         this.endpointId = id;
-        this.transport = trp;
+        this.connections = cncts;
     }
 
     /**
@@ -67,54 +88,65 @@ public class Endpoint {
      * @return
      * @throws java.lang.InterruptedException
      */
-    public static Endpoint create(String endpointId, Transport transport) throws InterruptedException {
+    public static Endpoint create(String endpointId, Connections transport) throws InterruptedException {
         Endpoint ep = new Endpoint(endpointId, transport);
+        return ep;
+    }
 
+    public void start() throws InterruptedException {
         try {
-            ep.initGroups();
-            ep.bootstrap.group(ep.masterGroup, ep.workerGroup);
-            if (transport.getTransportType().equals(Transport.TransportType.SOCKET)) {
-                ep.bootstrap.channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }
-                });
+            this.initGroups();
+            this.bootstrap.group(this.masterGroup, this.workerGroup);
+            if (transportType.equals(TransportType.WEBSOCKET)) {
+                this.bootstrap.
+                        channel(NioServerSocketChannel.class).
+                        handler(new LoggingHandler(logLevel)).
+                        childHandler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            protected void initChannel(SocketChannel ch) throws Exception {
+                                ChannelPipeline p = ch.pipeline();
+                                p.addLast("encoder", new HttpResponseEncoder());
+                                p.addLast("decoder", new HttpRequestDecoder());
+                                p.addLast("aggregator", new HttpObjectAggregator(65536));
+                                p.addLast("handler", new WebsocketHandler());
+                            }
+                        });
             } else {
-                ep.bootstrap.channel(EpollServerDomainSocketChannel.class).childHandler(new ChannelInitializer<DomainSocketChannel>() {
+                this.bootstrap.channel(EpollServerDomainSocketChannel.class).childHandler(new ChannelInitializer<DomainSocketChannel>() {
                     @Override
                     protected void initChannel(DomainSocketChannel ch) throws Exception {
                         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                     }
                 });
             }
-            ep.bootstrap.option(ChannelOption.SO_BACKLOG, 3).childOption(ChannelOption.SO_KEEPALIVE, true);
+            this.bootstrap.option(ChannelOption.SO_BACKLOG, 3).childOption(ChannelOption.SO_KEEPALIVE, true);
         } catch (Exception ex) {
-            ep.logger.error(Endpoint.class.getSimpleName() + " interrupted due to: " + ex.getMessage(), ex);
+            this.logger.error(Endpoint.class.getSimpleName() + " interrupted due to: " + ex.getMessage(), ex);
         } finally {
-            ep.logger.debug("Adding shutdown hook for the endpoint.");
+            this.logger.debug("Adding shutdown hook for the endpoint.");
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                ep.logger.info("Stopping endpoint [%s].", endpointId);
-                ep.stop();
+                this.logger.info("Stopping endpoint [%s].", endpointId);
+                this.stop();
             }));
         }
-        ep.start();
-        return ep;
+        this.startInternal();
     }
 
     /**
      *
      * @throws InterruptedException
      */
-    private void start() throws InterruptedException {
-        for (SocketAddress addr : transport.getSocketAddresses()) {
+    private void startInternal() throws InterruptedException {
+        for (SocketAddress addr : connections.getSocketAddresses()) {
             ChannelFuture channelFuture = bootstrap.bind(addr).sync();
             Channel channel = channelFuture.await().channel();
             channelRegistry.add(channel);
         }
+        lifecycle = Lifecycle.STARTED;
     }
 
     public void stop() {
+        lifecycle = Lifecycle.UNITIALIZED;
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -150,6 +182,82 @@ public class Endpoint {
     }
 
     public Endpoint publish(String serviceID, Object serviceInstance) {
+//        if (lifecycle == Lifecycle.UNITIALIZED){
+//            throw new IllegalStateException();
+//        }
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public enum Protocol {
+        JSON
+    }
+
+    public enum TransportType {
+
+        /**
+         * Default
+         */
+        WEBSOCKET,
+        /**
+         * Unix Domain Socket - useful for host only IPC style communication
+         */
+        DOMAIN_SOCKET;
+    }
+
+    public static class Connections {
+
+        private final Set<SocketAddress> socketAddresses;
+
+        public Connections(int port, String... interfaceNames) {
+            this.socketAddresses = new HashSet<>();
+            for (String iface : interfaceNames) {
+                InetAddress inetAddress;
+                try {
+                    inetAddress = NetworkUtil.getInetAddressByInterface(NetworkUtil.getInterfaceByName(iface), true);
+                } catch (SocketException ex) {
+                    throw new RuntimeException(ex);
+                }
+                if (inetAddress == null) {
+                    throw new RuntimeException("No internet address bound to network interface " + iface);
+                } else {
+                    socketAddresses.add(new InetSocketAddress(inetAddress, port));
+                }
+
+            }
+        }
+
+        public Connections(SocketAddress... addresses) {
+            if (addresses == null) {
+                throw new RuntimeException("Please specify some socket addresses.");
+            }
+            this.socketAddresses = new HashSet<>(Arrays.asList(addresses));
+        }
+
+        public Set<SocketAddress> getSocketAddresses() {
+            return socketAddresses;
+        }
+    }
+
+    public Endpoint logLevel(LogLevel logLevel) {
+        this.logLevel = logLevel;
+        return this;
+    }
+
+    public Endpoint transportType(TransportType transportType) {
+        this.transportType = transportType;
+        return this;
+    }
+
+    public Endpoint protocol(Protocol protocol) {
+        this.protocol = protocol;
+        return this;
+    }
+    
+    public Protocol getProtocol() {
+        return protocol;
+    }
+
+    public TransportType getTransportType() {
+        return transportType;
     }
 }
