@@ -13,12 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsplode.connect.core;
+package org.thingsplode.connect.core.handlers;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import org.thingsplode.connect.core.domain.Request;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class Command extends AbstractMessage {
+public class RequestHandler extends SimpleChannelInboundHandler<Request> {
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, Request msg) throws Exception {
+        System.out.println("Message received" + msg.toString());
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

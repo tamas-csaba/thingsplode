@@ -13,12 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsplode.connect.core;
+package org.thingsplode.connect.core.handlers;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class Response extends AbstractMessage {
+public class WebsocketHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

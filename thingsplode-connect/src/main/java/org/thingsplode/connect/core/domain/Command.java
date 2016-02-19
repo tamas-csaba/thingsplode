@@ -13,33 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsplode.connect.core;
+package org.thingsplode.connect.core.domain;
+
+import java.io.Serializable;
 
 /**
  *
  * @author tamas.csaba@gmail.com
+ * @param <T>
  */
-public class Transport {
-
-    public enum TransportType {
-
-        /**
-         * Default 
-         */
-        SOCKET,
-        /**
-         * Unix Domain Socket - useful for host only IPC style communication
-         */
-        DOMAIN_SOCKET;
-    }
-    private final TransportType transportType;
-
-    public Transport(TransportType transportType) {
-        this.transportType = transportType;
-    }
-
-    public TransportType getTransportType() {
-        return transportType;
-    }
-
+public class Command<T extends Serializable> extends AbstractMessage<T> {
+    
 }

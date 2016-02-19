@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsplode.connect.core;
+package org.thingsplode.connect.core.exceptions;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
-public class Event extends AbstractMessage {
-    
+public class ConnectMarshallerException extends Exception {
+
+    public ConnectMarshallerException(String msg) {
+        super(msg);
+    }
+
+    public ConnectMarshallerException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
+
 }
