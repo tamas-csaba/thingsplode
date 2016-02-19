@@ -30,6 +30,17 @@ public abstract class AbstractMessage<T extends Serializable> implements Seriali
 
     private T body;
 
+    public AbstractMessage() {
+    }
+
+    
+    public AbstractMessage(T body) {
+        this();
+        this.body = body;
+    }
+    
+    
+
     public class MessageHeader {
 
         private final AtomicLong id = new AtomicLong(0);

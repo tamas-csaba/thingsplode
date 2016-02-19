@@ -34,6 +34,8 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -45,7 +47,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thingsplode.connect.core.handlers.WebsocketHandler;
+import org.thingsplode.connect.core.handlers.HttRequestHandler;
+import org.thingsplode.connect.core.handlers.RequestHandler;
 import org.thingsplode.connect.util.NetworkUtil;
 
 /**
@@ -54,7 +57,10 @@ import org.thingsplode.connect.util.NetworkUtil;
  */
 public class Endpoint {
 
-    Logger logger = LoggerFactory.getLogger(Endpoint.class);
+    private Logger logger = LoggerFactory.getLogger(Endpoint.class);
+    public static final String HTTP_ENCODER = "http_encoder";
+    public static final String HTTP_DECODER = "http_decoder";
+    public static final String REQUEST_HANDLER = "request_handler";
     public static final String ALL_CHANNEL_GROUP_NAME = "all-open-channels";
     private static int TERMINATION_TIMEOUT = 60;//number of seconds to wait after the worker threads are shutted down and until those are finishing the last bit of the execution.
     private EventLoopGroup masterGroup = null;//the eventloop group used for the server socket
@@ -67,7 +73,8 @@ public class Endpoint {
     private TransportType transportType = TransportType.DOMAIN_SOCKET;
     private Protocol protocol = Protocol.JSON;
     private Lifecycle lifecycle = Lifecycle.UNITIALIZED;
-    
+    private EventExecutorGroup evtExecutorGroup = new DefaultEventExecutorGroup(10);
+
     private enum Lifecycle {
         UNITIALIZED,
         STARTED
@@ -97,18 +104,19 @@ public class Endpoint {
         try {
             this.initGroups();
             this.bootstrap.group(this.masterGroup, this.workerGroup);
-            if (transportType.equals(TransportType.WEBSOCKET)) {
+            if (transportType.equals(TransportType.HTTP_REST)) {
                 this.bootstrap.
-                        channel(NioServerSocketChannel.class).
-                        handler(new LoggingHandler(logLevel)).
-                        childHandler(new ChannelInitializer<SocketChannel>() {
+                        channel(NioServerSocketChannel.class)
+                        .childOption(ChannelOption.SO_KEEPALIVE, true)
+                        .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             protected void initChannel(SocketChannel ch) throws Exception {
                                 ChannelPipeline p = ch.pipeline();
-                                p.addLast("encoder", new HttpResponseEncoder());
-                                p.addLast("decoder", new HttpRequestDecoder());
+                                p.addLast(HTTP_ENCODER, new HttpResponseEncoder());
+                                p.addLast(HTTP_DECODER, new HttpRequestDecoder());
                                 p.addLast("aggregator", new HttpObjectAggregator(65536));
-                                p.addLast("handler", new WebsocketHandler());
+                                p.addLast("http_request_handler", new HttRequestHandler());
+                                p.addLast(evtExecutorGroup, "handler", new RequestHandler());
                             }
                         });
             } else {
@@ -119,7 +127,7 @@ public class Endpoint {
                     }
                 });
             }
-            this.bootstrap.option(ChannelOption.SO_BACKLOG, 3).childOption(ChannelOption.SO_KEEPALIVE, true);
+            this.bootstrap.handler(new LoggingHandler(logLevel)).option(ChannelOption.SO_BACKLOG, 3);
         } catch (Exception ex) {
             this.logger.error(Endpoint.class.getSimpleName() + " interrupted due to: " + ex.getMessage(), ex);
         } finally {
@@ -147,7 +155,15 @@ public class Endpoint {
 
     public void stop() {
         lifecycle = Lifecycle.UNITIALIZED;
-        throw new UnsupportedOperationException("Not supported yet.");
+        channelRegistry.close().awaitUninterruptibly();
+        if (masterGroup != null) {
+            logger.debug("Closing down Master Group event-loop gracefully...");
+            masterGroup.shutdownGracefully(1, TERMINATION_TIMEOUT, TimeUnit.SECONDS);
+        }
+        if (workerGroup != null) {
+            logger.debug("Closing down Worker Group event-loop gracefully...");
+            workerGroup.shutdownGracefully(5, TERMINATION_TIMEOUT, TimeUnit.SECONDS);
+        }
     }
 
     private void initGroups() throws InterruptedException {
@@ -197,7 +213,17 @@ public class Endpoint {
         /**
          * Default
          */
-        WEBSOCKET,
+        HTTP_REST,
+
+        /**
+         *
+         */
+        WEBSOCKET_STOMP,
+
+        /**
+         *
+         */
+        MQTT,
         /**
          * Unix Domain Socket - useful for host only IPC style communication
          */
@@ -252,7 +278,7 @@ public class Endpoint {
         this.protocol = protocol;
         return this;
     }
-    
+
     public Protocol getProtocol() {
         return protocol;
     }

@@ -20,14 +20,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.thingsplode.connect.core.Filter;
 import org.thingsplode.connect.core.TestEndpoint;
+import org.thingsplode.connect.core.annotations.RequestMapping;
+import org.thingsplode.connect.core.annotations.RequestParam;
+import org.thingsplode.connect.core.annotations.Service;
+import org.thingsplode.connect.core.domain.RequestMethod;
 
 /**
  *
  * @author tamas.csaba@gmail.com
  */
+@Service("/test/first")
 public class TestEndpointService implements TestEndpoint {
 
     @Override
+    @RequestMapping("/ping")
     public void ping() {
         try {
             Thread.sleep(2000);
@@ -38,11 +44,13 @@ public class TestEndpointService implements TestEndpoint {
     }
 
     @Override
-    public String echo(String message) {
+    @RequestMapping(value = "/echo", method = {RequestMethod.GET, RequestMethod.POST})
+    public String echo(@RequestParam(value = "message", required = true, defaultValue = "Hello World") String message) {
         return message;
     }
 
     @Override
+    @RequestMapping(value = "/echo", method = {RequestMethod.GET})
     public Serializable getInfo() {
         return new Filter("some query", 10, 100);
     }

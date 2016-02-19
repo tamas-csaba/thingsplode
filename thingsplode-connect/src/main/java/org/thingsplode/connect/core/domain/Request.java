@@ -26,8 +26,29 @@ import java.io.Serializable;
 public class Request<T extends Serializable> extends AbstractMessage<T> {
 
     private RequestHeader header;
-    
-    public class RequestHeader extends AbstractMessage.MessageHeader {
+
+    public Request() {
+    }
+
+    public Request(RequestHeader header) {
+        super();
+        this.header = header;
+    }
+
+    public Request(RequestHeader header, T body) {
+        super(body);
+        this.header = header;
+    }
+
+    public RequestHeader getHeader() {
+        return header;
+    }
+
+    public void setHeader(RequestHeader header) {
+        this.header = header;
+    }
+
+    public static class RequestHeader extends AbstractMessage.MessageHeader {
 
         private HttpMethod method;
 
@@ -44,12 +65,4 @@ public class Request<T extends Serializable> extends AbstractMessage<T> {
         }
     }
 
-    public RequestHeader getHeader() {
-        return header;
-    }
-
-    public void setHeader(RequestHeader header) {
-        this.header = header;
-    }
-    
 }

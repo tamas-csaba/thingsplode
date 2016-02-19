@@ -15,7 +15,6 @@
  */
 package org.thingsplode.connect.core.domain;
 
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.Serializable;
 
@@ -26,7 +25,27 @@ import java.io.Serializable;
  */
 public class Response<T extends Serializable> extends AbstractMessage<T> {
 
-    public class ResponseHeader extends AbstractMessage.MessageHeader {
+    private ResponseHeader header;
+
+    public Response(ResponseHeader header) {
+        super();
+        this.header = header;
+    }
+
+    public Response(ResponseHeader header, T body) {
+        super(body);
+        this.header = header;
+    }
+
+    public ResponseHeader getHeader() {
+        return header;
+    }
+
+    public void setHeader(ResponseHeader header) {
+        this.header = header;
+    }
+
+    public static class ResponseHeader extends AbstractMessage.MessageHeader {
 
         private HttpResponseStatus responseCode = HttpResponseStatus.INTERNAL_SERVER_ERROR;
 

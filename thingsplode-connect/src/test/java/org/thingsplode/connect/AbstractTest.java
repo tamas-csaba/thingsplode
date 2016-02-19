@@ -15,12 +15,14 @@
  */
 package org.thingsplode.connect;
 
+import io.netty.handler.logging.LogLevel;
 import java.net.InetSocketAddress;
+import org.apache.log4j.BasicConfigurator;
 import org.junit.Rule;
 import org.junit.rules.ExternalResource;
 import org.thingsplode.connect.core.TestEndpoint;
-import org.thingsplode.connect.core.Transport;
 import org.thingsplode.connect.endpoint.Endpoint;
+import org.thingsplode.connect.endpoint.Endpoint.Connections;
 import org.thingsplode.connect.services.TestEndpointService;
 
 /**
@@ -32,20 +34,42 @@ public abstract class AbstractTest {
     private Endpoint ep;
 
     @Rule
-    public ExternalResource resource = new ExternalResource() {
+    public ExternalResource resource;
 
-        @Override
-        protected void before() throws InterruptedException {
-            TestEndpoint remoteService = new TestEndpointService();
-            ep = Endpoint.create("test", new Transport(Transport.TransportType.SOCKET, new InetSocketAddress("0.0.0.0", 0))).publish("test_service", remoteService);
-        }
+    public AbstractTest() {
+        this.resource = new ExternalResource() {
 
-        @Override
-        protected void after() {
-        }
-    };
+            private Endpoint ep;
+
+            @Override
+            protected void before() throws InterruptedException {
+                System.out.println("\n\n BEFORE METHOD CALLED\n\n");
+                TestEndpoint remoteService = new TestEndpointService();
+                Connections c;
+                BasicConfigurator.configure();
+                this.ep = Endpoint.create("test", new Connections(new InetSocketAddress("0.0.0.0", 8080)))
+                        .logLevel(LogLevel.TRACE)
+                        .protocol(Endpoint.Protocol.JSON)
+                        .transportType(Endpoint.TransportType.HTTP_REST);
+                        //.publish("test_service", remoteService);
+                this.ep.start();
+            }
+
+            @Override
+            protected void after() {
+                ep.stop();
+            }
+        };
+    }
 
     public Endpoint getEndpoint() {
         return ep;
     }
 }
+
+
+//http://netty.io/wiki/user-guide-for-4.x.html#wiki-h3-11
+//https://keyholesoftware.com/2015/03/16/netty-a-different-kind-of-websocket-server/
+//https://github.com/jwboardman/khs-stockticker/blob/master/src/main/java/com/khs/stockticker/StockTickerServer.java
+//https://github.com/jwboardman/khs-stockticker/blob/master/src/main/java/com/khs/stockticker/NettyHttpFileHandler.java
+//http://microservices.io/patterns/microservices.html
