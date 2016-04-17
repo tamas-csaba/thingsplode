@@ -14,7 +14,7 @@ import org.springframework.context.ApplicationContext;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Ignore
 public abstract class TestBase extends AbstractTestRoot {

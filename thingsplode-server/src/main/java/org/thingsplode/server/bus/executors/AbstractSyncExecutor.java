@@ -17,7 +17,7 @@ import org.thingsplode.core.protocol.ExecutionStatus;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <REQ>
  */
 public abstract class AbstractSyncExecutor<REQ extends AbstractRequest> extends AbstractExecutor {

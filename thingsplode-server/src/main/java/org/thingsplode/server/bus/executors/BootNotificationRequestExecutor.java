@@ -18,7 +18,7 @@ import org.thingsplode.server.infrastructure.DeviceService;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <REQ>
  * @param <RSP>
  */

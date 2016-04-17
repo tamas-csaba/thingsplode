@@ -16,7 +16,7 @@ import org.thingsplode.server.repositories.DeviceRepository;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public abstract class AbstractExecutor {
 

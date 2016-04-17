@@ -25,7 +25,7 @@ import org.thingsplode.core.entities.Device;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Configuration
 @EnableJpaRepositories(Bootstrap.REPOS)

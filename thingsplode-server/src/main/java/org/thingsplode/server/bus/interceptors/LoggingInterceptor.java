@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Component
 public class LoggingInterceptor extends ChannelInterceptorAdapter {

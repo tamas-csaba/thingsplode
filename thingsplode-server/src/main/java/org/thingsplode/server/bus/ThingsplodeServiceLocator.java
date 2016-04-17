@@ -19,7 +19,7 @@ import org.thingsplode.server.bus.executors.AbstractExecutor;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Component
 public class ThingsplodeServiceLocator implements ApplicationContextAware {

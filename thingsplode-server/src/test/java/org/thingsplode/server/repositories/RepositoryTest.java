@@ -34,7 +34,7 @@ import org.thingsplode.server.JpaConfig;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {BaseConfig.class, JpaConfig.class})

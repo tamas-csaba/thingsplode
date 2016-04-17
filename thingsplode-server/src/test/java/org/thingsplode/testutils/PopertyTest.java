@@ -17,7 +17,7 @@ import org.thingsplode.server.BaseConfig;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {BaseConfig.class})

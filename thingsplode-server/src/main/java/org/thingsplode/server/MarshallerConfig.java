@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Configuration
 public class MarshallerConfig {

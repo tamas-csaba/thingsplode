@@ -13,7 +13,7 @@ import org.thingsplode.core.protocol.Response;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @MessagingGateway(name = "requestEntryGateway", defaultRequestChannel = "requestChannel")
 public interface RequestGateway {

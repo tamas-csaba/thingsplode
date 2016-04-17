@@ -13,7 +13,7 @@ import org.thingsplode.core.entities.Device;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <Device>
  */
 public interface DeviceRepository extends JpaRepository<Device, Long> {

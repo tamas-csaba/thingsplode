@@ -17,7 +17,7 @@ import org.thingsplode.server.repositories.EventRepository;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <REQ>
  */
 @Service

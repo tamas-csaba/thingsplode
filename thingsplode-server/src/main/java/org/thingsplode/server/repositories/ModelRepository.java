@@ -10,7 +10,7 @@ import org.thingsplode.core.entities.Model;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public interface ModelRepository extends JpaRepository<Model, Long> {
 

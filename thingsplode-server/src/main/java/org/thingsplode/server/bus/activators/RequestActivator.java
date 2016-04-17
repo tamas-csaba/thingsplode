@@ -24,7 +24,7 @@ import org.thingsplode.core.protocol.sync.EventSync;
  * @BridgeFrom
  * @BridgeTo
  * 
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @MessageEndpoint
 public class RequestActivator {

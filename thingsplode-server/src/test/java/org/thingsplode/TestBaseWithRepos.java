@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Ignore()
 public class TestBaseWithRepos extends TestBase {

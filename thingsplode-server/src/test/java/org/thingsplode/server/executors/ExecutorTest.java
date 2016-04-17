@@ -53,7 +53,7 @@ import org.thingsplode.server.repositories.DeviceRepository;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {BaseConfig.class, JpaConfig.class, BusConfig.class})

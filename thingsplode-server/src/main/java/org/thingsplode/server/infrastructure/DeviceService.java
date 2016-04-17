@@ -32,7 +32,7 @@ import org.thingsplode.server.repositories.ModelRepository;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Service
 public class DeviceService {

@@ -16,7 +16,7 @@ import org.springframework.integration.config.EnableIntegration;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Configuration
 @ComponentScan("org.thingsplode.server")

@@ -12,7 +12,7 @@ import org.thingsplode.core.entities.Component;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public interface ComponentRepository extends PagingAndSortingRepository<Component, Long> {
 
