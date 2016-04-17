@@ -13,7 +13,7 @@ import org.thingsplode.core.protocol.ResponseCode;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "BootNotificationRsp")

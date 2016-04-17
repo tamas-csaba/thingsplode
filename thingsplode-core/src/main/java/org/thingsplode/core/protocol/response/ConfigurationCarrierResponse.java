@@ -17,7 +17,7 @@ import org.thingsplode.core.protocol.ResponseCode;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <T>
  */
 public abstract class ConfigurationCarrierResponse<T extends ConfigurationCarrierResponse<T>> extends Response<T> {

@@ -10,7 +10,7 @@ import org.thingsplode.core.exceptions.MessageConversionException;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public class Expectable implements Serializable {
 

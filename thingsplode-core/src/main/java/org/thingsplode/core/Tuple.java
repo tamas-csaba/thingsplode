@@ -7,7 +7,7 @@ package org.thingsplode.core;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public class Tuple<X, Y> {
 

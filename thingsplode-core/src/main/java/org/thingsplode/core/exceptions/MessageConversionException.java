@@ -8,7 +8,7 @@ package org.thingsplode.core.exceptions;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public class MessageConversionException extends Exception {
 

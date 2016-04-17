@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AReq")

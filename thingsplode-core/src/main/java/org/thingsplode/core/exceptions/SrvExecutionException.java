@@ -10,7 +10,7 @@ import org.thingsplode.core.protocol.ResponseCode;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public class SrvExecutionException extends Exception {
 

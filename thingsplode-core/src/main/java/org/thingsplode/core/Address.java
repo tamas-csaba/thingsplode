@@ -10,7 +10,7 @@ import javax.persistence.Embeddable;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Embeddable
 public class Address implements Serializable {

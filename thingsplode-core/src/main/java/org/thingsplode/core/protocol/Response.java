@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <T>
  */
 @XmlAccessorType(XmlAccessType.FIELD)

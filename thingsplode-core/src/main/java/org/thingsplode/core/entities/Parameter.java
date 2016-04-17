@@ -15,7 +15,7 @@ import org.thingsplode.core.ValueType;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Entity
 @Table(name = Parameter.TABLE_NAME)

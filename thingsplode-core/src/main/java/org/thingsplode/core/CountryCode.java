@@ -8,7 +8,7 @@ package org.thingsplode.core;
 
 /**
  * //ISO3166
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 
 public enum CountryCode {

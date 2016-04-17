@@ -11,7 +11,7 @@ import org.thingsplode.core.protocol.request.BootNotificationRequest;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @XmlRegistry
 public class ThingsplodeObjectFactory {

@@ -24,7 +24,7 @@ import org.thingsplode.core.StatusInfo;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Entity
 @XmlAccessorType(XmlAccessType.FIELD)

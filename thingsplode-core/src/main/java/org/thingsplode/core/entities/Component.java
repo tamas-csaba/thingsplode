@@ -35,7 +35,7 @@ import org.thingsplode.core.StatusInfo;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <T>
  */
 @Entity

@@ -7,7 +7,7 @@ package org.thingsplode.core.protocol;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public class ErrorMessage extends Response {
 

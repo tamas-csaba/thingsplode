@@ -11,7 +11,7 @@ import javax.persistence.Embedded;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Embeddable
 public class Location implements Serializable {

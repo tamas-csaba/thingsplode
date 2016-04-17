@@ -29,7 +29,7 @@ import org.thingsplode.core.Value;
 /**
  *
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Entity
 @XmlAccessorType(XmlAccessType.FIELD)

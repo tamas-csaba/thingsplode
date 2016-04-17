@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public abstract class AbstractTestRoot extends TestCase {
 
