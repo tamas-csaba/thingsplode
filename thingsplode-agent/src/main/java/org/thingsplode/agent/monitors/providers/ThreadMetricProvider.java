@@ -18,7 +18,7 @@ import org.thingsplode.core.entities.Event;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public class ThreadMetricProvider extends SamplingProvider<Event> {
 

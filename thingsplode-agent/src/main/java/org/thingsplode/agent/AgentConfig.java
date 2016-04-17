@@ -17,7 +17,7 @@ import org.thingsplode.core.entities.Event;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Configuration
 @ComponentScan("org.thingsplode.agent")

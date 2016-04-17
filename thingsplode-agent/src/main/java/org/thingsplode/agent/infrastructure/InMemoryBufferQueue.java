@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <ITEM>
  */
 public class InMemoryBufferQueue<ITEM> implements BufferQueue<ITEM> {

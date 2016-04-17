@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <ITEM>
  */
 public abstract class SamplingProvider<ITEM> extends StaticProvider<ITEM> implements Runnable {

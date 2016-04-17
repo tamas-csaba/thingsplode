@@ -7,7 +7,7 @@ package org.thingsplode.agent.infrastructure;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public abstract class StateChangeProvider<ITEM> extends StaticProvider<ITEM> {
     

@@ -13,7 +13,7 @@ import org.thingsplode.core.entities.Event;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Component
 public class EventQueueManager {

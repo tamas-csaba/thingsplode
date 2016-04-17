@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  * @param <ITEM>
  */
 public abstract class StaticProvider<ITEM> {

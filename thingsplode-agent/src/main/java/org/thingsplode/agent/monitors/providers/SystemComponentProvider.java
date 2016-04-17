@@ -26,7 +26,7 @@ import org.thingsplode.core.entities.Event;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @org.springframework.stereotype.Component
 public class SystemComponentProvider extends StaticProvider<Component> {

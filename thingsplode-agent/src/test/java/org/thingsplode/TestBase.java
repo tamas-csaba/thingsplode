@@ -12,7 +12,7 @@ import org.junit.Ignore;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Ignore()
 public abstract class TestBase extends AbstractTestRoot {

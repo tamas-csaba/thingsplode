@@ -23,7 +23,7 @@ import org.thingsplode.core.entities.Device;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 @Component
 public class DeviceController implements ApplicationListener<ApplicationEvent> {

@@ -20,7 +20,7 @@ import org.thingsplode.core.entities.Event.EventType;
 
 /**
  *
- * @author tamas.csaba@gmail.com
+ * @author Csaba Tamas
  */
 public class SystemMetricProvider extends SamplingProvider<Event> {
 
